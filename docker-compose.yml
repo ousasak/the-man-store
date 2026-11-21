@@ -1,0 +1,344 @@
+# Compose profiles (default = light dev stack; stops heavy containers on `up`):
+#   (none)     db + backend + frontend only — use: pwsh scripts/docker-up.ps1
+#   full       everything below + workers + ai + pgAdmin — use: pwsh scripts/docker-up.ps1 -Mode full
+#   workers    queue-worker + scheduler
+#   ai         qdrant + ai-service (image search / vectorize)
+#   tools      pgAdmin
+# Optional tunnel: docker compose --profile cloudflare-token up -d
+#
+# --- Docker Desktop (Windows / Mac): published ports ---
+#   Postgres (host):     localhost:5434  → container :5432  (5433 is used by another local stack)
+#   pgAdmin:             http://localhost:5050
+#   Laravel API:         http://localhost:8001  (maps to service "backend" :8000)
+#   SPA (static build):   http://localhost:5176
+#   Qdrant:              localhost:6333
+#
+# backend/.env (mounted into the PHP container) must use the Compose network for the DB, not localhost:
+#   DB_CONNECTION=pgsql  DB_HOST=db  DB_PORT=5432  DB_DATABASE=<same as repo-root .env / backend/.env>
+#
+# pgAdmin / local tools on the host (Windows/Mac): use backend/.env as-is (127.0.0.1 + published port 5433).
+#
+# Frontend image is built for the public hostname: VITE_BACKEND_ORIGIN + VITE_API_BASE_URL=/api.
+# nginx in the frontend container proxies /api, /storage, and /sanctum to Laravel.
+# Rebuild after changing: docker compose build frontend
+#
+# Compose loads a repo-root `.env` for ${DB_*} on the `db` service (see `.env.example`).
+#   DB_DATABASE / DB_USERNAME / DB_PASSWORD must match backend/.env (e.g. fitandsleek_v4 / postgres / Norng@123).
+# PHP containers use DB_HOST=db and DB_PORT=5432; host tools use backend/.env (127.0.0.1:5433).
+
+name: fitandsleek_ai
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: fitandsleek_db1
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-fitandsleek_store_db}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Norng@123}
+    command: ["postgres", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    profiles: [tools, full]
+    image: dpage/pgadmin4:latest
+    container_name: fitandsleek_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@fitandsleek.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fitandsleek_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Docker Desktop / local dev: these override backend/.env so production URLs never leak into localhost.
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: https://fitandsleekapp.kalapak-team.space
+      APP_URL_LOCAL: https://fitandsleekapp.kalapak-team.space
+      FRONTEND_URL: https://fitandsleekapp.kalapak-team.space
+      FRONTEND_URL_LOCAL: https://fitandsleekapp.kalapak-team.space
+      SANCTUM_STATEFUL_DOMAINS: localhost,127.0.0.1,localhost:5173,127.0.0.1:5173,0.0.0.0:5173,fitandsleek.kalapak-team.space,fitandsleekapp.kalapak-team.space
+      GOOGLE_REDIRECT_URI: https://fitandsleekapp.kalapak-team.space/api/auth/google/callback
+      GOOGLE_REDIRECT_URI_LOCAL: https://fitandsleekapp.kalapak-team.space/api/auth/google/callback
+      FACEBOOK_REDIRECT_URI: https://fitandsleekapp.kalapak-team.space/api/auth/facebook/callback
+      FACEBOOK_REDIRECT_URI_LOCAL: https://fitandsleekapp.kalapak-team.space/api/auth/facebook/callback
+      APP_PORT: 8000
+      SERVER_PORT: 8000
+      # Use Compose DNS so indexing works without host port forwarding quirks.
+      FITANDSLEEK_CLIP_ENDPOINT: http://ai-service:8000/vectorize
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: products_fitandsleek_512
+      QDRANT_VECTOR_SIZE: "512"
+      IMAGE_SEARCH_TIMEOUT: "120"
+      # Same DB name/user/password as backend/.env; host/port are the Compose network (not 127.0.0.1:5433).
+      # Clear URL-based DSN so a host/Neon/Railway DATABASE_URL in backend/.env cannot bypass DB_HOST=db.
+      DATABASE_URL: ""
+      DB_URL: ""
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: ${DB_DATABASE:-fitandsleek_v4}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-Norng@123}
+      DB_SSLMODE: disable
+      OTP_DEBUG: "true"
+      # Telegram KHQR confirmation needs a worker; jobs sit in `jobs` otherwise.
+      RUN_QUEUE_WORKER: "true"
+      RUN_SCHEDULER: "true"
+    # nginx + php-fpm (concurrent requests; replaces single-threaded `artisan serve`)
+    command: ["web"]
+    ports:
+      - "8001:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./backend/app:/var/www/html/app
+      - ./backend/config:/var/www/html/config
+      - ./backend/database/migrations:/var/www/html/database/migrations
+      - ./backend/.env:/var/www/html/.env
+      - ./backend/routes:/var/www/html/routes
+      - ./backend/resources/views:/var/www/html/resources/views
+      - ./backend/resources/fonts:/var/www/html/resources/fonts
+      - ./backend/public:/var/www/html/public
+      - ./backend/docker/nginx:/etc/nginx/conf.d
+      - ./backend/storage/app/public:/var/www/html/storage/app/public
+      - ./backend/storage/framework:/var/www/html/storage/framework
+      - ./backend/storage/logs:/var/www/html/storage/logs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "php",
+          "-r",
+          "exit(@file_get_contents('http://127.0.0.1:8000/api/health') ? 0 : 1);",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  queue-worker:
+    profiles: [workers, full]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fitandsleek_queue
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: ${DB_DATABASE:-fitandsleek_v4}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-Norng@123}
+      DB_SSLMODE: disable
+      FITANDSLEEK_CLIP_ENDPOINT: http://ai-service:8000/vectorize
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: products_fitandsleek_512
+      QDRANT_VECTOR_SIZE: "512"
+      IMAGE_SEARCH_TIMEOUT: "120"
+    command: ["worker", "queue:work", "--sleep=3", "--tries=3", "--timeout=180", "--max-jobs=500"]
+    volumes:
+      - ./backend/app:/var/www/html/app
+      - ./backend/config:/var/www/html/config
+      - ./backend/database/migrations:/var/www/html/database/migrations
+      - ./backend/.env:/var/www/html/.env
+      - ./backend/routes:/var/www/html/routes
+      - ./backend/resources/views:/var/www/html/resources/views
+      - ./backend/public:/var/www/html/public
+      - ./backend/storage/app/public:/var/www/html/storage/app/public
+      - ./backend/storage/framework:/var/www/html/storage/framework
+      - ./backend/storage/logs:/var/www/html/storage/logs
+
+  # Runs Laravel scheduler (includes qdrant:index-products --only-missing every 10 minutes).
+  scheduler:
+    profiles: [workers, full]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fitandsleek_scheduler
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: ${DB_DATABASE:-fitandsleek_v4}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-Norng@123}
+      DB_SSLMODE: disable
+      FITANDSLEEK_CLIP_ENDPOINT: http://ai-service:8000/vectorize
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: products_fitandsleek_512
+      QDRANT_VECTOR_SIZE: "512"
+      IMAGE_SEARCH_TIMEOUT: "120"
+    command: ["artisan", "schedule:work"]
+    volumes:
+      - ./backend/app:/var/www/html/app
+      - ./backend/config:/var/www/html/config
+      - ./backend/database/migrations:/var/www/html/database/migrations
+      - ./backend/.env:/var/www/html/.env
+      - ./backend/routes:/var/www/html/routes
+      - ./backend/resources/views:/var/www/html/resources/views
+      - ./backend/public:/var/www/html/public
+      - ./backend/storage/app/public:/var/www/html/storage/app/public
+      - ./backend/storage/framework:/var/www/html/storage/framework
+      - ./backend/storage/logs:/var/www/html/storage/logs
+
+  # Static `serve` does not proxy `/api`. For a public hostname, the tunnel/reverse proxy must route
+  # `/api` (and usually `/storage`) to Laravel; the SPA then calls same-origin `/api` (set
+  # VITE_API_BASE_URL=/api) or relies on PROD fallback in `frontend/src/lib/backendOrigin.js` when the
+  # image was built with localhost as VITE_BACKEND_ORIGIN.
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+        VITE_BACKEND_ORIGIN: ${VITE_BACKEND_ORIGIN:-https://fitandsleekapp.kalapak-team.space}
+        VITE_STORAGE_MEDIA_ORIGIN: ${VITE_STORAGE_MEDIA_ORIGIN:-}
+    image: fitandsleek-frontend:latest
+    container_name: fitandsleek_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5176:5173"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:5173/ >/dev/null || exit 1",
+        ]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  qdrant:
+    profiles: [ai, full]
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  ai-service:
+    profiles: [ai, full]
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    image: fitandsleek-ai-service:latest
+    container_name: ai-service
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ai_model_cache:/root/.cache/huggingface
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      PYTHONUNBUFFERED: "1"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - qdrant
+    ports:
+      - "9000:8000"
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: fitandsleek_ngrok
+    restart: unless-stopped
+    profiles:
+      - ngrok
+    depends_on:
+      - backend
+    env_file:
+      - ./backend/.env
+    command:
+      - "http"
+      - "backend:8000"
+    ports:
+      - "4040:4040"
+
+  cf_frontend:
+    image: cloudflare/cloudflared:latest
+    container_name: fitandsleek_cf_frontend
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    command:
+      - "tunnel"
+      - "--no-autoupdate"
+      - "--url"
+      - "http://frontend:5173"
+    profiles:
+      - cloudflare
+
+  cf_backend:
+    image: cloudflare/cloudflared:latest
+    container_name: fitandsleek_cf_backend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    command:
+      - "tunnel"
+      - "--no-autoupdate"
+      - "--url"
+      - "http://backend:8000"
+    profiles:
+      - cloudflare
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: fitandsleek_tunnel
+    restart: unless-stopped
+    profiles:
+      - cloudflare-token
+    depends_on:
+      - frontend
+      - backend
+    command: tunnel --no-autoupdate run
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+
+volumes:
+  postgres_data:
+    name: fitandsleek_fullstack_postgres_data
+  pgadmin_data:
+    name: fitandsleek_fullstack_pgadmin_data
+  qdrant_storage:
+  ai_model_cache:

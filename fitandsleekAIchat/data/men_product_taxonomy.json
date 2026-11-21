@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "groups": {
+    "tops": {
+      "label_en": "tops / shirts",
+      "label_km": "អាវ / tops",
+      "search_terms": ["shirt", "tee", "polo", "hoodie", "sweater", "អាវ", "អាវយឺត"]
+    },
+    "bottoms": {
+      "label_en": "pants / joggers",
+      "label_km": "ខោ / joggers",
+      "search_terms": ["pants", "jean", "jeans", "chino", "jogger", "shorts", "ខោ"]
+    },
+    "outerwear": {
+      "label_en": "jackets / coats",
+      "label_km": "អាវក្រៅ / jackets",
+      "search_terms": ["jacket", "hoodie", "bomber", "coat", "windbreaker", "parka", "អាវក្រៅ"]
+    },
+    "footwear": {
+      "label_en": "shoes",
+      "label_km": "ស្បែកជើង",
+      "search_terms": ["shoe", "sneaker", "boot", "loafer", "sandal", "ស្បែកជើង", "ប៉ាតា", "ប៊ូ"]
+    },
+    "formal": {
+      "label_en": "formal wear",
+      "label_km": "សម្លៀកបំពាក់ផ្លូវការ",
+      "search_terms": ["suit", "blazer", "shirt", "tie", "vest", "tuxedo"]
+    },
+    "accessories": {
+      "label_en": "accessories",
+      "label_km": "គ្រឿងប្រើប្រាស់ម៉ូដ",
+      "search_terms": ["belt", "wallet", "watch", "cap", "hat", "bag", "sock", "មួក", "កាបូប", "ខ្សែ"]
+    },
+    "bags": {
+      "label_en": "bags",
+      "label_km": "កាបូប",
+      "search_terms": ["backpack", "bag", "duffel", "messenger", "briefcase", "កាបូប"]
+    },
+    "hats": {
+      "label_en": "hats / caps",
+      "label_km": "មួក / caps",
+      "search_terms": ["hat", "cap", "beanie", "មួក"]
+    },
+    "sportswear": {
+      "label_en": "sportswear",
+      "label_km": "សម្លៀកបំពាក់កីឡា",
+      "search_terms": ["jogger", "shorts", "hoodie", "tee", "track", "gym"]
+    },
+    "beachwear": {
+      "label_en": "beachwear",
+      "label_km": "សម្លៀកបំពាក់ឆ្នេរ",
+      "search_terms": ["shorts", "swim", "sandal", "hat", "flip"]
+    },
+    "underwear": {
+      "label_en": "underwear / sleepwear",
+      "label_km": "ខោក្នុង / គេង",
+      "search_terms": ["boxer", "brief", "trunk", "pajama", "robe", "undershirt"]
+    },
+    "jewelry": {
+      "label_en": "jewelry",
+      "label_km": "គ្រឿងអលង្ការ",
+      "search_terms": ["ring", "bracelet", "necklace", "chain", "watch"]
+    },
+    "grooming": {
+      "label_en": "grooming",
+      "label_km": "គ្រឿងថែរក្សា",
+      "search_terms": ["razor", "cologne", "perfume", "comb", "shave"]
+    }
+  },
+  "products": [
+    {"id": "tshirt", "group": "tops", "name_en": "T-Shirt", "aliases": ["t-shirt", "tshirt", "t shirt", "tee", "tees", "អាវយឺត", "អាវ t-shirt", "អាវ tshirt", "អាវដៃខ្លី"], "search_terms": ["t-shirt", "tee", "shirt", "អាវយឺត"], "wear_en": "Everyday casual, campus, travel, under a jacket.", "wear_km": "ប្រចាំថ្ងៃ · សាលា · ធ្វើដំណើរ · ពាក់ក្រោមអាវក្រៅ។", "occasions": ["casual", "campus", "gym"]},
+    {"id": "polo", "group": "tops", "name_en": "Polo Shirt", "aliases": ["polo", "polo shirt", "polos", "poloshirt"], "search_terms": ["polo"], "wear_en": "Smart-casual office, brunch, light dates, campus.", "wear_km": "ការិយាល័យស្រាល · brunch · ណាត់ជួបស្រាល · សាលា។", "occasions": ["office", "date", "casual", "campus"]},
+    {"id": "dress_shirt", "group": "formal", "name_en": "Dress Shirt", "aliases": ["dress shirt", "oxford", "oxford shirt", "formal shirt", "អាវខោអាវ"], "search_terms": ["shirt", "oxford"], "wear_en": "Office, meetings, interviews, events, weddings.", "wear_km": "ការិយាល័យ · ប្រជុំ · សម្ភាសន៍ · កម្មវិធី · អាពាហ៍។", "occasions": ["office", "event", "wedding"]},
+    {"id": "casual_shirt", "group": "tops", "name_en": "Casual Shirt", "aliases": ["casual shirt", "flannel", "flannel shirt", "henley", "henley shirt", "អាវដៃវែង"], "search_terms": ["shirt", "flannel", "henley", "អាវ"], "wear_en": "Weekends, casual Fridays, cool evenings.", "wear_km": "ចុងសប្តាហ៍ · casual Friday · យប់ត្រជាក់។", "occasions": ["casual", "date"]},
+    {"id": "tank", "group": "tops", "name_en": "Tank Top", "aliases": ["tank", "tank top", "sleeveless"], "search_terms": ["tank", "tee"], "wear_en": "Gym, hot days, under shirts.", "wear_km": "Gym · ថ្ងៃក្តៅ · ពាក់ក្រោមអាវ។", "occasions": ["gym", "beach"]},
+    {"id": "hoodie", "group": "outerwear", "name_en": "Hoodie", "aliases": ["hoodie", "hoodies", "hoody", "hodie", "ហ៊ូឌី", "sweatshirt"], "search_terms": ["hoodie", "ហ៊ូឌី"], "wear_en": "Casual days, travel, cool weather, campus.", "wear_km": "ថ្ងៃធម្មតា · ធ្វើដំណើរ · អាកាសធាតុត្រជាក់ · សាលា។", "occasions": ["casual", "campus", "travel"]},
+    {"id": "sweater", "group": "tops", "name_en": "Sweater", "aliases": ["sweater", "sweaters", "cardigan", "knit"], "search_terms": ["sweater", "cardigan"], "wear_en": "Cool evenings, smart casual, layering.", "wear_km": "យប់ត្រជាក់ · smart casual · ពាក់ជាន់។", "occasions": ["casual", "office", "date"]},
+    {"id": "blazer", "group": "formal", "name_en": "Blazer", "aliases": ["blazer", "blazers", "suit jacket"], "search_terms": ["blazer", "jacket"], "wear_en": "Office, dinner, events — sharp but not full suit.", "wear_km": "ការិយាល័យ · dinner · កម្មវិធី — ស្អាតមិនត្រូវ suit ពេញ។", "occasions": ["office", "event", "date"]},
+    {"id": "bomber", "group": "outerwear", "name_en": "Bomber Jacket", "aliases": ["bomber", "bomber jacket", "bombers"], "search_terms": ["bomber", "jacket"], "wear_en": "Night out, casual evenings, travel.", "wear_km": "ចេញលេង · យប់ casual · ធ្វើដំណើរ។", "occasions": ["casual", "date", "event"]},
+    {"id": "denim_jacket", "group": "outerwear", "name_en": "Denim Jacket", "aliases": ["denim jacket", "jean jacket", "jeans jacket"], "search_terms": ["denim", "jacket", "jean"], "wear_en": "Everyday layering, weekends, cool weather.", "wear_km": "ប្រចាំថ្ងៃ · ចុងសប្តាហ៍ · អាកាសធាតុត្រជាក់។", "occasions": ["casual", "date"]},
+    {"id": "leather_jacket", "group": "outerwear", "name_en": "Leather Jacket", "aliases": ["leather jacket", "leather"], "search_terms": ["leather", "jacket"], "wear_en": "Date night, evenings, statement looks.", "wear_km": "ណាត់ជួប · យប់ · មើលទាន់សម័យ។", "occasions": ["date", "event"]},
+    {"id": "windbreaker", "group": "outerwear", "name_en": "Windbreaker", "aliases": ["windbreaker", "wind breaker", "rain jacket", "raincoat"], "search_terms": ["windbreaker", "jacket"], "wear_en": "Windy/rainy days, travel, light outdoor.", "wear_km": "ថ្ងៃខ្យល់/ភ្លៀង · ធ្វើដំណើរ · outdoor ស្រាល។", "occasions": ["casual", "travel", "gym"]},
+    {"id": "parka", "group": "outerwear", "name_en": "Parka / Puffer / Coat", "aliases": ["parka", "puffer", "puffer jacket", "trench", "trench coat", "overcoat", "coat", "coats"], "search_terms": ["parka", "puffer", "coat", "jacket"], "wear_en": "Cold weather, travel, outer layer over outfits.", "wear_km": "អាកាសធាតុត្រជាក់ · ធ្វើដំណើរ · ពាក់ក្រៅ។", "occasions": ["casual", "travel", "office"]},
+    {"id": "jeans", "group": "bottoms", "name_en": "Jeans", "aliases": ["jeans", "jean", "jeens", "denim pants"], "search_terms": ["jean", "jeans", "denim"], "wear_en": "Almost anytime casual — weekends, dates, travel.", "wear_km": "ស្ទើរគ្រប់ថ្ងៃ casual — ចុងសប្តាហ៍ · ណាត់ · ធ្វើដំណើរ។", "occasions": ["casual", "date", "campus"]},
+    {"id": "chinos", "group": "bottoms", "name_en": "Chinos", "aliases": ["chino", "chinos", "khaki pants"], "search_terms": ["chino", "chinos", "pants"], "wear_en": "Office smart-casual, campus, neat everyday.", "wear_km": "ការិយាល័យ smart-casual · សាលា · ថ្ងៃស្អាត។", "occasions": ["office", "campus", "casual", "date"]},
+    {"id": "dress_pants", "group": "bottoms", "name_en": "Dress / Cargo / Linen Pants", "aliases": ["dress pants", "cargo", "cargo pants", "linen pants", "trouser", "trousers", "pant", "pants"], "search_terms": ["pants", "cargo", "trouser", "linen"], "wear_en": "Dress pants for office/events; cargo/linen for casual & heat.", "wear_km": "ខោផ្លូវការ៖ ការិយាល័យ/កម្មវិធី · cargo/linen៖ casual និងថ្ងៃក្តៅ។", "occasions": ["office", "event", "casual", "beach"]},
+    {"id": "joggers", "group": "bottoms", "name_en": "Joggers / Sweatpants / Track Pants", "aliases": ["jogger", "joggers", "joggr", "sweatpants", "sweat pant", "track pants", "trackpant"], "search_terms": ["jogger", "sweat", "track", "pants"], "wear_en": "Gym, lounging, travel comfort, casual weekends.", "wear_km": "Gym · សម្រាក · ធ្វើដំណើរ · ចុងសប្តាហ៍។", "occasions": ["gym", "casual", "travel"]},
+    {"id": "shorts", "group": "bottoms", "name_en": "Shorts", "aliases": ["shorts", "denim shorts", "cargo shorts", "swim shorts", "gym shorts", "training shorts"], "search_terms": ["shorts"], "wear_en": "Hot days, beach, gym, casual outdoor.", "wear_km": "ថ្ងៃក្តៅ · ឆ្នេរ · gym · outdoor casual។", "occasions": ["beach", "gym", "casual"]},
+    {"id": "suit", "group": "formal", "name_en": "Suit / Tuxedo", "aliases": ["suit", "suits", "tuxedo", "tux"], "search_terms": ["suit", "blazer"], "wear_en": "Weddings, formal events, important meetings.", "wear_km": "អាពាហ៍ · កម្មវិធីផ្លូវការ · ប្រជុំសំខាន់។", "occasions": ["wedding", "event", "office"]},
+    {"id": "tie", "group": "formal", "name_en": "Tie / Bow Tie", "aliases": ["tie", "necktie", "bow tie", "bowtie"], "search_terms": ["tie", "bow"], "wear_en": "Formal events, office polish, weddings.", "wear_km": "កម្មវិធីផ្លូវការ · ការិយាល័យ · អាពាហ៍។", "occasions": ["office", "event", "wedding"]},
+    {"id": "sneakers", "group": "footwear", "name_en": "Sneakers / Running Shoes", "aliases": ["sneaker", "sneakers", "sneeker", "snekers", "running shoes", "runners", "ប៉ាតា"], "search_terms": ["sneaker", "shoe", "ប៉ាតា"], "wear_en": "Everyday, campus, travel, smart-casual with chinos.", "wear_km": "ប្រចាំថ្ងៃ · សាលា · ធ្វើដំណើរ · ពាក់ជាមួយ chinos។", "occasions": ["casual", "campus", "gym", "travel"]},
+    {"id": "dress_shoes", "group": "footwear", "name_en": "Dress Shoes / Oxford / Derby / Monk", "aliases": ["dress shoes", "oxford shoes", "derby", "monk strap", "formal shoes"], "search_terms": ["oxford", "derby", "shoe"], "wear_en": "Office, weddings, formal events.", "wear_km": "ការិយាល័យ · អាពាហ៍ · កម្មវិធីផ្លូវការ។", "occasions": ["office", "event", "wedding"]},
+    {"id": "loafers", "group": "footwear", "name_en": "Loafers / Boat Shoes", "aliases": ["loafer", "loafers", "boat shoes", "boat shoe"], "search_terms": ["loafer", "boat", "shoe"], "wear_en": "Smart casual, dinner, warm-weather polish.", "wear_km": "Smart casual · dinner · ថ្ងៃក្តៅមើលស្អាត។", "occasions": ["office", "date", "casual"]},
+    {"id": "boots", "group": "footwear", "name_en": "Boots / Chelsea Boots", "aliases": ["boot", "boots", "chelsea", "chelsea boots", "ប៊ូ"], "search_terms": ["boot", "chelsea", "ប៊ូ"], "wear_en": "Cooler weather, jeans outfits, evening looks.", "wear_km": "អាកាសធាតុត្រជាក់ · ឈុត jeans · យប់។", "occasions": ["casual", "date", "event"]},
+    {"id": "sandals", "group": "footwear", "name_en": "Sandals / Flip-Flops / Slippers", "aliases": ["sandal", "sandals", "flip flop", "flip-flops", "flipflops", "slippers", "slipper"], "search_terms": ["sandal", "flip", "slipper"], "wear_en": "Beach, home, hot casual days.", "wear_km": "ឆ្នេរ · ផ្ទះ · ថ្ងៃក្តៅ casual។", "occasions": ["beach", "casual"]},
+    {"id": "belt", "group": "accessories", "name_en": "Belt", "aliases": ["belt", "belts", "beltz", "ខ្សែ"], "search_terms": ["belt", "ខ្សែ"], "wear_en": "Finishes chinos/jeans/dress pants for office and events.", "wear_km": "បញ្ចប់ឈុត chinos/jeans/ខោផ្លូវការ សម្រាប់ការិយាល័យ និងកម្មវិធី។", "occasions": ["office", "event", "casual"]},
+    {"id": "wallet", "group": "accessories", "name_en": "Wallet / Card Holder", "aliases": ["wallet", "walet", "card holder", "cardholder", "កាបូបលុយ"], "search_terms": ["wallet", "card"], "wear_en": "Everyday essential — pairs with any outfit.", "wear_km": "ប្រើប្រចាំថ្ងៃ — ផ្គូរគ្រប់ឈុត។", "occasions": ["casual", "office"]},
+    {"id": "watch", "group": "accessories", "name_en": "Watch", "aliases": ["watch", "watches", "នាឡិកា", "smart watch", "analog watch"], "search_terms": ["watch", "នាឡិកា"], "wear_en": "Office polish, dates, elevates any look.", "wear_km": "ការិយាល័យ · ណាត់ជួប · ធ្វើឱ្យឈុតមើលឡើង។", "occasions": ["office", "date", "event"]},
+    {"id": "sunglasses", "group": "accessories", "name_en": "Sunglasses", "aliases": ["sunglasses", "sunglass", "shades", "aviator", "wayfarer"], "search_terms": ["sunglass", "aviator"], "wear_en": "Sunny days, driving, beach, travel.", "wear_km": "ថ្ងៃមានពន្លឺ · បើកបរ · ឆ្នេរ · ធ្វើដំណើរ។", "occasions": ["beach", "casual", "travel"]},
+    {"id": "cap", "group": "hats", "name_en": "Cap / Baseball Cap / Bucket Hat / Beanie", "aliases": ["cap", "caps", "baseball cap", "dad hat", "bucket hat", "beanie", "hat", "hats", "មួក"], "search_terms": ["cap", "hat", "beanie", "មួក"], "wear_en": "Casual days, sun, travel; beanie for cool weather.", "wear_km": "ថ្ងៃ casual · ពន្លឺថ្ងៃ · ធ្វើដំណើរ · beanie សម្រាប់ត្រជាក់។", "occasions": ["casual", "beach", "travel"]},
+    {"id": "scarf_gloves", "group": "accessories", "name_en": "Scarf / Gloves", "aliases": ["scarf", "gloves", "glove"], "search_terms": ["scarf", "glove"], "wear_en": "Cool/cold weather finishing touch.", "wear_km": "អាកាសធាតុត្រជាក់ — បញ្ចប់ឈុត។", "occasions": ["casual", "travel"]},
+    {"id": "socks", "group": "accessories", "name_en": "Socks", "aliases": ["sock", "socks", "sports socks", "ស្រោម"], "search_terms": ["sock", "ស្រោម"], "wear_en": "Everyday with sneakers or dress shoes; sports socks for gym.", "wear_km": "ប្រចាំថ្ងៃជាមួយ sneakers/ស្បែកជើងផ្លូវការ · sports សម្រាប់ gym។", "occasions": ["casual", "gym", "office"]},
+    {"id": "backpack", "group": "bags", "name_en": "Backpack", "aliases": ["backpack", "backpacks", "កាបូបស្ពាយ"], "search_terms": ["backpack", "bag", "កាបូប"], "wear_en": "Campus, travel, gym, everyday carry.", "wear_km": "សាលា · ធ្វើដំណើរ · gym · យកប្រចាំថ្ងៃ។", "occasions": ["campus", "travel", "gym", "casual"]},
+    {"id": "messenger", "group": "bags", "name_en": "Messenger / Crossbody / Briefcase / Duffel / Tote / Laptop / Waist Bag", "aliases": ["messenger", "messenger bag", "crossbody", "briefcase", "duffel", "tote", "laptop bag", "travel bag", "waist bag", "sling"], "search_terms": ["bag", "messenger", "duffel", "briefcase", "កាបូប"], "wear_en": "Work commute, travel, gym bag, short trips.", "wear_km": "ទៅធ្វើការ · ធ្វើដំណើរ · gym · ដំណើរខ្លី។", "occasions": ["office", "travel", "gym"]},
+    {"id": "boxers", "group": "underwear", "name_en": "Boxer Briefs / Boxers / Briefs / Trunks", "aliases": ["boxer", "boxers", "boxer briefs", "briefs", "trunks", "underwear"], "search_terms": ["boxer", "brief", "trunk"], "wear_en": "Everyday base layer — comfort under any outfit.", "wear_km": "គ្រឿងមូលដ្ឋានប្រចាំថ្ងៃ — ស្រួលក្រោមគ្រប់ឈុត។", "occasions": ["casual"]},
+    {"id": "pajamas", "group": "underwear", "name_en": "Pajamas / Robe / Undershirt", "aliases": ["pajama", "pajamas", "pyjamas", "robe", "undershirt"], "search_terms": ["pajama", "robe", "undershirt"], "wear_en": "Home, sleep, lounging.", "wear_km": "នៅផ្ទះ · គេង · សម្រាក។", "occasions": ["casual"]},
+    {"id": "tracksuit", "group": "sportswear", "name_en": "Tracksuit / Track Jacket / Compression / Running Tights", "aliases": ["tracksuit", "track jacket", "compression", "running tights", "sports t-shirt"], "search_terms": ["track", "compression", "jogger", "gym"], "wear_en": "Training, running, gym sessions.", "wear_km": "ហាត់ប្រាណ · រត់ · gym។", "occasions": ["gym"]},
+    {"id": "swim", "group": "beachwear", "name_en": "Swim Trunks / Rash Guard / Beach Hat", "aliases": ["swim", "swim trunks", "rash guard", "beach hat", "swimsuit"], "search_terms": ["swim", "rash", "shorts", "hat"], "wear_en": "Beach, pool, island trips.", "wear_km": "ឆ្នេរ · អាង · ទៅកោះ។", "occasions": ["beach"]},
+    {"id": "jewelry", "group": "jewelry", "name_en": "Ring / Bracelet / Necklace / Chain / Earrings", "aliases": ["ring", "bracelet", "necklace", "chain", "earring", "earrings"], "search_terms": ["ring", "bracelet", "necklace", "chain"], "wear_en": "Personal style accent for casual or night out.", "wear_km": "បន្ថែមស្ទីលសម្រាប់ casual ឬចេញលេង។", "occasions": ["casual", "date", "event"]},
+    {"id": "grooming", "group": "grooming", "name_en": "Grooming Kit / Cologne / Razor", "aliases": ["cologne", "perfume", "razor", "shaver", "beard comb", "beard brush", "hair clipper", "grooming kit", "grooming"], "search_terms": ["cologne", "perfume", "razor", "grooming"], "wear_en": "Daily grooming, dates, events — finish the look.", "wear_km": "ថែរក្សាប្រចាំថ្ងៃ · ណាត់ · កម្មវិធី — បញ្ចប់រូបរាង។", "occasions": ["date", "event", "office"]}
+  ],
+  "typo_aliases": {
+    "pant": "pants",
+    "jeen": "jeans",
+    "jeens": "jeans",
+    "jeen": "jeans",
+    "ble": "blue",
+    "blu": "blue",
+    "navyy": "navy",
+    "hodie": "hoodie",
+    "hoody": "hoodie",
+    "hoodiee": "hoodie",
+    "tshrit": "t-shirt",
+    "tshirt": "t-shirt",
+    "jackt": "jacket",
+    "sneeker": "sneakers",
+    "snekers": "sneakers",
+    "snickers": "sneakers",
+    "walet": "wallet",
+    "beltz": "belt",
+    "joggr": "jogger",
+    "poloshirt": "polo",
+    "windbraker": "windbreaker",
+    "sun glasses": "sunglasses",
+    "back pack": "backpack",
+    "trosers": "trousers",
+    "trouser": "trousers",
+    "shoess": "shoes",
+    "bootz": "boots",
+    "capps": "cap"
+  },
+  "wear_when_markers": {
+    "en": ["when to wear", "when should i wear", "what occasion", "good for", "wear for", "wear when", "suitable for", "for what"],
+    "km": ["ពាក់ពេលណា", "ពាក់ពេលណា?", "សម្រាប់ពេលណា", "ដាក់ពេលណា", "ប្រើពេលណា", "ល្អសម្រាប់", "ទៅណា", "ឱកាសណា"]
+  }
+}

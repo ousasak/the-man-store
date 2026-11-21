@@ -1,0 +1,808 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Mail\NewDeviceLoginAlertMail;
+use App\Mail\OtpCodeMail;
+use App\Models\OtpCode;
+use App\Models\User;
+use App\Models\UserDeviceSession;
+use App\Services\DeviceSessionService;
+use App\Services\SecurityAuditService;
+use App\Services\TwoFactorService;
+use App\Services\VerificationChallengeService;
+use App\Support\MailDiagnostics;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
+use Laravel\Socialite\Facades\Socialite;
+use Laravel\Sanctum\PersonalAccessToken;
+
+class AuthController extends Controller
+{
+  public function __construct(
+    private DeviceSessionService $deviceSessionService,
+    private TwoFactorService $twoFactor,
+    private VerificationChallengeService $verificationChallenge,
+    private SecurityAuditService $securityAudit,
+  ) {
+  }
+
+  public function register(Request $request)
+  {
+    $data = $request->validate([
+      'name' => ['required','string','max:120'],
+      'email' => ['required','email','max:190','unique:users,email'],
+      'phone' => ['nullable','string','max:30'],
+      'password' => ['required', 'confirmed', PasswordRule::min(8)],
+    ]);
+
+    $user = User::create([
+      'name' => $data['name'],
+      'email' => $data['email'],
+      'password' => Hash::make($data['password']),
+      'role' => 'customer',
+      'phone' => $data['phone'] ?? null,
+      'status' => 'pending',
+      'email_verified_at' => null,
+    ]);
+
+    $challengeToken = $this->verificationChallenge->create($user, 'register');
+    $this->verificationChallenge->setMethod($challengeToken, 'email');
+    $otpDelivery = $this->sendOtpCode($user->email, 'register');
+
+    return response()->json(array_merge([
+      'message' => $this->otpSentMessage($otpDelivery['email_sent']),
+      'verification_required' => true,
+      'step' => 'otp',
+      'challenge_token' => $challengeToken,
+      'verification_methods' => $this->verificationChallenge->availableMethods($user),
+      'preferred_method' => $user->two_factor_preferred_method ?? 'email',
+      'purpose' => 'register',
+    ], $this->otpDeliveryPayload($otpDelivery)), 201);
+  }
+
+  public function login(Request $request)
+  {
+    try {
+      return $this->performLogin($request);
+    } catch (\Throwable $e) {
+      Log::error('Login failed', [
+        'email' => $request->input('email'),
+        'error' => $e->getMessage(),
+      ]);
+
+      return response()->json([
+        'message' => 'Server Error',
+      ], 500);
+    }
+  }
+
+  private function performLogin(Request $request)
+  {
+    $data = $request->validate([
+      'email' => ['required','email'],
+      'password' => ['nullable','string'],
+    ]);
+
+    $user = User::where('email', $data['email'])->first();
+
+    if (!$user) {
+      return response()->json(['message' => 'Invalid credentials'], 422);
+    }
+
+    if (!empty($data['password']) && !Hash::check($data['password'], $user->password)) {
+      return response()->json(['message' => 'Invalid credentials'], 422);
+    }
+
+    if (! $user->email_verified_at || $user->status !== 'active') {
+      if (
+        $this->deviceSessionService->isTrustedDevice($user, $request)
+        && ! empty($data['password'])
+        && Hash::check($data['password'], $user->password)
+      ) {
+        $user->update([
+          'email_verified_at' => $user->email_verified_at ?? now(),
+          'status' => 'active',
+        ]);
+        $user->refresh();
+      } else {
+        return response()->json(
+          $this->beginVerificationChallengeResponse($user, $request, 'register', 'Account not verified. OTP sent to email.'),
+          403
+        );
+      }
+    }
+
+    if ($this->deviceSessionService->isTrustedDevice($user, $request)) {
+      if (empty($data['password'])) {
+        return response()->json(['message' => 'Password is required on this device.'], 422);
+      }
+
+      $this->deviceSessionService->touchTrustedDevice($user, $request);
+      $token = $this->issueDeviceBoundToken($user, 'themanstorepro', $request, markTrusted: false);
+      $this->securityAudit->record($request, 'login.trusted_device', $user);
+
+      return response()->json([
+        'message' => 'Signed in on a trusted device.',
+        'token' => $token,
+        'user' => $this->authUserPayload($user),
+        'trusted_device' => true,
+      ]);
+    }
+
+    $this->securityAudit->record($request, 'login.verification_required', $user, [
+      'reason' => 'new_or_untrusted_device',
+    ]);
+
+    return response()->json(
+      $this->beginVerificationChallengeResponse(
+        $user,
+        $request,
+        'login',
+        'A verification code was sent to your email.'
+      )
+    );
+  }
+
+  /** @return array<string, mixed> */
+  private function beginVerificationChallengeResponse(
+    User $user,
+    Request $request,
+    string $purpose,
+    string $message,
+  ): array {
+    $context = $this->deviceSessionService->resolveDeviceContext($request);
+    $deviceMeta = [
+      'device_id' => $context['device_id'],
+      'device_name' => $context['device_name'],
+      'platform' => $request->input('platform'),
+      'app_version' => $request->input('app_version'),
+    ];
+    $challengeToken = $this->verificationChallenge->create($user, $purpose, $deviceMeta);
+    $this->verificationChallenge->setMethod($challengeToken, 'email');
+    $otpDelivery = $this->sendOtpCode($user->email, $purpose);
+
+    return array_merge([
+      'message' => $otpDelivery['email_sent'] ? $message : $this->otpSentMessage(false),
+      'verification_required' => true,
+      'step' => 'otp',
+      'challenge_token' => $challengeToken,
+      'verification_methods' => $this->verificationChallenge->availableMethods($user),
+      'preferred_method' => $user->two_factor_preferred_method ?? 'email',
+      'purpose' => $purpose,
+      'device_verification_required' => $purpose === 'login',
+    ], $this->otpDeliveryPayload($otpDelivery));
+  }
+
+  public function selectVerificationMethod(Request $request)
+  {
+    $data = $request->validate([
+      'challenge_token' => ['required', 'string'],
+      'method' => ['required', 'in:email,authenticator'],
+    ]);
+
+    $payload = $this->verificationChallenge->get($data['challenge_token']);
+    if (! $payload) {
+      return response()->json(['message' => 'Verification session expired. Please try again.'], 422);
+    }
+
+    $user = $this->verificationChallenge->resolveUser($data['challenge_token']);
+    if (! $user) {
+      return response()->json(['message' => 'Account not found.'], 404);
+    }
+
+    if (! $this->verificationChallenge->isMethodAllowed($user, $data['method'])) {
+      return response()->json(['message' => 'This verification method is not available.'], 422);
+    }
+
+    $this->verificationChallenge->setMethod($data['challenge_token'], $data['method']);
+
+    $this->securityAudit->record($request, 'login.verification_method', $user, [
+      'method' => $data['method'],
+      'purpose' => $payload['purpose'] ?? 'login',
+    ]);
+
+    if ($data['method'] === 'email') {
+      $purpose = $this->otpPurposeForChallenge($payload);
+      $otpDelivery = $this->sendOtpCode($user->email, $purpose);
+
+      return response()->json(array_merge([
+        'step' => 'otp',
+        'email' => $user->email,
+        'purpose' => $purpose,
+        'message' => $this->otpSentMessage($otpDelivery['email_sent']),
+      ], $this->otpDeliveryPayload($otpDelivery)));
+    }
+
+    return response()->json([
+      'step' => 'authenticator',
+      'message' => 'Enter the 6-digit code from your authenticator app (or a recovery code).',
+    ]);
+  }
+
+  public function verifyOtp(Request $request)
+  {
+    $data = $request->validate([
+      'email' => ['required','email'],
+      'code' => ['required','string','min:4','max:12'],
+      'purpose' => ['required','in:register,login,forgot'],
+      'challenge_token' => ['nullable', 'string'],
+    ]);
+
+    if (! empty($data['challenge_token'])) {
+      $payload = $this->verificationChallenge->get($data['challenge_token']);
+      if (is_array($payload)) {
+        $data['purpose'] = $this->otpPurposeForChallenge($payload);
+      }
+    }
+
+    $otp = OtpCode::where('email', $data['email'])
+      ->where('purpose', $data['purpose'])
+      ->whereNull('consumed_at')
+      ->where('expires_at', '>', now())
+      ->latest('id')
+      ->first();
+
+    if (!$otp) {
+      return response()->json(['message' => 'OTP expired or not found'], 422);
+    }
+
+    $otp->increment('attempts');
+
+    if (!Hash::check($data['code'], $otp->code_hash)) {
+      return response()->json(['message' => 'Invalid OTP'], 422);
+    }
+
+    $user = User::where('email', $data['email'])->first();
+    if (!$user) {
+      return response()->json(['message' => 'User not found'], 404);
+    }
+
+    if (! empty($data['challenge_token'])) {
+      $payload = $this->verificationChallenge->get($data['challenge_token']);
+      if (is_array($payload) && (int) ($payload['user_id'] ?? 0) === (int) $user->id) {
+        $expectedPurpose = (string) ($payload['purpose'] ?? $data['purpose']);
+
+        $response = $this->completeVerificationChallenge(
+          $data['challenge_token'],
+          $user,
+          $request,
+          $expectedPurpose,
+          'email'
+        );
+
+        if ($response->getStatusCode() < 400) {
+          $this->consumeOtp($otp, $data['purpose']);
+        }
+
+        return $response;
+      }
+    }
+
+    if ($data['purpose'] === 'register') {
+      $user->update([
+        'email_verified_at' => now(),
+        'status' => 'active',
+      ]);
+    }
+
+    if ($data['purpose'] !== 'forgot' && $user->status !== 'active') {
+      return response()->json(['message' => 'Account is not active'], 403);
+    }
+
+    if ($data['purpose'] === 'forgot') {
+      return response()->json([
+        'verified' => true,
+        'message' => 'OTP verified successfully.',
+      ]);
+    }
+
+    if ($this->twoFactor->isEnabled($user)) {
+      $this->consumeOtp($otp, $data['purpose']);
+
+      $challengeToken = $this->twoFactor->createLoginChallenge($user, $request->only([
+        'device_id', 'device_name', 'platform', 'app_version',
+      ]));
+
+      return response()->json([
+        'message' => 'Enter the code from your authenticator app.',
+        'two_factor_required' => true,
+        'challenge_token' => $challengeToken,
+        'user' => $user,
+      ]);
+    }
+
+    $token = $this->issueDeviceBoundToken($user, 'themanstorepro', $request, markTrusted: true);
+    $this->consumeOtp($otp, $data['purpose']);
+
+    return response()->json([
+      'token' => $token,
+      'user' => $this->authUserPayload($user),
+      'device_verified' => true,
+    ]);
+  }
+
+  private function consumeOtp(OtpCode $otp, string $purpose): void
+  {
+    if ($purpose === 'forgot') {
+      return;
+    }
+
+    $otp->update(['consumed_at' => now()]);
+  }
+
+  public function resendOtp(Request $request)
+  {
+    $data = $request->validate([
+      'email' => ['required','email'],
+      'purpose' => ['required','in:register,login,forgot'],
+      'challenge_token' => ['nullable', 'string'],
+    ]);
+
+    if (! empty($data['challenge_token'])) {
+      $payload = $this->verificationChallenge->get($data['challenge_token']);
+      if (! $payload || ($payload['method'] ?? '') !== 'email') {
+        return response()->json(['message' => 'Verification session expired. Please try again.'], 422);
+      }
+
+      $user = $this->verificationChallenge->resolveUser($data['challenge_token']);
+      if (! $user || $user->email !== $data['email']) {
+        return response()->json(['message' => 'Email does not match this verification session.'], 422);
+      }
+
+      $purpose = $this->otpPurposeForChallenge($payload);
+      $otpDelivery = $this->sendOtpCode($user->email, $purpose);
+
+      return response()->json(array_merge([
+        'message' => $this->otpSentMessage($otpDelivery['email_sent']),
+        'otp_required' => true,
+        'purpose' => $purpose,
+      ], $this->otpDeliveryPayload($otpDelivery)));
+    }
+
+    $otpDelivery = $this->sendOtpCode($data['email'], $data['purpose']);
+
+    return response()->json(array_merge([
+      'message' => $this->otpSentMessage($otpDelivery['email_sent']),
+      'otp_required' => true,
+      'purpose' => $data['purpose'],
+    ], $this->otpDeliveryPayload($otpDelivery)));
+  }
+
+  public function me(Request $request)
+  {
+    return response()->json($request->user());
+  }
+
+  public function driverToken(Request $request)
+  {
+    $user = $request->user();
+
+    if (! $user || $user->role !== 'driver') {
+      return response()->json(['message' => 'Forbidden (driver only).'], 403);
+    }
+
+    $token = $this->issueDeviceBoundToken($user, 'driver-device', $request);
+
+    return response()->json([
+      'token' => $token,
+      'user' => $user,
+    ]);
+  }
+
+  public function logout(Request $request)
+  {
+    $user = $request->user();
+    $token = $user?->currentAccessToken();
+
+    if ($token) {
+      UserDeviceSession::query()
+        ->where('user_id', $user->id)
+        ->where('personal_access_token_id', $token->id)
+        ->delete();
+
+      $token->delete();
+    }
+
+    return response()->json(['message' => 'Logged out']);
+  }
+
+  public function redirectToFacebook()
+  {
+    return Socialite::driver('facebook')
+      ->stateless()
+      ->redirect();
+  }
+
+  public function handleFacebookCallback(Request $request)
+  {
+    try {
+      $facebookUser = Socialite::driver('facebook')
+        ->stateless()
+        ->user();
+    } catch (\Throwable $e) {
+      return response()->json([
+        'message' => 'Facebook login failed.',
+      ], 422);
+    }
+
+    $email = trim((string) $facebookUser->getEmail());
+    if ($email === '') {
+      return response()->json([
+        'message' => 'Facebook account does not provide an email.',
+      ], 422);
+    }
+
+    $facebookId = (string) $facebookUser->getId();
+    $name = $facebookUser->getName() ?: $facebookUser->getNickname() ?: 'Customer';
+
+    $user = User::where('email', $email)->first();
+
+    if (!$user) {
+      $user = User::create([
+        'name' => $name,
+        'email' => $email,
+        'password' => null,
+        'role' => 'customer',
+        'status' => 'active',
+        'email_verified_at' => now(),
+        'facebook_id' => $facebookId !== '' ? $facebookId : null,
+        'social_type' => 'facebook',
+      ]);
+    } else {
+      $updates = [
+        'social_type' => 'facebook',
+      ];
+
+      if ($facebookId !== '' && empty($user->facebook_id)) {
+        $updates['facebook_id'] = $facebookId;
+      }
+
+      if (!$user->email_verified_at) {
+        $updates['email_verified_at'] = now();
+      }
+
+      if ($user->status !== 'active') {
+        $updates['status'] = 'active';
+      }
+
+      $user->update($updates);
+      $user->refresh();
+    }
+
+    $token = $this->issueDeviceBoundToken($user, 'facebook-login', $request);
+
+    return response()->json([
+      'message' => 'Facebook login successful.',
+      'token' => $token,
+      'user' => $user,
+    ]);
+  }
+
+    public function forgotPassword(Request $request)
+    {
+      $data = $request->validate([
+        'email' => ['required', 'email'],
+      ]);
+
+      $user = User::where('email', $data['email'])->first();
+
+      if (! $user) {
+        return response()->json([
+          'message' => 'If the account exists, you can choose how to verify your identity.',
+        ], 200);
+      }
+
+      $challengeToken = $this->verificationChallenge->create($user, 'forgot');
+      $this->verificationChallenge->setMethod($challengeToken, 'email');
+      $otpDelivery = $this->sendOtpCode($user->email, 'forgot');
+
+      return response()->json(array_merge([
+        'message' => $this->otpSentMessage($otpDelivery['email_sent']),
+        'verification_required' => true,
+        'step' => 'otp',
+        'challenge_token' => $challengeToken,
+        'verification_methods' => $this->verificationChallenge->availableMethods($user),
+        'preferred_method' => $user->two_factor_preferred_method ?? 'email',
+        'purpose' => 'forgot',
+      ], $this->otpDeliveryPayload($otpDelivery)), 200);
+    }
+
+    public function resetPasswordOtp(Request $request)
+    {
+      $data = $request->validate([
+        'challenge_token' => ['required', 'string'],
+        'password' => [
+          'required',
+          'confirmed',
+          PasswordRule::min(8)->letters()->mixedCase()->numbers()->symbols(),
+        ],
+      ]);
+
+      $payload = $this->verificationChallenge->get($data['challenge_token']);
+      if (! $payload || ($payload['purpose'] ?? '') !== 'forgot' || empty($payload['verified_at'])) {
+        return response()->json([
+          'message' => 'Please complete identity verification before resetting your password.',
+        ], 422);
+      }
+
+      $user = User::query()->find($payload['user_id']);
+      if (! $user) {
+        return response()->json(['message' => 'Account not found.'], 404);
+      }
+
+      $user->forceFill([
+        'password' => Hash::make($data['password']),
+        'remember_token' => Str::random(60),
+      ])->save();
+
+      $user->tokens()->delete();
+      $this->verificationChallenge->forget($data['challenge_token']);
+
+      return response()->json([
+        'message' => 'Password has been reset successfully. You can sign in now.',
+      ], 200);
+    }
+
+    public function resetPassword(Request $request)
+    {
+      $data = $request->validate([
+        'token' => ['required', 'string'],
+        'email' => ['required', 'email:rfc,dns'],
+        'password' => [
+          'required',
+          'confirmed',
+          PasswordRule::min(8)->letters()->mixedCase()->numbers()->symbols(),
+        ],
+      ]);
+
+      $status = Password::reset([
+        'email' => $data['email'],
+        'token' => $data['token'],
+        'password' => $data['password'],
+        'password_confirmation' => $request->input('password_confirmation'),
+      ], function (User $user, string $password) {
+        $user->forceFill([
+          'password' => Hash::make($password),
+          'remember_token' => Str::random(60),
+        ])->save();
+
+        $user->tokens()->delete();
+      });
+
+      if ($status === Password::PASSWORD_RESET) {
+        return response()->json([
+          'message' => 'Password has been reset successfully.',
+        ], 200);
+      }
+
+      return response()->json([
+        'message' => 'The reset token is invalid or expired.',
+      ], 422);
+    }
+
+  private function completeVerificationChallenge(
+    string $challengeToken,
+    User $user,
+    Request $request,
+    string $expectedPurpose,
+    string $expectedMethod
+  ) {
+    $payload = $this->verificationChallenge->get($challengeToken);
+    if (! $payload || ($payload['user_id'] ?? null) !== $user->id) {
+      return response()->json(['message' => 'Verification session expired. Please try again.'], 422);
+    }
+
+    if (($payload['purpose'] ?? '') !== $expectedPurpose) {
+      return response()->json(['message' => 'Invalid verification session.'], 422);
+    }
+
+    if (($payload['method'] ?? '') !== $expectedMethod) {
+      return response()->json(['message' => 'Use the verification method you selected.'], 422);
+    }
+
+    if ($expectedPurpose === 'forgot') {
+      $this->verificationChallenge->markVerified($challengeToken);
+
+      return response()->json([
+        'verified' => true,
+        'challenge_token' => $challengeToken,
+        'message' => 'Identity verified. You can set a new password.',
+      ]);
+    }
+
+    if ($expectedPurpose === 'register') {
+      $user->update([
+        'email_verified_at' => now(),
+        'status' => 'active',
+      ]);
+    } elseif ($user->status !== 'active') {
+      return response()->json(['message' => 'Account is not active'], 403);
+    }
+
+    $this->verificationChallenge->forget($challengeToken);
+
+    try {
+      $token = $this->issueDeviceBoundToken($user, 'themanstorepro', $request, markTrusted: true);
+
+      return response()->json([
+        'token' => $token,
+        'user' => $this->authUserPayload($user->fresh()),
+        'device_verified' => true,
+      ]);
+    } catch (\Throwable $e) {
+      Log::error('Verification challenge completion failed', [
+        'user_id' => $user->id,
+        'purpose' => $expectedPurpose,
+        'error' => $e->getMessage(),
+      ]);
+
+      return response()->json([
+        'message' => 'We could not finish signing you in. Please try again.',
+      ], 500);
+    }
+  }
+
+  /** @return array<string, mixed> */
+  private function authUserPayload(?User $user): array
+  {
+    if (! $user) {
+      return [];
+    }
+
+    return [
+      'id' => $user->id,
+      'name' => $user->name,
+      'email' => $user->email,
+      'phone' => $user->phone,
+      'role' => $user->role,
+      'status' => $user->status,
+      'address' => $user->address,
+      'profile_image_url' => $user->profile_image_url,
+      ...($user->isAdmin() ? ['effective_admin_permissions' => $user->effective_admin_permissions] : []),
+    ];
+  }
+
+  /** @param array<string, mixed> $payload */
+  private function otpPurposeForChallenge(array $payload): string
+  {
+    $purpose = (string) ($payload['purpose'] ?? 'login');
+
+    return in_array($purpose, ['register', 'login', 'forgot'], true) ? $purpose : 'login';
+  }
+
+  /** @return array{email_sent: bool} */
+  private function sendOtpCode(string $email, string $purpose): array
+  {
+    $expiresMinutes = (int) (config('auth.otp_expires_minutes') ?? 10);
+    $code = (string) random_int(100000, 999999);
+
+    OtpCode::where('email', $email)->where('purpose', $purpose)->delete();
+
+    OtpCode::create([
+      'email' => $email,
+      'purpose' => $purpose,
+      'code_hash' => Hash::make($code),
+      'expires_at' => now()->addMinutes($expiresMinutes),
+    ]);
+
+    $emailSent = true;
+
+    try {
+      Mail::to($email)->send(new OtpCodeMail($code, $purpose, $expiresMinutes));
+      Log::info('OTP email accepted by mail transport', [
+        'email' => $email,
+        'purpose' => $purpose,
+        'mailer' => config('mail.default'),
+        'from' => config('mail.from.address'),
+      ]);
+    } catch (\Throwable $e) {
+      $emailSent = false;
+
+      Log::warning('OTP email delivery failed', [
+        'email' => $email,
+        'purpose' => $purpose,
+        'error' => $e->getMessage(),
+        'mail_issues' => MailDiagnostics::issues(),
+      ]);
+    }
+
+    if ($this->otpDebugEnabled()) {
+      Log::debug('OTP code (OTP_DEBUG; not exposed to API clients)', [
+        'email' => $email,
+        'purpose' => $purpose,
+        'code' => $code,
+        'email_sent' => $emailSent,
+      ]);
+    }
+
+    return [
+      'email_sent' => $emailSent,
+    ];
+  }
+
+  private function otpDebugEnabled(): bool
+  {
+    return filter_var(env('OTP_DEBUG', false), FILTER_VALIDATE_BOOL);
+  }
+
+  private function otpSentMessage(bool $emailSent): string
+  {
+    if ($emailSent) {
+      return 'A verification code was sent to your email.';
+    }
+
+    return MailDiagnostics::otpDeliveryFailureMessage();
+  }
+
+  /** @param array{email_sent: bool} $delivery */
+  private function otpDeliveryPayload(array $delivery): array
+  {
+    return [
+      'email_sent' => $delivery['email_sent'],
+    ];
+  }
+
+  private function issueDeviceBoundToken(
+    User $user,
+    string $tokenName,
+    Request $request,
+    bool $markTrusted = true,
+  ): string {
+    try {
+      $plainTextToken = $user->createToken($tokenName, ['*'], now()->addMonths(6))->plainTextToken;
+    } catch (\Throwable $e) {
+      Log::error('Sanctum token creation failed', [
+        'user_id' => $user->id,
+        'error' => $e->getMessage(),
+      ]);
+
+      throw $e;
+    }
+
+    $tokenId = (int) explode('|', $plainTextToken, 2)[0];
+    $tokenModel = PersonalAccessToken::query()->find($tokenId);
+
+    if ($tokenModel) {
+      try {
+        $binding = $this->deviceSessionService->bindTokenToDevice($user, $tokenModel, $request);
+
+        if ($markTrusted) {
+          $this->deviceSessionService->markDeviceVerified($user, $request);
+        }
+
+        $event = $binding['is_new_device'] ? 'login.new_device' : 'login.success';
+        $this->securityAudit->record($request, $event, $user, [
+          'token_name' => $tokenName,
+          'new_device' => $binding['is_new_device'],
+        ]);
+
+        if ($binding['is_new_device']) {
+          try {
+            Mail::to($user->email)->send(new NewDeviceLoginAlertMail(
+              $this->securityAudit->mailContextFromDevice($binding['context'])
+            ));
+          } catch (\Throwable $e) {
+            Log::warning('New device login alert email failed', [
+              'email' => $user->email,
+              'error' => $e->getMessage(),
+            ]);
+          }
+        }
+      } catch (\Throwable $e) {
+        Log::warning('Device session binding failed during token issue', [
+          'user_id' => $user->id,
+          'error' => $e->getMessage(),
+        ]);
+      }
+    }
+
+    return $plainTextToken;
+  }
+}

@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: The Man Store Store Backend API
+  description: Enterprise POS, Inventory, Repair & Multi-branch Retail Management API (v1).
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: API v1 Endpoint Base
+paths:
+  /auth/login:
+    post:
+      summary: User Login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: cashier@fitandsleek.com
+                password:
+                  type: string
+                  format: password
+                  example: Secret123!
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Unauthorized
+
+  /auth/me:
+    get:
+      summary: Get Current Authenticated Profile
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile details
+
+  /admin/dashboard:
+    get:
+      summary: Admin Dashboard Overview
+      tags:
+        - Admin Dashboard
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dashboard metrics & key indicators
+
+  /cashier/pos/session:
+    get:
+      summary: Check POS Register Session Status
+      tags:
+        - Cashier POS
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current POS register shift details
+
+  /cashier/pos/checkout:
+    post:
+      summary: Process POS Checkout & Sale
+      tags:
+        - Cashier POS
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items, payment_method, subtotal, total_amount]
+              properties:
+                customer_id:
+                  type: integer
+                  nullable: true
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [product_id, quantity, unit_price]
+                    properties:
+                      product_id:
+                        type: integer
+                      quantity:
+                        type: number
+                      unit_price:
+                        type: number
+                      imei_sn:
+                        type: string
+                payment_method:
+                  type: string
+                  example: khqr
+                subtotal:
+                  type: number
+                total_amount:
+                  type: number
+      responses:
+        '201':
+          description: POS Sale created
+
+  /technician/repairs:
+    get:
+      summary: List Assigned Repair Tickets
+      tags:
+        - Technician Repairs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of repair tickets
+
+  /mobile/init:
+    get:
+      summary: Mobile App Bootstrap Configuration
+      tags:
+        - Mobile
+      responses:
+        '200':
+          description: Store app initialization payload
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum

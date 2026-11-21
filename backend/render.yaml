@@ -1,0 +1,98 @@
+# Render Blueprint (optional). See backend/docs/render-free.md
+# Netlify proxies /api/* → fitandsleek-official.onrender.com — APP_URL + OAuth must match that host.
+services:
+  - type: web
+    name: fitandsleek-official
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: Dockerfile
+    branch: main
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://fitandsleek-official.onrender.com
+      - key: FRONTEND_URL
+        value: https://www.fitandsleek.online
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: fitandsleek.online,www.fitandsleek.online,fitandsleek-official-frontend.netlify.app,fitandsleek-official.vercel.app
+      - key: RUN_MIGRATIONS
+        value: "false"
+      # Media — Cloudflare R2 (account 29531ec2… — create bucket "fitandsleek" in dashboard)
+      - key: FILESYSTEM_DISK
+        value: r2
+      - key: ADMIN_PROFILE_IMAGE_DISK
+        value: r2
+      - key: MEDIA_FALLBACK_TO_PUBLIC
+        value: "false"
+      - key: ADMIN_PROFILE_IMAGE_FALLBACK_TO_PUBLIC
+        value: "false"
+      - key: R2_BUCKET
+        value: fitandsleek
+      - key: R2_ENDPOINT
+        value: https://29531ec21763c961814bc2de1cf2aa75.r2.cloudflarestorage.com
+      # Set after R2 public access: custom domain media.fitandsleek.online (zone on this account)
+      # or interim https://pub-xxxxxxxx.r2.dev — also set AWS_URL to the same value on Render.
+      - key: R2_PUBLIC_URL
+        value: https://media.fitandsleek.online
+      - key: R2_REGION
+        value: auto
+      - key: R2_USE_PATH_STYLE_ENDPOINT
+        value: "true"
+      # Mail — Resend (set RESEND_API_KEY in Render dashboard; rotate if exposed)
+      - key: MAIL_MAILER
+        value: resend
+      # Production: verify fitandsleek.online in Resend, then use no-reply@fitandsleek.online
+      # onboarding@resend.dev only delivers to your verified Resend inbox (not customers).
+      - key: MAIL_FROM_ADDRESS
+        value: no-reply@fitandsleek.online
+      - key: MAIL_FROM_NAME
+        value: FitandSleek
+      # OAuth — same Google/Facebook apps as website; secrets in Render dashboard
+      - key: GOOGLE_REDIRECT_URI
+        value: https://fitandsleek-official.onrender.com/api/auth/google/callback
+      - key: FACEBOOK_REDIRECT_URI
+        value: https://fitandsleek-official.onrender.com/api/auth/facebook/callback
+      - key: MOBILE_OAUTH_CALLBACK_URL
+        value: fitandsleek://oauth/callback
+      - key: QUEUE_CONNECTION
+        value: database
+      # Free tier restarts wipe the container disk, so a file cache is empty on every
+      # boot and the first visitor pays for the whole homepage rebuild (504 via Netlify).
+      - key: CACHE_STORE
+        value: database
+      # Light boot for Free tier (see backend/docs/render-free.md)
+      - key: RUN_QUEUE_WORKER
+        value: "false"
+      - key: RUN_SCHEDULER
+        value: "false"
+      - key: QDRANT_SETUP_ON_BOOT
+        value: "false"
+      - key: QDRANT_INDEX_MISSING_ON_BOOT
+        value: "false"
+      - key: QDRANT_INDEX_BATCH_SIZE
+        value: "10"
+      # Payments — Rielpay KHQR + bank deeplink (set RIELPAY_API_KEY in dashboard)
+      - key: RIELPAY_API_URL
+        value: https://api-norng-rielpay.fitandsleek.online
+      - key: RIELPAY_CURRENCY
+        value: KHR
+      - key: RIELPAY_EXPIRES_IN
+        value: "300"
+      - key: RIELPAY_DEEPLINK_APP_NAME
+        value: FitandSleek
+      - key: RIELPAY_DEEPLINK_ICON_URL
+        value: https://www.fitandsleek.online/logo-circle.png
+      - key: RIELPAY_DEEPLINK_CALLBACK
+        value: fitandsleek://payment/callback
+      # Image search (set in dashboard): FITANDSLEEK_CLIP_ENDPOINT, QDRANT_URL, QDRANT_API_KEY,
+      # QDRANT_COLLECTION, IMAGE_SEARCH_TIMEOUT=90. One-time: php artisan qdrant:setup &&
+      # php artisan qdrant:index-products
+      # Secrets (Render dashboard only): APP_KEY, DATABASE_URL, RESEND_API_KEY,
+      # RIELPAY_API_KEY (from merchant-norng-rielpay.fitandsleek.online),
+      # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET,
+      # R2_ACCESS_KEY_ID + R2_SECRET_ACCESS_KEY (or AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY)

@@ -1,0 +1,7 @@
+# Backward compatibility: the app stack now lives in docker-compose.yml (pgAdmin on host port 5050).
+# Use either file with the same project name so volumes match, e.g.:
+#   docker compose -f docker-compose.yml up -d
+#   docker compose -f docker-compose.fullstack.yml up -d
+
+include:
+  - path: docker-compose.yml

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="The Man Store">
+  <defs>
+    <linearGradient id="favGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF4E3"/>
+      <stop offset="40%" stop-color="#E2BA64"/>
+      <stop offset="80%" stop-color="#C59B37"/>
+      <stop offset="100%" stop-color="#8F6717"/>
+    </linearGradient>
+    <linearGradient id="favWhite" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#D9E2DC"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Obsidian Black Background -->
+  <rect width="512" height="512" rx="112" fill="#0B0F17"/>
+
+  <!-- Outer Elegant Gold Ring -->
+  <rect x="24" y="24" width="464" height="464" rx="96" fill="none" stroke="url(#favGold)" stroke-width="6" opacity="0.9"/>
+  <rect x="36" y="36" width="440" height="440" rx="84" fill="none" stroke="url(#favGold)" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6"/>
+
+  <!-- Shield / Crest Frame -->
+  <polygon points="256,76 390,146 390,296 256,380 122,296 122,146"
+           fill="#05080E" stroke="url(#favGold)" stroke-width="5" stroke-linejoin="round"/>
+
+  <!-- Apex Crown -->
+  <path d="M 234 116 L 256 94 L 278 116 L 270 123 L 242 123 Z" fill="url(#favGold)"/>
+
+  <!-- Stylized "M" Monogram & Suit Lapels -->
+  <!-- Left Pillar -->
+  <path d="M 172 152 L 198 152 L 198 304 L 172 304 Z" fill="url(#favWhite)"/>
+  <!-- Right Pillar -->
+  <path d="M 314 152 L 340 152 L 340 304 L 314 304 Z" fill="url(#favWhite)"/>
+  <!-- Left Lapel Fold -->
+  <path d="M 198 152 L 256 238 L 238 250 L 172 152 Z" fill="url(#favGold)"/>
+  <!-- Right Lapel Fold -->
+  <path d="M 314 152 L 256 238 L 274 250 L 340 152 Z" fill="url(#favGold)"/>
+  <!-- Necktie Center -->
+  <polygon points="256,252 267,272 256,336 245,272" fill="url(#favGold)"/>
+  <circle cx="256" cy="246" r="6" fill="#FFFFFF"/>
+
+  <!-- Compact Brand Text -->
+  <text x="256" y="432"
+        text-anchor="middle"
+        font-family="'Montserrat', 'Cinzel', 'Inter', -apple-system, sans-serif"
+        font-weight="800"
+        font-size="34"
+        letter-spacing="9"
+        fill="url(#favGold)">THE MAN</text>
+  <text x="256" y="464"
+        text-anchor="middle"
+        font-family="'Montserrat', 'Inter', sans-serif"
+        font-weight="600"
+        font-size="19"
+        letter-spacing="10"
+        fill="#A3B8AA">STORE</text>
+</svg>

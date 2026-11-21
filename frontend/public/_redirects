@@ -1,0 +1,5 @@
+# Proxy API to backend BEFORE the SPA fallback (force with !).
+/api/*  /api/:splat  200
+
+# SPA: React Router deep links
+/*    /index.html   200

@@ -1,0 +1,13 @@
+# Railway — Laravel API (Docker). Root directory in Railway dashboard = `backend`.
+# Docs: backend/docs/railway.md
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+# Entrypoint CMD ["web"] listens on $PORT (Railway injects this).

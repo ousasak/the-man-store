@@ -1,0 +1,26 @@
+# Root
+.env
+**/.env
+**/.env.local
+venv/
+.venv/
+node_modules/
+.next/
+out/
+dist/
+build/
+__pycache__/
+*.pyc
+.gradio/
+.cache/
+*.bin
+*.safetensors
+.DS_Store
+.idea/
+.vscode/
+*.log
+docker-gpu-build.log
+data/text_quality_report.json
+models/*
+!models/.gitkeep
+!models/.gitignore

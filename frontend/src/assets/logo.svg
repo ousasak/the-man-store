@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1350 360" width="1350" height="360" role="img" aria-label="The Man Store">
+  <defs>
+    <linearGradient id="goldLuxury" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBF0D9" />
+      <stop offset="35%" stop-color="#E2BA64" />
+      <stop offset="70%" stop-color="#C59B37" />
+      <stop offset="100%" stop-color="#916B19" />
+    </linearGradient>
+    <linearGradient id="whiteSoft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Brand Emblem Monogram -->
+  <g id="brand-emblem" transform="translate(60, 45)" filter="url(#softShadow)">
+    <!-- Outer Shield / Hexagon Frame -->
+    <polygon points="135,10 240,70 240,195 135,260 30,195 30,70"
+             fill="#05080E" stroke="url(#goldLuxury)" stroke-width="4.5" stroke-linejoin="round" />
+    
+    <!-- Inner Delicate Geometric Border -->
+    <polygon points="135,24 226,76 226,186 135,244 44,186 44,76"
+             fill="none" stroke="url(#goldLuxury)" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.65" />
+
+    <!-- Stylized Crown / Crest Apex -->
+    <path d="M 115 52 L 135 34 L 155 52 L 148 58 L 122 58 Z" fill="url(#goldLuxury)" />
+
+    <!-- Stylized Luxury "M" Geometry -->
+    <path d="M 72 82 L 94 82 L 94 204 L 72 204 Z" fill="url(#whiteSoft)" />
+    <path d="M 176 82 L 198 82 L 198 204 L 176 204 Z" fill="url(#whiteSoft)" />
+    <path d="M 94 82 L 135 152 L 120 162 L 72 82 Z" fill="url(#goldLuxury)" />
+    <path d="M 176 82 L 135 152 L 150 162 L 198 82 Z" fill="url(#goldLuxury)" />
+    <polygon points="135,162 144,178 135,225 126,178" fill="url(#goldLuxury)" />
+    <circle cx="135" cy="158" r="4.5" fill="#FFFFFF" />
+  </g>
+
+  <!-- Typography Block -->
+  <g id="brand-typography" transform="translate(350, 75)">
+    <!-- Small Top Label -->
+    <text x="4" y="38"
+          font-family="'Montserrat', 'Inter', -apple-system, sans-serif"
+          font-size="18"
+          font-weight="700"
+          letter-spacing="10"
+          fill="url(#goldLuxury)">THE PREMIER</text>
+
+    <!-- Main Title -->
+    <text x="0" y="122"
+          font-family="'Cinzel', 'Playfair Display', 'Trajan Pro', 'Georgia', serif"
+          font-size="74"
+          font-weight="800"
+          letter-spacing="10"
+          fill="url(#whiteSoft)"
+          filter="url(#softShadow)">THE MAN STORE</text>
+
+    <!-- Elegant Gold Divider Line with Center Rhombus -->
+    <line x1="2" y1="150" x2="330" y2="150" stroke="url(#goldLuxury)" stroke-width="2" />
+    <polygon points="345,150 352,143 359,150 352,157" fill="url(#goldLuxury)" />
+    <line x1="368" y1="150" x2="710" y2="150" stroke="url(#goldLuxury)" stroke-width="2" />
+
+    <!-- Subtitle / Tagline -->
+    <text x="4" y="190"
+          font-family="'Montserrat', 'Inter', -apple-system, sans-serif"
+          font-size="20"
+          font-weight="600"
+          letter-spacing="10"
+          fill="#C4D1C7">PREMIER ONLINE STORE</text>
+  </g>
+</svg>

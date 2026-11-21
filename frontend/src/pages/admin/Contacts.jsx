@@ -1,0 +1,570 @@
+import React, { useCallback, useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import api from "../../lib/api";
+import AdminModal, { AdminConfirmDialog } from "../../components/admin/AdminModal.jsx";
+import AdminRowActions from "../../components/admin/AdminRowActions.jsx";
+import { AdminSectionLoader, AdminContentSkeleton } from "@/components/admin/AdminLoading";
+import AdminListPaginationBar from "../../components/admin/AdminListPaginationBar.jsx";
+import {
+ buildAllColumnsVisibility,
+ loadTableColumnVisibility,
+ TableColumnVisibilityMenu,
+} from "../../components/admin/TableColumnVisibilityMenu.jsx";
+import { useAdminPermissions } from "../../hooks/useAdminPermissions.js";
+import { getFirstAccessibleAdminPath } from "../../lib/adminPermissions.js";
+import AdminSearchSelect from "../../components/admin/AdminSearchSelect.jsx";
+
+const CONTACT_STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "new", label: "New" },
+  { value: "read", label: "Read" },
+  { value: "replied", label: "Replied" },
+  { value: "closed", label: "Closed" },
+];
+
+const CONTACT_SORT_OPTIONS = [
+  { value: "created_at-desc", label: "Newest First" },
+  { value: "created_at-asc", label: "Oldest First" },
+  { value: "name-asc", label: "Name A-Z" },
+  { value: "name-desc", label: "Name Z-A" },
+];
+
+const CONTACTS_TABLE_COLUMNS = [
+ { id: "select", label: "Select" },
+ { id: "name", label: "Name" },
+ { id: "email", label: "Email" },
+ { id: "subject", label: "Subject" },
+ { id: "status", label: "Status" },
+ { id: "date", label: "Date" },
+ { id: "actions", label: "Actions" },
+];
+
+const CONTACTS_COLUMNS_STORAGE_KEY = "themanstore-contacts-columns";
+
+export default function Contacts() {
+ const { user, can, permissionsReady } = useAdminPermissions();
+ const canViewContacts = can("contacts", "view");
+ const canEditContacts = can("contacts", "edit");
+ const canDeleteContacts = can("contacts", "delete");
+ const canBulkSelect = canEditContacts || canDeleteContacts;
+ const [contacts, setContacts] = useState([]);
+ const [loading, setLoading] = useState(true);
+ const [stats, setStats] = useState(null);
+ const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
+ const [filters, setFilters] = useState({ status: "", search: "", sort_by: "created_at", sort_dir: "desc" });
+ const [selectedIds, setSelectedIds] = useState([]);
+ const [viewContact, setViewContact] = useState(null);
+ const [err, setErr] = useState("");
+ const [success, setSuccess] = useState("");
+ const [pendingDeleteId, setPendingDeleteId] = useState(null);
+ const [pendingBulkDelete, setPendingBulkDelete] = useState(false);
+ const [deleteBusy, setDeleteBusy] = useState(false);
+ const [columnVisibility, setColumnVisibility] = useState(() =>
+ loadTableColumnVisibility(CONTACTS_COLUMNS_STORAGE_KEY, CONTACTS_TABLE_COLUMNS),
+ );
+
+ const loadContacts = useCallback(async () => {
+ if (!canViewContacts) {
+ setContacts([]);
+ setStats(null);
+ setLoading(false);
+ return;
+ }
+ setLoading(true);
+ try {
+ const params = new URLSearchParams();
+ if (filters.status) params.append("status", filters.status);
+ if (filters.search) params.append("search", filters.search);
+ if (filters.sort_by) params.append("sort_by", filters.sort_by);
+ if (filters.sort_dir) params.append("sort_dir", filters.sort_dir);
+ params.append("page", pagination.current_page);
+
+ console.log("Loading contacts from:", `/admin/contacts?${params.toString()}`);
+ const { data } = await api.get(`/admin/contacts?${params.toString()}`);
+ console.log("Contacts response:", data);
+ setContacts(data.contacts || []);
+ setStats(data.stats || {});
+ setPagination(data.pagination || { current_page: 1, last_page: 1, total: 0 });
+ setErr("");
+ } catch (e) {
+ console.error("Failed to load contacts:", e);
+ const errorMessage = e.response?.data?.message || e.message || "Failed to load contacts";
+ setErr(`${errorMessage}. Make sure you've run: php artisan migrate`);
+ } finally {
+ setLoading(false);
+ }
+ }, [canViewContacts, filters.status, filters.search, filters.sort_by, filters.sort_dir, pagination.current_page]);
+
+ useEffect(() => {
+ if (!permissionsReady) return;
+ loadContacts();
+ }, [loadContacts, permissionsReady]);
+
+ useEffect(() => {
+ try {
+ localStorage.setItem(CONTACTS_COLUMNS_STORAGE_KEY, JSON.stringify(columnVisibility));
+ } catch { /* ignore quota */ }
+ }, [columnVisibility]);
+
+ const isColVisible = (columnId) => columnVisibility[columnId] !== false;
+
+ const toggleTableColumn = (columnId) => {
+ setColumnVisibility((prev) => ({ ...prev, [columnId]: !isColVisible(columnId) }));
+ };
+
+ const setAllTableColumnsVisible = (visible) => {
+ setColumnVisibility(buildAllColumnsVisibility(CONTACTS_TABLE_COLUMNS, visible, "name"));
+ };
+
+ const visibleColumnCount = CONTACTS_TABLE_COLUMNS.filter((col) => isColVisible(col.id)).length || 1;
+
+ const handleStatusChange = async (id, newStatus) => {
+ if (!canEditContacts) return;
+ try {
+ await api.patch(`/admin/contacts/${id}`, { status: newStatus });
+ setSuccess("Contact status updated");
+ loadContacts();
+ setViewContact(null);
+ } catch (e) {
+ setErr("Failed to update contact");
+ }
+ };
+
+ const handleDelete = (id) => {
+ if (!canDeleteContacts) return;
+ setPendingDeleteId(id);
+ };
+
+ const confirmDelete = async () => {
+ if (!canDeleteContacts) return;
+ setDeleteBusy(true);
+ try {
+ if (pendingBulkDelete) {
+ await api.post("/admin/contacts/bulk-delete", { ids: selectedIds });
+ setSuccess(`${selectedIds.length} contacts deleted`);
+ setSelectedIds([]);
+ } else if (pendingDeleteId != null) {
+ await api.delete(`/admin/contacts/${pendingDeleteId}`);
+ setSuccess("Contact deleted");
+ if (viewContact?.id === pendingDeleteId) setViewContact(null);
+ }
+ loadContacts();
+ } catch (e) {
+ setErr("Failed to delete contact(s)");
+ } finally {
+ setDeleteBusy(false);
+ setPendingDeleteId(null);
+ setPendingBulkDelete(false);
+ }
+ };
+
+ const handleBulkAction = async () => {
+ if (!canEditContacts || selectedIds.length === 0) return;
+
+ if (filters.status && filters.status !== "") {
+ try {
+ await api.post("/admin/contacts/bulk-update", { ids: selectedIds, status: filters.status });
+ setSuccess(`${selectedIds.length} contacts updated`);
+ setSelectedIds([]);
+ loadContacts();
+ } catch (e) {
+ setErr("Failed to update contacts");
+ }
+ }
+ };
+
+ const handleBulkDelete = async () => {
+ if (!canDeleteContacts || selectedIds.length === 0) return;
+ setPendingBulkDelete(true);
+ };
+
+ const handleSelectAll = (e) => {
+ if (e.target.checked) {
+ setSelectedIds(contacts.map(c => c.id));
+ } else {
+ setSelectedIds([]);
+ }
+ };
+
+ const handleSelectOne = (id) => {
+ if (selectedIds.includes(id)) {
+ setSelectedIds(selectedIds.filter(i => i !== id));
+ } else {
+ setSelectedIds([...selectedIds, id]);
+ }
+ };
+
+ if (!permissionsReady || (loading && contacts.length === 0)) {
+ return <AdminContentSkeleton title="Contacts" />;
+ }
+
+ if (!canViewContacts) {
+ return <Navigate to={getFirstAccessibleAdminPath(user)} replace />;
+ }
+
+ if (loading) return <AdminContentSkeleton title="Contacts" />;
+
+ const getStatusBadge = (status) => {
+ const styles = {
+ new: "bg-[color:var(--admin-primary)] text-white",
+ read: "bg-slate-700 text-white dark:bg-slate-600",
+ replied: "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100",
+ closed: "bg-white text-slate-400 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700",
+ };
+ return (
+ <span className={"px-2.5 py-1 rounded-full text-xs font-semibold " + (styles[status] || styles.new)}>
+ {status?.charAt(0).toUpperCase() + status?.slice(1)}
+ </span>
+ );
+ };
+
+ return (
+ <div className="min-h-full admin-soft text-slate-800 dark:text-slate-100">
+ <div className="w-full min-w-0">
+ <AdminConfirmDialog
+ open={pendingDeleteId != null || pendingBulkDelete}
+ onClose={() => {
+ if (deleteBusy) return;
+ setPendingDeleteId(null);
+ setPendingBulkDelete(false);
+ }}
+ onConfirm={confirmDelete}
+ title={pendingBulkDelete ? "Delete selected contacts?" : "Delete this contact?"}
+ message={
+ pendingBulkDelete
+ ? `Permanently remove ${selectedIds.length} contact(s)? This cannot be undone.`
+ : "This action cannot be undone."
+ }
+ confirmLabel="Delete"
+ cancelLabel="Cancel"
+ destructive
+ busy={deleteBusy}
+ />
+
+ {/* Header */}
+ <div className="mb-8">
+ <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-2">
+ Contacts
+ </h1>
+ <p className="text-slate-500 dark:text-slate-400 text-lg">Manage customer inquiries and messages</p>
+ </div>
+
+ {/* Success/Error Messages */}
+ {success && (
+ <div className="mb-6 bg-[rgba(var(--admin-primary-rgb),0.1)] dark:bg-[rgba(var(--admin-primary-rgb),0.16)] border border-[rgba(var(--admin-primary-rgb),0.3)] dark:border-[rgba(var(--admin-primary-rgb),0.4)] rounded-2xl p-4 flex items-center gap-3 animate-fade-in">
+ <svg className="w-5 h-5 text-[color:var(--admin-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+ </svg>
+ <span className="text-[color:var(--admin-primary)] dark:text-[color:var(--admin-primary)]">{success}</span>
+ <button onClick={() => setSuccess("")} className="ml-auto text-[color:var(--admin-primary)] hover:brightness-125">&times;</button>
+ </div>
+ )}
+ {err && (
+ <div className="mb-6 bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-2xl p-4 flex items-center gap-3">
+ <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
+ </svg>
+ <span className="text-red-700">{err}</span>
+ <button onClick={() => setErr("")} className="ml-auto text-red-400 hover:text-red-600">&times;</button>
+ </div>
+ )}
+
+ {/* Stats Cards */}
+ {stats && (
+ <div className="admin-stat-grid grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+ <div className="admin-surface admin-spectrum-kpi rounded-2xl p-4 border admin-border">
+ <p className="text-sm text-slate-500 dark:text-slate-400">Total</p>
+ <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.total}</p>
+ </div>
+ <div className="admin-surface admin-spectrum-kpi rounded-2xl p-4 border admin-border">
+ <p className="text-sm text-slate-500 dark:text-slate-400">New</p>
+ <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.new}</p>
+ </div>
+ <div className="admin-surface admin-spectrum-kpi rounded-2xl p-4 border admin-border">
+ <p className="text-sm text-slate-500 dark:text-slate-400">Read</p>
+ <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.read}</p>
+ </div>
+ <div className="admin-surface admin-spectrum-kpi rounded-2xl p-4 border admin-border">
+ <p className="text-sm text-slate-500 dark:text-slate-400">Replied</p>
+ <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.replied}</p>
+ </div>
+ <div className="admin-surface admin-spectrum-kpi rounded-2xl p-4 border admin-border">
+ <p className="text-sm text-slate-500 dark:text-slate-400">Closed</p>
+ <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.closed}</p>
+ </div>
+ </div>
+ )}
+
+ {/* Filters */}
+ <div className="admin-surface rounded-2xl border admin-border p-6 mb-6">
+ <div className="flex flex-wrap gap-4 items-center">
+ <div className="flex-1 min-w-[200px]">
+ <input
+ type="text"
+ placeholder="Search contacts..."
+ value={filters.search}
+ onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+ className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[rgba(var(--admin-primary-rgb),0.22)] focus:bg-white dark:focus:bg-slate-900 transition-all"
+ />
+ </div>
+ <AdminSearchSelect
+ value={filters.status}
+ onChange={(status) => setFilters({ ...filters, status })}
+ options={CONTACT_STATUS_OPTIONS}
+ inputClassName="h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[rgba(var(--admin-primary-rgb),0.22)] transition-all"
+ ariaLabel="Filter by status"
+ placeholder="Search status…"
+ />
+ <AdminSearchSelect
+ value={filters.sort_by + "-" + filters.sort_dir}
+ onChange={(v) => {
+ const [sort_by, sort_dir] = v.split("-");
+ setFilters({ ...filters, sort_by, sort_dir });
+ }}
+ options={CONTACT_SORT_OPTIONS}
+ inputClassName="h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[rgba(var(--admin-primary-rgb),0.22)] transition-all"
+ ariaLabel="Sort contacts"
+ placeholder="Search sort…"
+ allowEmpty={false}
+ />
+ {canBulkSelect && selectedIds.length > 0 && (
+ <div className="flex items-center gap-2">
+ {canEditContacts ? (
+ <button
+ onClick={handleBulkAction}
+ className="px-4 py-2 bg-[color:var(--admin-primary)] text-white rounded-lg hover:brightness-110 transition-colors font-medium"
+ >
+ Update Selected ({selectedIds.length})
+ </button>
+ ) : null}
+ {canDeleteContacts ? (
+ <button
+ onClick={handleBulkDelete}
+ className="px-4 py-2 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-300 bg-white dark:bg-slate-900 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+ >
+ Delete Selected ({selectedIds.length})
+ </button>
+ ) : null}
+ </div>
+ )}
+ </div>
+ </div>
+
+ {/* Contacts Table */}
+ <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+ <div className="relative z-10 flex items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 px-4 py-3 md:px-6">
+ <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+ {pagination.total || contacts.length} contact{(pagination.total || contacts.length) !== 1 ? "s" : ""}
+ </p>
+ <TableColumnVisibilityMenu
+ columns={CONTACTS_TABLE_COLUMNS}
+ visibility={columnVisibility}
+ onToggle={toggleTableColumn}
+ onShowAll={() => setAllTableColumnsVisible(true)}
+ onHideAll={() => setAllTableColumnsVisible(false)}
+ />
+ </div>
+ <div className="overflow-x-auto rounded-b-2xl">
+ <table className="w-full">
+ <thead>
+ <tr className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
+ {canBulkSelect && isColVisible("select") ? (
+ <th className="px-6 py-4">
+ <input
+ type="checkbox"
+ onChange={handleSelectAll}
+ checked={selectedIds.length === contacts.length && contacts.length > 0}
+ className="rounded"
+ />
+ </th>
+ ) : null}
+ {isColVisible("name") ? <th className="px-6 py-4">Name</th> : null}
+ {isColVisible("email") ? <th className="px-6 py-4">Email</th> : null}
+ {isColVisible("subject") ? <th className="px-6 py-4">Subject</th> : null}
+ {isColVisible("status") ? <th className="px-6 py-4">Status</th> : null}
+ {isColVisible("date") ? <th className="px-6 py-4">Date</th> : null}
+ {isColVisible("actions") ? <th className="px-6 py-4">Actions</th> : null}
+ </tr>
+ </thead>
+ <tbody>
+ {loading ? (
+ <tr>
+ <td colSpan={visibleColumnCount} className="p-0">
+ <AdminSectionLoader rows={4} />
+ </td>
+ </tr>
+ ) : contacts.length === 0 ? (
+ <tr>
+ <td colSpan={visibleColumnCount} className="p-12 text-center">
+ <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+ <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+ </svg>
+ </div>
+ <p className="text-slate-500 dark:text-slate-400 text-lg">No contacts found</p>
+ </td>
+ </tr>
+ ) : (
+ contacts.map((contact) => (
+ <tr key={contact.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+ {canBulkSelect && isColVisible("select") ? (
+ <td className="px-6 py-4">
+ <input
+ type="checkbox"
+ checked={selectedIds.includes(contact.id)}
+ onChange={() => handleSelectOne(contact.id)}
+ className="rounded"
+ />
+ </td>
+ ) : null}
+ {isColVisible("name") ? (
+ <td className="px-6 py-4">
+ <div className="flex items-center gap-3">
+ <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold">
+ {contact.name?.charAt(0).toUpperCase()}
+ </div>
+ <span className="font-medium text-slate-800 dark:text-slate-100">{contact.name}</span>
+ </div>
+ </td>
+ ) : null}
+ {isColVisible("email") ? (
+ <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{contact.email}</td>
+ ) : null}
+ {isColVisible("subject") ? (
+ <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 truncate max-w-[200px]">{contact.subject || "No subject"}</td>
+ ) : null}
+ {isColVisible("status") ? (
+ <td className="px-6 py-4">{getStatusBadge(contact.status)}</td>
+ ) : null}
+ {isColVisible("date") ? (
+ <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm">
+ {new Date(contact.created_at).toLocaleDateString()}
+ </td>
+ ) : null}
+ {isColVisible("actions") ? (
+                    <td className="px-6 py-4">
+                      <AdminRowActions
+                        align="start"
+                        onView={() => setViewContact(contact)}
+                        onDelete={() => handleDelete(contact.id)}
+                        canDelete={canDeleteContacts}
+                        deleteTitle="Delete message"
+                        extraActions={
+                          canEditContacts
+                            ? [
+                                {
+                                  key: "status",
+                                  icon: (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                  ),
+                                  title: "Update Status",
+                                  onClick: () => handleStatusChange(contact.id, contact.status === "new" ? "read" : "replied"),
+                                },
+                              ]
+                            : []
+                        }
+                      />
+                    </td>
+                  ) : null}
+ </tr>
+ ))
+ )}
+ </tbody>
+ </table>
+ </div>
+
+ <AdminListPaginationBar
+ page={pagination.current_page}
+ lastPage={pagination.last_page}
+ total={pagination.total}
+ onPageChange={(p) => setPagination((prev) => ({ ...prev, current_page: p }))}
+ />
+ </div>
+ </div>
+
+ {/* Contact Detail Modal */}
+ <AdminModal
+ open={!!viewContact}
+ onClose={() => setViewContact(null)}
+ title="Contact Details"
+ titleId="contact-details-title"
+ maxWidthClass="max-w-lg"
+ >
+ {viewContact ? (
+ <div className="space-y-4">
+ <div className="flex items-center gap-4">
+ <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 text-xl font-bold">
+ {viewContact.name?.charAt(0).toUpperCase()}
+ </div>
+ <div>
+ <h4 className="font-bold text-slate-800 dark:text-slate-100">{viewContact.name}</h4>
+ <p className="text-sm text-slate-500 dark:text-slate-400">{viewContact.email}</p>
+ {viewContact.phone && <p className="text-sm text-slate-500 dark:text-slate-400">{viewContact.phone}</p>}
+ </div>
+ </div>
+
+ <div>
+ <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Subject</p>
+ <p className="font-medium text-slate-800 dark:text-slate-100">{viewContact.subject || "No subject"}</p>
+ </div>
+
+ <div>
+ <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Message</p>
+ <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-slate-700 dark:text-slate-200">
+ {viewContact.message}
+ </div>
+ </div>
+
+ <div>
+ <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Status</p>
+ {canEditContacts ? (
+ <div className="flex gap-2 flex-wrap">
+ {["new", "read", "replied", "closed"].map((status) => (
+ <button
+ key={status}
+ onClick={() => handleStatusChange(viewContact.id, status)}
+ className={"px-3 py-1 rounded-full text-sm font-medium transition-colors " + (viewContact.status === status ? "bg-[color:var(--admin-primary)] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700")}
+ >
+ {status.charAt(0).toUpperCase() + status.slice(1)}
+ </button>
+ ))}
+ </div>
+ ) : (
+ <div>{getStatusBadge(viewContact.status)}</div>
+ )}
+ </div>
+
+ <div className="flex gap-3 pt-4">
+ {canEditContacts ? (
+ <button
+ onClick={() => {
+ window.location.href = "mailto:" + viewContact.email + "?subject=Re: " + (viewContact.subject || "");
+ }}
+ className="flex-1 py-3 bg-[color:var(--admin-primary)] text-white rounded-xl font-semibold hover:brightness-110 transition-colors"
+ >
+ Reply via Email
+ </button>
+ ) : null}
+ {canDeleteContacts ? (
+ <button
+ onClick={() => handleDelete(viewContact.id)}
+ className="px-4 py-3 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-300 rounded-xl font-semibold hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+ >
+ Delete
+ </button>
+ ) : null}
+ </div>
+ </div>
+ ) : null}
+ </AdminModal>
+
+ <style>{`
+ @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+ .animate-fade-in { animation: fade-in 0.3s ease-out; }
+ `}</style>
+ </div>
+ );
+}
+

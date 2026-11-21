@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::table('collections', function (Blueprint $table) {
+            if (!Schema::hasColumn('collections', 'placement')) {
+                $table->string('placement', 32)->default('home')->after('gender');
+                $table->index('placement');
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('collections', function (Blueprint $table) {
+            if (Schema::hasColumn('collections', 'placement')) {
+                $table->dropIndex(['placement']);
+                $table->dropColumn('placement');
+            }
+        });
+    }
+};

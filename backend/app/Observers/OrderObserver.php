@@ -1,0 +1,212 @@
+<?php
+
+namespace App\Observers;
+
+use App\Mail\PaymentSuccessMail;
+use App\Models\Order;
+use App\Models\Shipment;
+use App\Models\ShipmentTrackingEvent;
+use App\Models\User;
+use App\Services\LoyaltyService;
+use App\Services\StorefrontEventService;
+use App\Services\TelegramService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+
+class OrderObserver
+{
+    public function __construct(
+        private LoyaltyService $loyaltyService,
+        private StorefrontEventService $eventService,
+        private TelegramService $telegramService
+    ) {
+    }
+
+    public function updated(Order $order): void
+    {
+        if ($order->wasChanged('status') && in_array($order->status, ['completed', 'delivered'], true)) {
+            $this->handleOrderCompleted($order);
+        }
+
+        if ($order->wasChanged('status')) {
+            $this->telegramService->notifyOrderStatusChanged($order, (string) $order->status);
+        }
+
+        $statusPaid = $order->wasChanged('status') && $order->status === 'paid';
+        $paymentPaid = $order->wasChanged('payment_status') && $order->payment_status === 'paid';
+
+        if (! $statusPaid && ! $paymentPaid) {
+            return;
+        }
+
+        $this->loyaltyService->applyPurchase($order);
+        $this->eventService->track('purchase', $order->user_id ? (int) $order->user_id : null, null, null, (int) $order->id, [
+            'total' => (float) $order->total,
+            'payment_status' => (string) $order->payment_status,
+        ]);
+
+        if ($order->shipment) {
+            if ($paymentPaid || $statusPaid) {
+                $this->telegramService->notifyOrderPaid($order->fresh(['user', 'items', 'shipment', 'payments']));
+                if ($paymentPaid) {
+                    $this->sendPaymentSuccessEmails(
+                        $order,
+                        includeCustomer: ! $this->isCodDriverSettlement($order)
+                    );
+                }
+            }
+
+            return;
+        }
+
+        $trackingCode = $this->generateTrackingCode();
+
+        $shipment = Shipment::create([
+            'order_id' => $order->id,
+            'provider' => 'Internal',
+            'tracking_code' => $trackingCode,
+            'status' => 'pending',
+        ]);
+
+        ShipmentTrackingEvent::create([
+            'shipment_id' => $shipment->id,
+            'status' => 'pending',
+            'note' => 'Order confirmed. Preparing for shipment.',
+            'event_time' => now(),
+        ]);
+
+        if ($paymentPaid) {
+            $this->sendPaymentSuccessEmails(
+                $order,
+                includeCustomer: ! $this->isCodDriverSettlement($order)
+            );
+        }
+
+        if ($paymentPaid || $statusPaid) {
+            $this->telegramService->notifyOrderPaid($order->fresh(['user', 'items', 'shipment', 'payments']));
+        }
+    }
+
+    public function created(Order $order): void
+    {
+        // Order::create fires before cart lines are inserted in the same transaction.
+        $orderId = (int) $order->id;
+        $isCod = $order->payment_method === 'cod';
+
+        DB::afterCommit(function () use ($orderId, $isCod) {
+            $order = Order::query()->with(['user', 'items.product', 'shipment'])->find($orderId);
+            if (! $order) {
+                return;
+            }
+
+            if ($isCod && ! $order->shipment) {
+                $shipment = Shipment::create([
+                    'order_id' => $order->id,
+                    'provider' => 'Internal',
+                    'tracking_code' => $this->generateTrackingCode(),
+                    'status' => 'pending',
+                ]);
+
+                ShipmentTrackingEvent::create([
+                    'shipment_id' => $shipment->id,
+                    'status' => 'pending',
+                    'note' => 'COD order placed. Preparing for shipment.',
+                    'event_time' => now(),
+                ]);
+
+                $order->setRelation('shipment', $shipment);
+            }
+
+            $this->telegramService->subscribeLinkedCustomerChats($order);
+
+            if ($isCod) {
+                $this->telegramService->notifyOrderPlacedCod($order);
+            } else {
+                $this->telegramService->notifyStaffOfNewOrder($order);
+            }
+        });
+    }
+
+    private function isCodDriverSettlement(Order $order): bool
+    {
+        $order->loadMissing('payments');
+
+        return app(\App\Services\CodCollectionService::class)->isDriverToShopSettlement($order);
+    }
+
+    private function sendPaymentSuccessEmails(Order $order, bool $includeCustomer = true): void
+    {
+        $order->loadMissing(['user', 'payments']);
+
+        $customerEmail = $includeCustomer ? trim((string) ($order->user?->email ?? '')) : '';
+
+        $adminEmails = User::query()
+            ->whereIn('role', ['admin', 'superadmin'])
+            ->whereNotNull('email')
+            ->pluck('email')
+            ->map(fn ($email) => trim((string) $email))
+            ->filter(fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL))
+            ->values();
+
+        $fallbackAdmin = trim((string) config('mail.admin_address'));
+        if ($fallbackAdmin !== '' && filter_var($fallbackAdmin, FILTER_VALIDATE_EMAIL)) {
+            $adminEmails->push($fallbackAdmin);
+        }
+
+        $adminEmails = $adminEmails
+            ->reject(fn ($email) => strcasecmp($email, $customerEmail) === 0)
+            ->unique()
+            ->values();
+
+        try {
+            if ($customerEmail !== '' && filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($customerEmail)->send(new PaymentSuccessMail($order, 'customer'));
+            }
+
+            foreach ($adminEmails as $adminEmail) {
+                Mail::to($adminEmail)->send(new PaymentSuccessMail($order, 'admin'));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Failed sending payment success emails', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function handleOrderCompleted(Order $order): void
+    {
+        $order->loadMissing('shipment');
+
+        if ($order->shipment && $order->shipment->status !== 'delivered') {
+            ShipmentTrackingEvent::create([
+                'shipment_id' => $order->shipment->id,
+                'status' => 'delivered',
+                'note' => 'Order marked as completed.',
+                'event_time' => now(),
+            ]);
+
+            $order->shipment->update([
+                'status' => 'delivered',
+                'delivered_at' => $order->shipment->delivered_at ?? now(),
+            ]);
+
+            return;
+        }
+
+        if (! $order->shipment) {
+            $this->telegramService->notifyOrderDeliveredForOrder($order);
+        }
+    }
+
+    private function generateTrackingCode(): string
+    {
+        do {
+            $code = 'FS-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(6));
+        } while (Shipment::where('tracking_code', $code)->exists());
+
+        return $code;
+    }
+}

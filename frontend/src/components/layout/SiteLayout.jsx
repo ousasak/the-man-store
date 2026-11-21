@@ -1,0 +1,174 @@
+import React, { useCallback, useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
+import Topbar from "./Topbar.jsx";
+import Header from "./Header.jsx";
+import Footer from "./Footer.jsx";
+import MobileBottomNav from "./MobileBottomNav.jsx";
+import TelegramMiniAppDock from "./TelegramMiniAppDock.jsx";
+import TelegramMiniAppBackController from "./TelegramMiniAppBackController.jsx";
+import SupportChatWidget from "../widgets/SupportChatWidget.jsx";
+import CartDrawer from "../shop/CartDrawer.jsx";
+import NotificationDrawer from "./NotificationDrawer.jsx";
+import ApiDegradedBanner from "./ApiDegradedBanner.jsx";
+import api from "../../lib/api.js";
+import { useAuth } from "../../state/auth.jsx";
+import { wakeBackend } from "../../lib/wakeBackend.js";
+import { useTelegramMiniAppLayout } from "../../lib/telegramMiniApp.js";
+import { InfoPageModalProvider } from "../../state/infoPageModal.jsx";
+
+export default function SiteLayout() {
+  const [cartOpen, setCartOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationsUnread, setNotificationsUnread] = useState(0);
+  const { user } = useAuth();
+  const { active: telegramMiniApp, desktop: telegramMiniAppDesktop } = useTelegramMiniAppLayout();
+  const closeCart = useCallback(() => setCartOpen(false), []);
+
+  useEffect(() => {
+    wakeBackend();
+  }, []);
+
+  /** Storefront must never keep dashboard dark-mode marker on `<html>` (Tailwind `dark:` scope). */
+  useEffect(() => {
+    document.documentElement.removeAttribute("data-admin-theme");
+  }, []);
+
+  const loadNotifications = async () => {
+    setNotificationsLoading(true);
+    try {
+      const endpoint = user ? "/notifications" : "/notifications/public";
+      const { data } = await api.get(endpoint);
+      const items = data?.notifications?.data || [];
+      setNotifications(items);
+      setNotificationsUnread(data?.unread_count || 0);
+    } catch (err) {
+      setNotifications([]);
+      setNotificationsUnread(0);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  const markNotificationRead = async (item) => {
+    if (!user || item?.type !== "notification" || item?.is_read) return;
+    const rawId = String(item.id || "").replace("notification-", "");
+    if (!rawId) return;
+    try {
+      await api.patch(`/notifications/${rawId}/read`);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
+      );
+      setNotificationsUnread((v) => Math.max(0, v - 1));
+    } catch {
+      // ignore
+    }
+  };
+
+  const markAllNotificationsRead = async () => {
+    if (!user) return;
+    try {
+      await api.post("/notifications/mark-all-read");
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setNotificationsUnread(0);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (notificationsOpen) {
+      loadNotifications();
+    }
+  }, [notificationsOpen, user]);
+
+  const formatNotifTime = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+    });
+  };
+
+  return (
+    <InfoPageModalProvider>
+      <div
+        className={`fs-site min-h-screen flex flex-col ${telegramMiniApp ? "fs-site--telegram-miniapp" : ""} ${telegramMiniAppDesktop ? "fs-site--telegram-miniapp-desktop" : ""}`}
+        data-telegram-miniapp={telegramMiniApp ? "1" : undefined}
+        data-telegram-miniapp-desktop={telegramMiniAppDesktop ? "1" : undefined}
+      >
+        {!telegramMiniApp && <Topbar />}
+        <ApiDegradedBanner />
+        {!telegramMiniApp && (
+          <Header
+            onOpenCart={() => setCartOpen(true)}
+            onOpenNotifications={() => setNotificationsOpen(true)}
+            notificationsUnread={notificationsUnread}
+          />
+        )}
+        {telegramMiniApp && (
+          <TelegramMiniAppBackController
+            cartOpen={cartOpen}
+            onCloseCart={closeCart}
+          />
+        )}
+        <main
+          className={`fs-main-content flex-1 fs-page-enter text-base leading-relaxed text-slate-800 antialiased dark:text-slate-100 ${
+            telegramMiniApp
+              ? telegramMiniAppDesktop
+                ? "pb-24"
+                : "pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
+              : "pb-28 sm:pb-24 lg:pb-0"
+          }`}
+        >
+          <Outlet />
+        </main>
+        {!telegramMiniApp && <Footer />}
+        {telegramMiniApp ? (
+          <TelegramMiniAppDock onOpenCart={() => setCartOpen(true)} />
+        ) : (
+          <MobileBottomNav
+            onOpenNotifications={() => setNotificationsOpen(true)}
+            notificationsUnread={notificationsUnread}
+            notifications={notifications}
+            notificationsLoading={notificationsLoading}
+            onMarkNotificationRead={markNotificationRead}
+            onMarkAllNotificationsRead={markAllNotificationsRead}
+            formatTime={formatNotifTime}
+          />
+        )}
+        {!telegramMiniApp && <SupportChatWidget />}
+        <CartDrawer open={cartOpen} onClose={closeCart} />
+        {!telegramMiniApp && (
+          <NotificationDrawer
+            open={notificationsOpen}
+            onClose={() => setNotificationsOpen(false)}
+            notifications={notifications}
+            loading={notificationsLoading}
+            unreadCount={notificationsUnread}
+            onMarkRead={markNotificationRead}
+            onMarkAllRead={markAllNotificationsRead}
+            user={user}
+            formatTime={formatNotifTime}
+          />
+        )}
+      </div>
+    </InfoPageModalProvider>
+  );
+}

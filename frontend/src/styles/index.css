@@ -1,0 +1,4342 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fsFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fsShimmerWide {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.fs-skeleton-block {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: fsShimmerWide 1.5s linear infinite;
+  border-radius: 12px;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .fs-skeleton-block {
+  background: linear-gradient(90deg, #1f2937 25%, #111827 50%, #1f2937 75%);
+}
+
+:root {
+  /* Shadcn UI token bindings */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.75rem;
+}
+
+.dark,
+html.admin-dashboard[data-admin-theme="dark"],
+html.admin-dashboard[data-admin-theme="dark"] body {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 6.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 6.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+}
+
+:root {
+
+  /* Admin dashboard accent (inherits to `.admin-theme`; overridden on html via ThemeProvider) */
+  --admin-primary: #6E8B7E;
+  --admin-primary-rgb: 110, 139, 126;
+  --admin-spectrum-1: #6E8B7E;
+  --admin-spectrum-1-rgb: 110, 139, 126;
+  --admin-spectrum-2: #5B8DEF;
+  --admin-spectrum-2-rgb: 91, 141, 239;
+  --admin-spectrum-3: #7A9A8D;
+  --admin-spectrum-3-rgb: 122, 154, 141;
+  --admin-spectrum-4: #D4A574;
+  --admin-spectrum-4-rgb: 212, 165, 116;
+  --admin-spectrum-5: #9BB0A5;
+  --admin-spectrum-5-rgb: 155, 176, 165;
+  --admin-spectrum-6: #6B9BD1;
+  --admin-spectrum-6-rgb: 107, 155, 209;
+  --admin-spectrum-7: #8FA89A;
+  --admin-spectrum-7-rgb: 143, 168, 154;
+  --admin-kpi-accent: var(--admin-primary);
+  --admin-kpi-accent-rgb: var(--admin-primary-rgb);
+  --fs-bg: 248 249 250;
+  --fs-fg: 18 18 18;
+  --fs-muted: 99 102 106;
+  --fs-border: 226 232 240;
+  --fs-brand-primary: 243 156 18;
+  --fs-primary: 10 10 10;
+  --fs-radius-sm: 10px;
+  --fs-radius-md: 14px;
+  --fs-radius-lg: 18px;
+  --fs-shadow-soft: 0 10px 30px rgba(0, 0, 0, .08);
+  --fs-shadow: 0 18px 48px rgba(0, 0, 0, .12);
+  --fs-font-en: "Inter", "Kantumruy Pro", "Noto Sans Khmer", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --fs-font-km: "Kantumruy Pro", "Noto Sans Khmer", "Battambang", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --fs-font-base: var(--fs-font-km);
+  /* Thin blue scrollbars (Zandokh-style — fixed blue, not admin theme accent) */
+  --fs-scrollbar-size: 6px;
+  --fs-scrollbar-thumb: #4d9fff;
+  --fs-scrollbar-thumb-hover: #2563eb;
+  --fs-scrollbar-track: rgba(59, 130, 246, 0.12);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  color: rgb(var(--fs-fg));
+  background: rgb(var(--fs-bg));
+  font-family: var(--fs-font-base);
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* Storefront main: one readable body size (child utilities still override where needed) */
+main.fs-main-content {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/*
+  Global scrollbars: thin blue thumb, soft track (similar to zandokh.com).
+  Intentionally NOT tied to --admin-primary (avoids red/pink accent scrollbars).
+*/
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--fs-scrollbar-thumb) var(--fs-scrollbar-track);
+}
+
+html::-webkit-scrollbar {
+  width: var(--fs-scrollbar-size);
+  height: var(--fs-scrollbar-size);
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--fs-scrollbar-track);
+  border-radius: 9999px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: var(--fs-scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background-color: var(--fs-scrollbar-thumb-hover);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button {
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+button,
+[type="button"],
+[type="submit"],
+[type="reset"] {
+  font: inherit;
+  letter-spacing: 0.01em;
+  border-radius: var(--fs-radius-md);
+}
+
+button:focus-visible,
+[type="button"]:focus-visible,
+[type="submit"]:focus-visible,
+[type="reset"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, .12);
+}
+
+button:active,
+[type="button"]:active,
+[type="submit"]:active,
+[type="reset"]:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+input,
+textarea,
+select {
+  border-radius: var(--fs-radius-md);
+  border: 1px solid rgb(var(--fs-border));
+  background: #fff;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgba(15, 23, 42, .4);
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, .08);
+}
+
+/*
+  Storefront gutters — fluid from phone to ultrawide (13" laptop ≈ 1280px included).
+  clamp keeps side space visible without crushing content on smaller desktops.
+*/
+.container-safe {
+  @apply w-full max-w-none mx-auto box-border;
+  padding-inline: clamp(0.75rem, 1.1vw + 0.35rem, 2rem);
+}
+
+.container-safe-inset {
+  @apply w-full max-w-none mx-auto box-border;
+  padding-inline: clamp(1rem, 1.35vw + 0.5rem, 2.5rem);
+}
+
+/* Storefront header/footer chrome — colors from admin (background + text) */
+.fs-site-chrome {
+  background-color: var(--fs-chrome-bg, #6e8b7e);
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+.fs-site-chrome .fs-iconbtn-header {
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+.fs-site-chrome .fs-lang-pill {
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+.fs-site-chrome .fs-header-divider {
+  background: linear-gradient(180deg,
+      transparent 0%,
+      var(--fs-chrome-border, rgba(255, 255, 255, 0.45)) 50%,
+      transparent 100%);
+}
+
+.fs-site-chrome .fs-nav-link {
+  color: color-mix(in srgb, var(--fs-chrome-text, #fff) 85%, transparent);
+}
+
+.fs-site-chrome .fs-nav-link:hover,
+.fs-site-chrome .fs-nav-link-active {
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+.fs-site-chrome .fs-nav-underline {
+  background: color-mix(in srgb, var(--fs-chrome-text, #fff) 95%, transparent);
+}
+
+.fs-site-chrome .fs-header-search {
+  color: var(--fs-chrome-text, #ffffff);
+  border-color: var(--fs-chrome-border, rgba(255, 255, 255, 0.5));
+  background: color-mix(in srgb, var(--fs-chrome-text, #fff) 8%, rgba(0, 0, 0, 0.22));
+}
+
+.fs-site-chrome .fs-header-search .truncate {
+  color: color-mix(in srgb, var(--fs-chrome-text, #fff) 92%, transparent);
+}
+
+.fs-site-chrome .fs-chrome-muted {
+  color: var(--fs-chrome-text-muted, rgba(255, 255, 255, 0.82));
+}
+
+.fs-site-chrome .fs-chrome-heading {
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+.fs-site-chrome .fs-chrome-link {
+  color: var(--fs-chrome-text-muted, rgba(255, 255, 255, 0.82));
+  transition: color 0.2s ease;
+}
+
+.fs-site-chrome .fs-chrome-link:hover {
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+.fs-site-chrome .fs-chrome-border {
+  border-color: var(--fs-chrome-border, rgba(255, 255, 255, 0.12));
+}
+
+.fs-site-chrome .fs-chrome-social {
+  background: var(--fs-chrome-surface, rgba(255, 255, 255, 0.2));
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+.fs-site-chrome .fs-chrome-social:hover {
+  background: color-mix(in srgb, var(--fs-chrome-text, #fff) 24%, transparent);
+  color: var(--fs-chrome-text, #ffffff);
+}
+
+/* Header / nav: gutters grow with viewport; desktop bar caps so 17"+ does not go sparse */
+.fs-header-bar {
+  @apply w-full mx-auto box-border;
+  padding-inline: clamp(0.75rem, 1.1vw + 0.35rem, 2rem);
+}
+
+/* Desktop header — Zando-style 1fr | logo | 1fr: nav left, logo center, search+tools+auth right. */
+@media (min-width: 1024px) {
+  .fs-header-bar--desktop {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: clamp(0.75rem, 1.5vw, 1.75rem);
+    min-height: 4.5rem;
+    width: 100%;
+    max-width: 94rem;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 1.6vw + 0.4rem, 2.5rem);
+  }
+
+  .fs-header-bar__side {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .fs-header-bar__side--left {
+    justify-content: flex-start;
+  }
+
+  .fs-header-bar__side--right {
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .fs-header-bar__logo-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .fs-header-bar__logo {
+    height: clamp(3.25rem, 4.5vw + 1rem, 5.75rem);
+    max-height: 5.5rem;
+    width: auto;
+    max-width: min(34vw, 17rem);
+  }
+
+  .fs-header-bar__search {
+    width: min(100%, 8.5rem);
+    max-width: 100%;
+    flex: 0 1 8.5rem;
+    min-width: 7rem;
+  }
+
+  .fs-header-bar--desktop .fs-header-search {
+    height: 2.25rem;
+  }
+
+  .fs-header-bar__tools {
+    margin-inline-start: 0.15rem;
+  }
+
+  .fs-header-auth-link {
+    background: transparent;
+    border: 0;
+    padding: 0.25rem 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fs-chrome-text, #ffffff);
+    opacity: 0.92;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: Helvetica, sans-serif;
+  }
+
+  .fs-header-auth-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .fs-header-actions {
+    padding-inline-end: clamp(0.125rem, 0.35vw, 0.375rem);
+  }
+
+  /* Nav — match Login/Register size */
+  .fs-header-bar__side--left .fs-nav-link {
+    padding-inline: 0.15rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    font-family: Helvetica, sans-serif;
+  }
+}
+
+@media (min-width: 1280px) {
+  .fs-header-bar__side--right {
+    gap: 0.9rem;
+  }
+
+  .fs-header-bar__logo {
+    max-height: 6rem;
+    max-width: 19rem;
+  }
+
+  .fs-header-bar__search {
+    width: min(100%, 9.5rem);
+    flex-basis: 9.5rem;
+  }
+
+  .fs-header-bar__side--left .fs-nav-link,
+  .fs-header-auth-link {
+    font-size: 1.1rem;
+  }
+}
+
+/* 16–17" laptops (~1536–1920): scale type/icons/search so chrome does not look tiny */
+@media (min-width: 1536px) {
+  .fs-header-bar--desktop {
+    min-height: 5.25rem;
+    column-gap: 1.5rem;
+    padding-inline: clamp(1.25rem, 2vw, 3rem);
+  }
+
+  .fs-header-bar__side--right {
+    gap: 1.1rem;
+  }
+
+  .fs-header-bar__logo {
+    height: 6.25rem;
+    max-height: 6.5rem;
+    max-width: 22rem;
+  }
+
+  .fs-header-bar__search {
+    width: min(100%, 13.5rem);
+    flex: 0 1 13.5rem;
+    min-width: 11rem;
+  }
+
+  .fs-header-bar--desktop .fs-header-search {
+    height: 2.6rem;
+    font-size: 0.8125rem;
+  }
+
+  .fs-header-bar__side--left .fs-nav-link,
+  .fs-header-auth-link {
+    font-size: 1.2rem;
+  }
+
+  .fs-header-bar--desktop .fs-iconbtn-header {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .fs-header-bar--desktop .fs-header-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .fs-header-bar--desktop {
+    max-width: 108rem;
+    min-height: 5.75rem;
+    column-gap: 1.75rem;
+  }
+
+  .fs-header-bar__logo {
+    height: 6.75rem;
+    max-height: 7rem;
+    max-width: 24rem;
+  }
+
+  .fs-header-bar__search {
+    width: min(100%, 16rem);
+    flex-basis: 16rem;
+  }
+
+  .fs-header-bar--desktop .fs-header-search {
+    height: 2.75rem;
+    font-size: 0.875rem;
+  }
+
+  .fs-header-bar__side--left .fs-nav-link,
+  .fs-header-auth-link {
+    font-size: 1.28rem;
+  }
+
+  .fs-header-bar--desktop .fs-iconbtn-header {
+    width: 2.65rem;
+    height: 2.65rem;
+  }
+
+  .fs-header-bar--desktop .fs-header-icon {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+}
+
+/* Mobile header — single clean row (logo | search | theme) */
+.fs-header-bar--mobile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .fs-header-bar--mobile {
+    gap: 0.75rem;
+    min-height: 4rem;
+  }
+}
+
+.fs-header-bar--mobile .fs-header-bar__logo-mobile {
+  height: 3.375rem;
+  width: auto;
+  max-width: 8.25rem;
+  object-fit: contain;
+}
+
+@media (min-width: 640px) {
+  .fs-header-bar--mobile .fs-header-bar__logo-mobile {
+    height: 3.625rem;
+    max-width: 9.5rem;
+  }
+}
+
+/* Nike-style edge-to-edge hero: full width, no side/top gutter, viewport height below chrome */
+.fs-site {
+  --fs-storefront-chrome-mobile: 6.5rem;
+  --fs-storefront-chrome-desktop: 8.25rem;
+}
+
+/* Telegram Mini App only — compact action dock, no storefront header/footer */
+html[data-telegram-miniapp="1"] .fs-site {
+  --fs-storefront-chrome-mobile: 0rem;
+  --fs-storefront-chrome-desktop: 0rem;
+}
+
+.fs-tg-mini-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(24, 24, 27, 0.12);
+  backdrop-filter: blur(16px);
+}
+
+.fs-tg-mini-dock__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.4rem 0.25rem;
+  border: 0;
+  background: transparent;
+  color: #71717a;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.fs-tg-mini-dock__item.is-active {
+  color: #18181b;
+}
+
+.fs-tg-mini-dock__icon {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.9rem;
+  border: 1px solid #e4e4e7;
+  background: #fff;
+  color: inherit;
+}
+
+.fs-tg-mini-dock__item.is-active .fs-tg-mini-dock__icon {
+  background: #18181b;
+  border-color: #18181b;
+  color: #fff;
+}
+
+html[data-storefront-theme="dark"] .fs-tg-mini-dock {
+  background: rgba(24, 24, 27, 0.96);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-storefront-theme="dark"] .fs-tg-mini-dock__item {
+  color: #a1a1aa;
+}
+
+html[data-storefront-theme="dark"] .fs-tg-mini-dock__item.is-active {
+  color: #fafafa;
+}
+
+html[data-storefront-theme="dark"] .fs-tg-mini-dock__icon {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+html[data-storefront-theme="dark"] .fs-tg-mini-dock__item.is-active .fs-tg-mini-dock__icon {
+  background: #fafafa;
+  border-color: #fafafa;
+  color: #18181b;
+}
+
+.fs-tg-mini-back {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: calc(0.35rem + env(safe-area-inset-top, 0px)) 0.75rem 0.35rem;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid rgba(24, 24, 27, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.fs-tg-mini-back__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.35rem 0.4rem 0.35rem 0.15rem;
+  border: 0;
+  background: transparent;
+  color: #18181b;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+html[data-storefront-theme="dark"] .fs-tg-mini-back {
+  background: rgba(24, 24, 27, 0.94);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-storefront-theme="dark"] .fs-tg-mini-back__btn {
+  color: #fafafa;
+}
+
+html[data-telegram-miniapp="1"],
+html[data-telegram-miniapp="1"] body,
+html[data-telegram-miniapp="1"] #root {
+  width: 100%;
+  min-height: var(--fs-tg-viewport-height, 100vh);
+}
+
+html[data-telegram-miniapp="1"] .fs-site {
+  width: 100%;
+  max-width: none;
+  min-height: var(--fs-tg-viewport-height, 100vh);
+}
+
+/* Computer Telegram Mini App: fill the window; keep phone Mini App compact */
+html[data-telegram-miniapp-desktop="1"] .fs-tg-mini-dock {
+  left: 50%;
+  right: auto;
+  bottom: 1rem;
+  width: min(36rem, calc(100% - 2rem));
+  transform: translateX(-50%);
+  gap: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 32px rgba(24, 24, 27, 0.16);
+}
+
+html[data-telegram-miniapp-desktop="1"] .fs-tg-mini-back {
+  padding-inline: clamp(1rem, 2vw, 2.5rem);
+}
+
+html[data-telegram-miniapp-desktop="1"] .brand-scroll > .shrink-0,
+html[data-telegram-miniapp-desktop="1"] .brand-scroll > .fs-card {
+  flex-basis: calc(25% - 0.75rem) !important;
+}
+
+@media (min-width: 1100px) {
+  html[data-telegram-miniapp-desktop="1"] .brand-scroll > .shrink-0,
+  html[data-telegram-miniapp-desktop="1"] .brand-scroll > .fs-card {
+    flex-basis: calc(20% - 0.8rem) !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  html[data-telegram-miniapp-desktop="1"] .brand-scroll > .shrink-0,
+  html[data-telegram-miniapp-desktop="1"] .brand-scroll > .fs-card {
+    flex-basis: calc(16.666% - 0.85rem) !important;
+  }
+}
+
+.fs-hero-shell {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fs-hero-banner {
+  width: 100%;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.fs-hero-banner__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: auto;
+  min-height: calc(100svh - var(--fs-storefront-chrome-mobile));
+  height: calc(100svh - var(--fs-storefront-chrome-mobile));
+  overflow: hidden;
+}
+
+/* Phone Telegram Mini App: chrome mobile is 0, so the hero becomes too tall.
+   Cap hero height so products/sections stay visible. */
+html[data-telegram-miniapp="1"]:not([data-telegram-miniapp-desktop="1"]) .fs-hero-banner__frame {
+  min-height: clamp(14rem, 34svh, 22rem);
+  height: clamp(14rem, 34svh, 22rem);
+}
+
+@keyframes fsHeroFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fs-hero-banner__photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: cover;
+  object-position: center;
+  transform: none !important;
+}
+
+.fs-hero-banner__photo--in {
+  z-index: 1;
+  animation: fsHeroFadeIn 0.7s ease forwards;
+}
+
+@media (min-width: 1024px) {
+  .fs-hero-banner__frame {
+    min-height: calc(100svh - var(--fs-storefront-chrome-desktop));
+    height: calc(100svh - var(--fs-storefront-chrome-desktop));
+  }
+}
+
+.fs-promo-banner {
+  border-radius: clamp(0.75rem, 1.2vw, 1.25rem);
+  min-height: clamp(12rem, 28vw, 17.5rem);
+}
+
+@media (min-width: 768px) {
+  .fs-promo-banner {
+    min-height: clamp(14rem, 32vh, 17.5rem);
+  }
+}
+
+.fs-pill {
+  @apply inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-700;
+}
+
+.fs-iconbtn {
+  @apply relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
+}
+
+.fs-iconbtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .12);
+}
+
+.fs-header-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.fs-iconbtn-header {
+  @apply relative inline-flex h-9 w-9 items-center justify-center text-white;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+}
+
+.fs-iconbtn-header:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.fs-iconbtn-header:active {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.fs-iconbtn-header:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.95),
+    0 0 0 4px rgba(16, 163, 127, 0.55);
+}
+
+@keyframes fsBadgePop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.fs-header-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: #fff;
+  background: linear-gradient(135deg, #18181b 0%, #3f3f46 100%);
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 4px 10px -2px rgba(0, 0, 0, 0.35);
+  animation: fsBadgePop .35s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.fs-header-badge-accent {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 4px 12px -2px rgba(244, 63, 94, 0.55);
+}
+
+.fs-lang-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 8px 0 5px;
+  border-radius: 2px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fs-lang-pill:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.fs-lang-pill:active {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.fs-lang-pill__flag {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  object-fit: cover;
+  background: #fff;
+}
+
+.fs-header-divider {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  border-radius: 9999px;
+}
+
+.fs-avatar-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  overflow: visible;
+}
+
+.fs-avatar-ring:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.fs-avatar-ring__frame {
+  position: relative;
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.fs-avatar-ring__inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #3f3f46;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-size: 12px;
+}
+
+.fs-avatar-ring__status {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  z-index: 2;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: #10b981;
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* Button system */
+.fs-btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold;
+  letter-spacing: 0.01em;
+}
+
+.fs-btn-sm {
+  @apply px-3 py-2 text-xs rounded-lg;
+}
+
+.fs-btn-lg {
+  @apply px-6 py-3 text-base rounded-2xl;
+}
+
+.fs-btn-primary {
+  color: #fff;
+  background: linear-gradient(135deg, #f39c12, #ea8f00);
+  box-shadow: 0 10px 22px rgba(243, 156, 18, .28);
+}
+
+.fs-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(243, 156, 18, .35);
+}
+
+.fs-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(243, 156, 18, .26);
+}
+
+/* Storefront filter toolbar + drawer (portal — not inside .fs-site) */
+.fs-storefront-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.5rem;
+  padding: 0 1.1rem;
+  border-radius: 2px;
+  font-family: "Montserrat", "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background-color: #000;
+  border: 2px solid #000;
+  cursor: pointer;
+}
+
+.fs-storefront-filter-btn:hover {
+  background-color: transparent;
+  color: #000;
+}
+
+.fs-storefront-filter-btn:active {
+  opacity: 0.85;
+}
+
+.fs-storefront-filter-btn--contrast-dark {
+  color: #0b0b0f;
+  border-color: #0b0b0f;
+  background-color: #0b0b0f;
+}
+
+.fs-storefront-filter-btn--contrast-dark:hover {
+  background-color: transparent;
+  color: #0b0b0f;
+}
+
+.fs-storefront-filter-btn__badge {
+  display: inline-flex;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  padding: 0 0.3rem;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+}
+
+.fs-storefront-filter-btn:hover .fs-storefront-filter-btn__badge {
+  background: #000;
+  color: #fff;
+}
+
+.fs-storefront-filter-btn--contrast-dark .fs-storefront-filter-btn__badge {
+  background: #fff;
+  color: #0b0b0f;
+}
+
+/* Product listing page toolbar (category / shop) */
+.fs-plp-toolbar {
+  margin-bottom: 1.5rem;
+  font-family: "Montserrat", "Inter", "Kantumruy Pro", "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
+}
+
+.fs-plp-toolbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .fs-plp-toolbar__row {
+    flex-wrap: nowrap;
+    gap: 0.75rem 1rem;
+  }
+}
+
+.fs-plp-toolbar__title {
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #0a0a0a;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .fs-plp-toolbar__title {
+    font-size: 1.25rem;
+  }
+}
+
+.fs-plp-toolbar__title-name {
+  margin-right: 0.35rem;
+}
+
+.fs-plp-toolbar__title-count {
+  font-weight: 500;
+  color: #52525b;
+  white-space: nowrap;
+}
+
+.fs-plp-toolbar__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
+  order: 3;
+}
+
+@media (max-width: 767px) {
+  .fs-plp-toolbar__controls {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 768px) {
+  .fs-plp-toolbar__controls {
+    order: unset;
+  }
+}
+
+.fs-plp-toolbar__filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.85rem;
+  border: 1px solid #0a0a0a;
+  border-radius: 2px;
+  background: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0a0a0a;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.fs-plp-toolbar__filter-btn:hover {
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.fs-plp-toolbar__filter-badge {
+  display: inline-flex;
+  min-width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.fs-plp-toolbar__filter-btn:hover .fs-plp-toolbar__filter-badge {
+  background: #fff;
+  color: #0a0a0a;
+}
+
+.fs-plp-toolbar__brands-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1 1 8rem;
+  min-width: 0;
+  max-width: 100%;
+  order: 2;
+}
+
+@media (min-width: 768px) {
+  .fs-plp-toolbar__brands-wrap {
+    order: unset;
+    max-width: none;
+    gap: 0.5rem;
+  }
+}
+
+.fs-plp-toolbar__brands {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0.125rem 0;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Simple prev/next — pinned to outer left/right of the rail */
+.fs-plp-toolbar__scroll-btn {
+  position: static;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 2.75rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #18181b;
+  font-family: Helvetica, sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.fs-plp-toolbar__scroll-btn:hover:not(:disabled) {
+  color: #000;
+  opacity: 0.7;
+}
+
+.fs-plp-toolbar__scroll-btn:disabled {
+  opacity: 0;
+  pointer-events: none;
+  cursor: default;
+}
+
+.fs-plp-toolbar__scroll-btn--left,
+.fs-plp-toolbar__scroll-btn--right {
+  left: auto;
+  right: auto;
+}
+
+.fs-plp-toolbar__brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  height: 2.75rem;
+  padding: 0 1.1rem;
+  border: 1px solid #d4d4d8;
+  border-radius: 2px;
+  background: #fff;
+  font-family: Helvetica, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: #0a0a0a;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.fs-plp-toolbar__brand-chip:hover,
+.fs-plp-toolbar__brand-chip.is-active {
+  background: #fafafa;
+  border-color: #0a0a0a;
+  color: #0a0a0a;
+}
+
+.fs-plp-toolbar__brand-chip.is-active {
+  font-weight: 600;
+}
+
+.fs-plp-toolbar__brand-chip--skeleton {
+  width: 6.5rem;
+  border-color: #e4e4e7;
+  background: #f4f4f5;
+  animation: pulse 1.5s ease-in-out infinite;
+  cursor: default;
+}
+
+.fs-plp-toolbar__brand-count {
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.fs-plp-toolbar__sort {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.fs-plp-toolbar__sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid #0a0a0a;
+  border-radius: 2px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0a0a0a;
+  cursor: pointer;
+  max-width: 14rem;
+}
+
+.fs-plp-toolbar__sort-btn:hover {
+  background: #fafafa;
+}
+
+.fs-plp-toolbar__sort-label {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .fs-plp-toolbar__sort-label {
+    display: inline;
+  }
+}
+
+.fs-plp-toolbar__sort-value {
+  max-width: 7rem;
+}
+
+.fs-plp-toolbar__sort-chevron {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.fs-plp-toolbar__sort-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.fs-plp-toolbar__sort-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  z-index: 40;
+  min-width: 11.5rem;
+  margin: 0;
+  padding: 0.35rem 0;
+  list-style: none;
+  border: 1px solid #e4e4e7;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.fs-plp-toolbar__sort-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: left;
+  color: #18181b;
+  cursor: pointer;
+}
+
+.fs-plp-toolbar__sort-menu button:hover,
+.fs-plp-toolbar__sort-menu button.is-active {
+  background: #f4f4f5;
+  font-weight: 600;
+}
+
+.fs-pdp-gallery-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.38) !important;
+  box-shadow: none !important;
+  color: #111111 !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.fs-pdp-gallery-arrow--prev {
+  left: 0.75rem;
+}
+
+.fs-pdp-gallery-arrow--next {
+  right: 0.75rem;
+}
+
+.fs-pdp-gallery-arrow:hover,
+.fs-pdp-gallery-arrow:focus {
+  background: rgba(255, 255, 255, 0.52) !important;
+  opacity: 1;
+}
+
+.fs-pdp-gallery-arrow:active {
+  background: rgba(255, 255, 255, 0.52) !important;
+  transform: translateY(-50%) scale(0.96);
+}
+
+html[data-storefront-theme="dark"] .fs-pdp-gallery-arrow {
+  background: rgba(255, 255, 255, 0.38) !important;
+  color: #111111 !important;
+  box-shadow: none !important;
+}
+
+.fs-carousel-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid #a1a1aa;
+  background: rgba(113, 113, 122, 0.9);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+}
+
+.fs-carousel-nav-btn:hover {
+  background: #52525b;
+  border-color: #71717a;
+}
+
+.fs-carousel-nav-btn:active {
+  transform: scale(0.97);
+}
+
+/* Simple text chevrons (brand / facet rails) */
+.fs-carousel-nav-btn--simple {
+  width: 2rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #18181b;
+  font-family: Helvetica, sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.fs-carousel-nav-btn--simple:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #000;
+  opacity: 0.7;
+}
+
+.fs-carousel-nav-btn--simple:active {
+  transform: none;
+  opacity: 0.55;
+}
+
+.fs-carousel-nav-btn--simple:disabled {
+  opacity: 0;
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Homepage / mega-menu brand logo rail — arrows on outer edges */
+.fs-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fs-brand-row__arrow {
+  position: static;
+  flex: 0 0 auto;
+  transform: none;
+}
+
+.fs-brand-row__track {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .fs-brand-row {
+    gap: 0.5rem;
+  }
+
+  .fs-brand-row__track {
+    gap: 2.5rem;
+  }
+}
+
+html[data-storefront-theme="dark"] .fs-carousel-nav-btn {
+  border-color: #30363d;
+  background: rgba(33, 38, 45, 0.95);
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-carousel-nav-btn:hover {
+  background: #30363d;
+}
+
+html[data-storefront-theme="dark"] .fs-carousel-nav-btn--simple {
+  border-color: transparent;
+  background: transparent;
+  color: #f0f6fc;
+  box-shadow: none;
+}
+
+html[data-storefront-theme="dark"] .fs-carousel-nav-btn--simple:hover {
+  background: transparent;
+  opacity: 0.75;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__title {
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__title-count {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__filter-btn,
+html[data-storefront-theme="dark"] .fs-plp-toolbar__brand-chip,
+html[data-storefront-theme="dark"] .fs-plp-toolbar__sort-btn {
+  border-color: #30363d;
+  background: #161b22;
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__filter-btn:hover {
+  background: #f0f6fc;
+  color: #0d1117;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__brand-chip:hover,
+html[data-storefront-theme="dark"] .fs-plp-toolbar__brand-chip.is-active {
+  background: #21262d;
+  border-color: #f0f6fc;
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__scroll-btn {
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__sort-menu {
+  background: #161b22;
+  border-color: #30363d;
+}
+
+html[data-storefront-theme="dark"] .fs-plp-toolbar__sort-menu button {
+  color: #e6edf3;
+}
+
+.fs-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f4f4f5;
+  color: #27272a;
+  border: 1px solid #e4e4e7;
+}
+
+.fs-filter-chip button {
+  color: inherit;
+  opacity: 0.7;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.fs-filter-chip button:hover {
+  opacity: 1;
+  color: #dc2626;
+}
+
+/* Discounts page — spacing + toolbar */
+.fs-discounts-page {
+  padding-top: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.fs-discounts-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.fs-discounts-page__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #18181b;
+}
+
+.fs-discounts-page__meta {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #52525b;
+}
+
+.fs-discounts-page__banner {
+  margin-bottom: 2rem;
+}
+
+.fs-discounts-page__banner .fs-discounts-banner {
+  margin-bottom: 0;
+}
+
+.fs-discounts-page__products {
+  margin-top: 0;
+}
+
+.fs-discounts-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .fs-discounts-page {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+
+  .fs-discounts-page__header {
+    margin-bottom: 1.75rem;
+  }
+
+  .fs-discounts-page__title {
+    font-size: 1.875rem;
+  }
+
+  .fs-discounts-page__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .fs-discounts-page__grid {
+    gap: 1rem;
+  }
+}
+
+.fs-discounts-page__empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.fs-discounts-page__empty-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #18181b;
+}
+
+.fs-discounts-page__empty-desc {
+  font-size: 0.875rem;
+  color: #52525b;
+}
+
+.fs-discounts-page__cta {
+  margin-top: 1rem;
+  border-radius: 0.75rem;
+  background-color: var(--admin-primary);
+  padding: 0.625rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  transition: filter 0.2s ease;
+}
+
+.fs-discounts-page__cta:hover {
+  filter: brightness(1.08);
+}
+
+.fs-discounts-page__pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  margin-top: 2.5rem;
+}
+
+.fs-discounts-page__page-btn {
+  height: 2.75rem;
+  border-radius: 9999px;
+  border: 1px solid #e4e4e7;
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #3f3f46;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.fs-discounts-page__page-btn:hover:not(:disabled) {
+  background: #f4f4f5;
+}
+
+.fs-discounts-page__page-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.fs-discounts-page__page-meta {
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  color: #52525b;
+}
+
+/* Toolbar — nav-style row, no fill on controls */
+.fs-discounts-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  padding-bottom: 0.875rem;
+  background: transparent;
+  border-bottom: 1px solid #e5e5e5;
+  font-family: "Montserrat", "Inter", "Kantumruy Pro", "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
+}
+
+.fs-discounts-toolbar__field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.875rem 1rem;
+  border: none;
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  .fs-discounts-toolbar__field {
+    padding: 0.875rem 1.25rem;
+  }
+}
+
+.fs-discounts-toolbar__field--search {
+  flex: 1.5 1 10rem;
+}
+
+.fs-discounts-toolbar__field--menu {
+  flex: 0 1 auto;
+  min-width: 8.5rem;
+}
+
+.fs-discounts-toolbar__field--price {
+  flex: 0 0 auto;
+  gap: 0.75rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.fs-discounts-toolbar__control,
+.fs-discounts-toolbar__select,
+.fs-discounts-toolbar__price-input {
+  width: 100%;
+  min-width: 0;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #18181b;
+  outline: none !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fs-discounts-toolbar__control:focus,
+.fs-discounts-toolbar__control:focus-visible,
+.fs-discounts-toolbar__select:focus,
+.fs-discounts-toolbar__select:focus-visible,
+.fs-discounts-toolbar__price-input:focus,
+.fs-discounts-toolbar__price-input:focus-visible,
+.fs-discounts-toolbar__reset:focus,
+.fs-discounts-toolbar__reset:focus-visible {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.fs-discounts-toolbar__control {
+  cursor: text;
+}
+
+.fs-discounts-toolbar__menu-btn {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #18181b;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fs-discounts-toolbar__menu-btn:focus,
+.fs-discounts-toolbar__menu-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.fs-discounts-toolbar__chevron-inline {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: #52525b;
+  transition: transform 0.2s ease;
+}
+
+.fs-discounts-toolbar__chevron-inline.is-open {
+  transform: rotate(180deg);
+}
+
+.fs-discounts-toolbar__menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 60;
+  min-width: 100%;
+  max-height: 14rem;
+  margin: 0;
+  padding: 0.375rem 0;
+  list-style: none;
+  overflow-y: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #e4e4e7;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+}
+
+.fs-discounts-toolbar__menu button {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #27272a;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.fs-discounts-toolbar__menu button:hover {
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+.fs-discounts-toolbar__menu button.is-active {
+  background: rgba(var(--admin-primary-rgb), 0.1);
+  color: #18181b;
+}
+
+.fs-discounts-toolbar__control::placeholder {
+  color: #3f3f46;
+  font-weight: 500;
+}
+
+.fs-discounts-toolbar__price-input {
+  width: 3.25rem;
+  padding: 0.125rem 0;
+  text-align: center;
+  cursor: text;
+}
+
+.fs-discounts-toolbar__price-input::placeholder {
+  color: #71717a;
+  font-weight: 500;
+}
+
+.fs-discounts-toolbar__reset {
+  flex: 0 0 auto;
+  align-self: center;
+  border: none;
+  background: transparent;
+  padding: 0.875rem 1rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #18181b;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fs-discounts-toolbar__reset:hover {
+  color: #000;
+  background: transparent;
+}
+
+/* Discounts page — dark mode (GitHub-style palette, matches .fs-site) */
+html[data-storefront-theme="dark"] .fs-discounts-page__title {
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page__meta {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-banner {
+  border-color: #30363d;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar {
+  background: transparent;
+  border-bottom-color: #30363d;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__field {
+  background: transparent;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__control,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__select,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__price-input,
+html[data-storefront-theme="dark"] .fs-site .fs-discounts-toolbar input,
+html[data-storefront-theme="dark"] .fs-site .fs-discounts-toolbar select {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #e6edf3 !important;
+  color-scheme: dark;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__control::placeholder,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__price-input::placeholder,
+html[data-storefront-theme="dark"] .fs-site .fs-discounts-toolbar input::placeholder {
+  color: #8b949e !important;
+  opacity: 1;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__menu-btn {
+  color: #e6edf3;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__chevron-inline {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__menu {
+  border-color: #30363d;
+  background: #161b22;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__menu button {
+  color: #c9d1d9;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__menu button:hover {
+  background: rgba(240, 246, 252, 0.06);
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__menu button.is-active {
+  background: rgba(var(--admin-primary-rgb), 0.18);
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__reset {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__control:focus,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__control:focus-visible,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__select:focus,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__select:focus-visible,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__price-input:focus,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__price-input:focus-visible,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__reset:focus,
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__reset:focus-visible,
+html[data-storefront-theme="dark"] .fs-site .fs-discounts-toolbar input:focus,
+html[data-storefront-theme="dark"] .fs-site .fs-discounts-toolbar select:focus {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-toolbar__reset:hover {
+  color: #f0f6fc;
+  background: transparent;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page .fs-card {
+  border-color: #30363d;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page [class*="text-zinc-900"],
+html[data-storefront-theme="dark"] .fs-discounts-page [class*="text-slate-900"] {
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page [class*="text-zinc-600"],
+html[data-storefront-theme="dark"] .fs-discounts-page [class*="text-zinc-700"] {
+  color: #8b949e !important;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page [class*="border-zinc-200"] {
+  border-color: #30363d !important;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page [class*="hover:bg-zinc-50"]:hover {
+  background-color: rgba(240, 246, 252, 0.06) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page__empty-title {
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page__empty-desc,
+html[data-storefront-theme="dark"] .fs-discounts-page__page-meta {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page__page-btn {
+  border-color: #30363d;
+  color: #c9d1d9;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page__page-btn:hover:not(:disabled) {
+  background: rgba(240, 246, 252, 0.06);
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-discounts-page__grid .bg-zinc-100 {
+  background-color: #21262d !important;
+}
+
+@media (max-width: 767px) {
+  .fs-discounts-toolbar {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .fs-discounts-toolbar__field,
+  .fs-discounts-toolbar__field--search,
+  .fs-discounts-toolbar__field--menu {
+    flex: 1 1 100%;
+    min-width: 100%;
+    padding: 0.75rem 0;
+  }
+
+  .fs-discounts-toolbar__reset {
+    width: 100%;
+    padding: 0.75rem 0;
+    text-align: left;
+  }
+
+  .fs-discounts-page__banner {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.fs-filter-drawer__backdrop {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(1px);
+}
+
+.fs-filter-drawer__panel {
+  background: #ffffff;
+  border-left: 1px solid #e4e4e7;
+  color: #18181b;
+}
+
+.fs-filter-drawer__header,
+.fs-filter-drawer__footer {
+  border-color: #e4e4e7;
+}
+
+.fs-filter-drawer__header {
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.fs-filter-drawer__footer {
+  border-top: 1px solid #e4e4e7;
+}
+
+.fs-filter-drawer__title {
+  color: #18181b;
+}
+
+.fs-filter-drawer__close {
+  color: #71717a;
+}
+
+.fs-filter-drawer__close:hover {
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+.fs-filter-drawer__section-title {
+  color: #27272a;
+}
+
+.fs-filter-drawer__option {
+  color: #3f3f46;
+}
+
+.fs-filter-drawer__option:hover {
+  background: #f4f4f5;
+}
+
+.fs-filter-drawer__hint,
+.fs-filter-drawer__empty {
+  color: #71717a;
+}
+
+.fs-filter-drawer__price-value {
+  color: #18181b;
+}
+
+.fs-filter-drawer__control {
+  border-color: #d4d4d8;
+}
+
+.fs-filter-drawer__pill {
+  border-color: #e4e4e7;
+  background: #ffffff;
+  color: #27272a;
+}
+
+.fs-filter-drawer__pill:hover:not(.fs-filter-drawer__pill--active) {
+  border-color: #a1a1aa;
+}
+
+.fs-filter-drawer__clear {
+  color: #71717a;
+}
+
+.fs-filter-drawer__clear:hover {
+  color: #18181b;
+}
+
+.fs-filter-drawer__range {
+  height: 0.35rem;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-chip {
+  background: #21262d;
+  color: #e6edf3;
+  border-color: #30363d;
+}
+
+html[data-storefront-theme="dark"] .fs-storefront-filter-btn {
+  background-color: #fff;
+  border-color: #fff;
+  color: #000;
+}
+
+html[data-storefront-theme="dark"] .fs-storefront-filter-btn:hover {
+  background-color: transparent;
+  border-color: #fff;
+  color: #fff;
+}
+
+html[data-storefront-theme="dark"] .fs-storefront-filter-btn__badge {
+  background: #000;
+  color: #fff;
+}
+
+html[data-storefront-theme="dark"] .fs-storefront-filter-btn:hover .fs-storefront-filter-btn__badge {
+  background: #fff;
+  color: #000;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__panel {
+  background: #161b22;
+  border-left-color: #30363d;
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__header,
+html[data-storefront-theme="dark"] .fs-filter-drawer__footer {
+  border-color: #30363d;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__title,
+html[data-storefront-theme="dark"] .fs-filter-drawer__price-value {
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__section-title {
+  color: #e6edf3;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__option {
+  color: #c9d1d9;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__option:hover {
+  background: rgba(240, 246, 252, 0.06);
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__hint,
+html[data-storefront-theme="dark"] .fs-filter-drawer__empty,
+html[data-storefront-theme="dark"] .fs-filter-drawer__clear {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__clear:hover {
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__close {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__close:hover {
+  background: #21262d;
+  color: #f0f6fc;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__control {
+  border-color: #484f58;
+  background-color: #0d1117;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__pill:not(.fs-filter-drawer__pill--active) {
+  background: #21262d;
+  border-color: #30363d;
+  color: #e6edf3;
+}
+
+html[data-storefront-theme="dark"] .fs-filter-drawer__pill:not(.fs-filter-drawer__pill--active):hover {
+  border-color: #484f58;
+  background: #30363d;
+}
+
+.fs-btn-secondary {
+  color: #0f172a;
+  background: #f5f5f5;
+  border: 1px solid rgba(15, 23, 42, .08);
+}
+
+.fs-btn-secondary:hover {
+  background: #eeeeee;
+}
+
+.fs-btn-outline {
+  color: #0f172a;
+  background: transparent;
+  border: 1px solid rgba(15, 23, 42, .25);
+}
+
+.fs-btn-outline:hover {
+  background: rgba(15, 23, 42, .06);
+}
+
+.fs-btn-ghost {
+  color: #0f172a;
+  background: transparent;
+}
+
+.fs-btn-ghost:hover {
+  background: rgba(15, 23, 42, .06);
+}
+
+.fs-btn-icon {
+  @apply inline-flex items-center justify-center w-9 h-9 rounded-xl;
+  border: 1px solid rgba(15, 23, 42, .12);
+  background: #fff;
+}
+
+.fs-btn-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--fs-shadow-soft);
+}
+
+.fs-btn:disabled,
+.fs-btn[disabled],
+.fs-btn-icon:disabled,
+.fs-btn-icon[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Navigation links — shared typography for top nav + mega menu section titles */
+.fs-nav-link-typo {
+  @apply text-sm md:text-base font-bold uppercase tracking-[0.03em];
+  font-family: "Montserrat", "Inter", "Kantumruy Pro", "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
+}
+
+.fs-nav-link {
+  @apply relative inline-flex items-center justify-center px-4 py-2.5 text-sm md:text-base font-bold uppercase tracking-[0.03em] cursor-pointer;
+  font-family: "Montserrat", "Inter", "Kantumruy Pro", "Noto Sans Khmer", ui-sans-serif, system-ui, sans-serif;
+  color: rgba(255, 255, 255, .85);
+  transition: color 0.25s ease;
+}
+
+.fs-nav-link:hover {
+  color: #fff;
+}
+
+.fs-nav-link-active {
+  color: #fff;
+  font-weight: 800;
+}
+
+.fs-nav-underline {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 2px;
+  height: 2.5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .95);
+  opacity: 0;
+  transform: scaleX(0.5);
+  transition: opacity .3s cubic-bezier(0.4, 0, 0.2, 1), transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+.fs-nav-underline.is-on {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.fs-menu-item {
+  @apply block px-3 py-2 text-xs text-zinc-600 rounded-lg;
+}
+
+.fs-menu-item:hover {
+  color: #0f172a;
+  background: rgba(15, 23, 42, .06);
+}
+
+/* Product detail accordions — no rectangular focus ring on click */
+.fs-product-accordion__trigger:focus,
+.fs-product-accordion__trigger:focus-visible,
+.fs-product-accordion__trigger:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.fs-product-accordion__trigger:active {
+  transform: none;
+}
+
+html[data-storefront-theme="dark"] .fs-product-accordion {
+  border-color: #30363d !important;
+  border-radius: 0 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-product-accordion__trigger {
+  border-radius: 0 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-product-accordion__trigger:focus,
+html[data-storefront-theme="dark"] .fs-product-accordion__trigger:focus-visible,
+html[data-storefront-theme="dark"] .fs-product-accordion__trigger:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Product detail — square quantity controls in dark mode (no per-button radius) */
+html[data-storefront-theme="dark"] .fs-product-qty,
+html[data-storefront-theme="dark"] .fs-product-qty__btn,
+html[data-storefront-theme="dark"] .fs-product-qty__value {
+  border-radius: 0 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-product-qty__btn:focus,
+html[data-storefront-theme="dark"] .fs-product-qty__btn:focus-visible,
+html[data-storefront-theme="dark"] .fs-product-qty__btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+.fs-card {
+  @apply bg-white rounded-none;
+  box-shadow: none;
+}
+
+.fs-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.fs-link {
+  @apply text-zinc-700 hover:text-zinc-950;
+}
+
+.fs-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.fs-hover {
+  @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
+}
+
+.fs-page-enter {
+  animation: fsFadeInUp 420ms ease-out both;
+}
+
+.fs-hover-lift {
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.fs-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--fs-shadow-soft);
+}
+
+/* Form system */
+.fs-label {
+  @apply block text-xs font-semibold text-slate-700 mb-2 uppercase tracking-wide;
+}
+
+.fs-input {
+  @apply w-full rounded-xl border px-4 py-2.5 text-sm outline-none;
+  border: 1px solid rgba(15, 23, 42, .12);
+  background: #fff;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+.fs-input:focus {
+  border-color: rgba(15, 23, 42, .35);
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, .12);
+}
+
+.fs-helper {
+  @apply text-xs text-slate-500;
+}
+
+.fs-error {
+  @apply text-sm font-medium text-rose-700;
+  background: rgba(244, 63, 94, .08);
+  border: 1px solid rgba(244, 63, 94, .2);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.admin-theme {
+  /* Light Muted / Dasher-style: off-white canvas, white cards, soft sage accents */
+  --admin-card-bg: #ffffff;
+  --admin-card-border: #e2e8f0;
+  --admin-soft-bg: #f8f9fa;
+  --admin-soft-alt: #f0f4f2;
+  --admin-canvas: var(--admin-soft-bg);
+  --admin-elevated: #ffffff;
+  --admin-glow: rgba(var(--admin-primary-rgb), 0.12);
+  --admin-muted: #64748b;
+  --admin-heading: #0f172a;
+  --admin-status-info: #3b82f6;
+  --admin-status-info-bg: #eff6ff;
+  --admin-status-warning: #d97706;
+  --admin-status-warning-bg: #fffbeb;
+  --admin-status-danger: #dc2626;
+  --admin-status-danger-bg: #fef2f2;
+  --admin-status-success: var(--admin-primary);
+  --admin-status-success-bg: rgba(var(--admin-primary-rgb), 0.1);
+  background-color: var(--admin-soft-bg);
+  background-image:
+    radial-gradient(1200px 900px at -5% -10%, rgba(var(--admin-primary-rgb), 0.1), transparent 58%),
+    radial-gradient(900px 700px at 105% 5%, rgba(var(--admin-primary-rgb), 0.07), transparent 60%),
+    linear-gradient(180deg, var(--admin-soft-bg) 0%, var(--admin-soft-alt) 100%);
+  color: var(--admin-heading);
+}
+
+/*
+  Dark dashboard: neutral “canvas + elevated card” (common SaaS / GitHub-style depth).
+  Primary accent stays on --admin-primary* from ThemeProvider.
+*/
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme {
+  --admin-canvas: #0d1117;
+  --admin-soft-bg: var(--admin-canvas);
+  --admin-soft-alt: #010409;
+  --admin-card-bg: #161b22;
+  --admin-elevated: #21262d;
+  --admin-card-border: #30363d;
+  --admin-glow: rgba(var(--admin-primary-rgb), 0.07);
+  --admin-muted: #8b949e;
+  --admin-heading: #f0f6fc;
+  color: #c9d1d9;
+  background-color: var(--admin-canvas);
+  background-image:
+    radial-gradient(1000px 720px at 8% -8%, rgba(var(--admin-primary-rgb), 0.09), transparent 58%),
+    radial-gradient(780px 560px at 96% 6%, rgba(var(--admin-primary-rgb), 0.05), transparent 62%),
+    linear-gradient(180deg, var(--admin-soft-bg) 0%, var(--admin-soft-alt) 100%);
+}
+
+.admin-theme [class*="min-h-screen"],
+.admin-theme [class*="bg-gradient-to-br from-slate-50 to-slate-100"] {
+  background-image: none !important;
+  background-color: var(--admin-soft-bg) !important;
+}
+
+.admin-theme input:focus,
+.admin-theme textarea:focus,
+.admin-theme select:focus {
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 0 0 4px rgba(var(--admin-primary-rgb), 0.18) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme input:focus,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme textarea:focus,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme select:focus {
+  box-shadow: 0 0 0 3px rgba(var(--admin-primary-rgb), 0.24) !important;
+}
+
+/* Stock & Inventory — selected row: solid band across all cells (no column grid). */
+.admin-stock-inventory-table {
+  border-collapse: collapse;
+}
+
+.admin-stock-inventory-table tbody tr[data-selected]>td {
+  background-color: #f1f5f9 !important;
+  border-top: 1px solid #f1f5f9 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  box-shadow: none !important;
+}
+
+.admin-stock-inventory-table tbody tr[data-selected]>td:first-child {
+  border-left: 3px solid var(--admin-primary) !important;
+  padding-left: calc(0.75rem - 3px) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-stock-inventory-table tbody tr[data-selected]>td {
+  background-color: rgb(30 41 59 / 0.94) !important;
+  border-top-color: rgb(30 41 59 / 0.94) !important;
+  border-bottom-color: rgb(51 65 85) !important;
+}
+
+.admin-stock-inventory-table tbody tr[data-detail-open]>td {
+  background-color: #f8fafc !important;
+  border-top-color: #f8fafc !important;
+  border-bottom-color: #e2e8f0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  box-shadow: none !important;
+}
+
+.admin-stock-inventory-table tbody tr[data-detail-open]>td:first-child {
+  border-left: 3px solid var(--admin-primary) !important;
+  padding-left: calc(0.75rem - 3px) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-stock-inventory-table tbody tr[data-detail-open]>td {
+  background-color: rgb(30 41 59) !important;
+  border-top-color: rgb(30 41 59) !important;
+  border-bottom-color: rgb(51 65 85) !important;
+}
+
+/* Match `bg-white` cards only — not `dark:bg-white` (substring false positive breaks active filter chips). */
+.admin-theme [class*="bg-white"]:not([class*="dark:bg-white"]),
+.admin-theme [class*="dark:bg-slate-800"],
+.admin-theme [class*="dark:bg-slate-900"] {
+  background-color: var(--admin-card-bg) !important;
+}
+
+.admin-theme [class*="border-slate-100"],
+.admin-theme [class*="border-slate-200"],
+.admin-theme [class*="dark:border-slate-700"],
+.admin-theme [class*="dark:border-slate-800"] {
+  border-color: var(--admin-card-border) !important;
+}
+
+/* Admin dashboard: radius + type scale (overridden via ThemeProvider CSS variables) */
+html.admin-dashboard {
+  --admin-ui-radius: 8px;
+  --fs-radius-sm: var(--admin-ui-radius, 8px);
+  --fs-radius-md: var(--admin-ui-radius, 8px);
+  --fs-radius-lg: var(--admin-ui-radius, 8px);
+  --admin-font-page: 1.375rem;
+  --admin-font-page-lh: 1.3;
+  --admin-font-section: 1.125rem;
+  --admin-font-section-lh: 1.4;
+  --admin-font-subsection: 1rem;
+  --admin-font-body: 1rem;
+  --admin-font-compact: 0.875rem;
+}
+
+/*
+  Admin page content only (.admin-outlet in AdminLayout — excludes topbar & sidebar).
+  Normalizes mixed text-2xl / text-4xl / font-black page titles into one hierarchy.
+*/
+html.admin-dashboard main .admin-outlet {
+  font-size: var(--admin-font-body);
+  line-height: 1.55;
+}
+
+html.admin-dashboard main .admin-outlet h1 {
+  font-size: var(--admin-font-page) !important;
+  line-height: var(--admin-font-page-lh) !important;
+  letter-spacing: -0.02em !important;
+  font-weight: 600 !important;
+}
+
+html.admin-dashboard main .admin-outlet h2 {
+  font-size: var(--admin-font-section) !important;
+  line-height: var(--admin-font-section-lh) !important;
+  font-weight: 600 !important;
+}
+
+html.admin-dashboard main .admin-outlet h3 {
+  font-size: var(--admin-font-subsection) !important;
+  line-height: 1.45 !important;
+  font-weight: 600 !important;
+}
+
+html.admin-dashboard main .admin-outlet table {
+  font-size: var(--admin-font-compact);
+}
+
+html.admin-dashboard [class*="rounded-"]:not([class*="rounded-none"]) {
+  border-radius: var(--admin-ui-radius, 8px) !important;
+}
+
+html.admin-dashboard [class~="rounded"] {
+  border-radius: var(--admin-ui-radius, 8px) !important;
+}
+
+html.admin-dashboard button,
+html.admin-dashboard [type="button"],
+html.admin-dashboard [type="submit"],
+html.admin-dashboard [type="reset"],
+html.admin-dashboard [role="button"] {
+  border-radius: var(--admin-ui-radius, 8px) !important;
+}
+
+html.admin-dashboard input:not([type="checkbox"]):not([type="radio"]),
+html.admin-dashboard textarea,
+html.admin-dashboard select {
+  border-radius: var(--admin-ui-radius, 8px) !important;
+}
+
+/* Keep subtle elevation for scanability (avoid muddy flat UI). */
+.admin-theme [class*="shadow-xl"],
+.admin-theme [class*="shadow-2xl"] {
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="shadow-xl"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="shadow-2xl"] {
+  box-shadow: 0 12px 48px rgba(1, 4, 9, 0.55) !important;
+}
+
+.admin-theme [class*="shadow-lg"] {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="shadow-lg"] {
+  box-shadow: 0 10px 36px rgba(1, 4, 9, 0.42) !important;
+}
+
+.admin-theme [class*="shadow-md"],
+.admin-theme [class*="shadow-sm"],
+.admin-theme [class*=" shadow"],
+.admin-theme [class^="shadow"],
+.admin-theme [class*="drop-shadow"] {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+  filter: none !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="shadow-md"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="shadow-sm"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*=" shadow"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class^="shadow"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="drop-shadow"] {
+  box-shadow: 0 2px 10px rgba(1, 4, 9, 0.32) !important;
+}
+
+/*
+  Brand-only remap: map legacy indigo/violet CTAs to admin primary.
+  Do NOT touch emerald/red/amber/slate/etc. — remapping those caused
+  unreadable badges and same-color text on buttons.
+*/
+.admin-theme [class*="text-indigo-600"],
+.admin-theme [class*="text-indigo-700"],
+.admin-theme [class*="text-indigo-800"],
+.admin-theme [class*="text-purple-600"],
+.admin-theme [class*="text-purple-700"],
+.admin-theme [class*="text-blue-600"],
+.admin-theme [class*="text-blue-700"],
+.admin-theme [class*="text-blue-800"],
+.admin-theme [class*="text-violet-600"],
+.admin-theme [class*="text-violet-700"],
+.admin-theme [class*="text-pink-600"],
+.admin-theme [class*="text-pink-700"] {
+  color: var(--admin-primary) !important;
+}
+
+.admin-theme [class*="border-indigo-500"],
+.admin-theme [class*="border-indigo-600"],
+.admin-theme [class*="border-purple-500"],
+.admin-theme [class*="border-purple-600"],
+.admin-theme [class*="border-blue-500"],
+.admin-theme [class*="border-blue-600"],
+.admin-theme [class*="border-blue-700"],
+.admin-theme [class*="border-violet-500"],
+.admin-theme [class*="border-violet-600"],
+.admin-theme [class*="border-pink-500"],
+.admin-theme [class*="border-pink-600"] {
+  border-color: rgba(var(--admin-primary-rgb), 0.45) !important;
+}
+
+/* Indigo / purple tinted panels → follow preset (dashboard cards; light surfaces only here) */
+.admin-theme [class*="bg-indigo-50"],
+.admin-theme [class*="bg-indigo-100"] {
+  background-color: rgba(var(--admin-primary-rgb), 0.08) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-indigo-900/20"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-indigo-900/30"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-indigo-900/40"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-indigo-950"] {
+  background-color: rgba(var(--admin-primary-rgb), 0.12) !important;
+}
+
+/*
+  Strong CTAs only (500–700): do NOT match bg-indigo-50/100/etc. or subtle cards
+  become solid primary incorrectly.
+*/
+.admin-theme [class*="bg-indigo-500"],
+.admin-theme [class*="bg-indigo-600"],
+.admin-theme [class*="bg-indigo-700"],
+.admin-theme [class*="bg-purple-500"],
+.admin-theme [class*="bg-purple-600"],
+.admin-theme [class*="bg-purple-700"],
+.admin-theme [class*="bg-blue-600"],
+.admin-theme [class*="bg-blue-700"],
+.admin-theme [class*="bg-violet-500"],
+.admin-theme [class*="bg-violet-600"],
+.admin-theme [class*="bg-violet-700"],
+.admin-theme [class*="bg-pink-500"],
+.admin-theme [class*="bg-pink-600"],
+.admin-theme [class*="bg-pink-700"] {
+  background-color: var(--admin-primary) !important;
+}
+
+/* Only squash “brand” gradients, not arbitrary page backgrounds */
+.admin-theme [class*="bg-gradient-to-r"][class*="from-indigo-"],
+.admin-theme [class*="bg-gradient-to-br"][class*="from-indigo-"],
+.admin-theme [class*="bg-gradient-to-r"][class*="from-purple-"],
+.admin-theme [class*="bg-gradient-to-br"][class*="from-purple-"],
+.admin-theme [class*="bg-gradient-to-r"][class*="from-blue-"],
+.admin-theme [class*="bg-gradient-to-br"][class*="from-blue-"],
+.admin-theme [class*="bg-gradient-to-r"][class*="from-violet-"],
+.admin-theme [class*="bg-gradient-to-br"][class*="from-violet-"],
+.admin-theme [class*="bg-gradient-to-r"][class*="from-pink-"],
+.admin-theme [class*="bg-gradient-to-br"][class*="from-pink-"] {
+  background-image: none !important;
+  background-color: var(--admin-primary) !important;
+}
+
+.admin-theme button[class*="bg-gradient"],
+.admin-theme a[class*="bg-gradient"],
+.admin-theme button[class*="bg-indigo-500"],
+.admin-theme button[class*="bg-indigo-600"],
+.admin-theme button[class*="bg-indigo-700"],
+.admin-theme button[class*="bg-purple-500"],
+.admin-theme button[class*="bg-purple-600"],
+.admin-theme button[class*="bg-purple-700"],
+.admin-theme button[class*="bg-blue-600"],
+.admin-theme button[class*="bg-blue-700"] {
+  background-image: none !important;
+  background-color: var(--admin-primary) !important;
+  color: #fff !important;
+}
+
+.admin-theme button[class*="bg-gradient"]:hover,
+.admin-theme a[class*="bg-gradient"]:hover,
+.admin-theme button[class*="bg-indigo-500"]:hover,
+.admin-theme button[class*="bg-indigo-600"]:hover,
+.admin-theme button[class*="bg-purple-500"]:hover,
+.admin-theme button[class*="bg-purple-600"]:hover,
+.admin-theme button[class*="bg-blue-600"]:hover {
+  filter: brightness(0.95);
+}
+
+.admin-theme [class*="hover:bg-indigo-500"]:hover,
+.admin-theme [class*="hover:bg-indigo-600"]:hover,
+.admin-theme [class*="hover:bg-purple-500"]:hover,
+.admin-theme [class*="hover:bg-purple-600"]:hover,
+.admin-theme [class*="hover:bg-blue-600"]:hover,
+.admin-theme [class*="hover:bg-violet-500"]:hover,
+.admin-theme [class*="hover:bg-violet-600"]:hover,
+.admin-theme [class*="hover:bg-pink-500"]:hover,
+.admin-theme [class*="hover:bg-pink-600"]:hover {
+  background-color: rgba(var(--admin-primary-rgb), 0.14) !important;
+}
+
+.admin-theme [class*="focus:ring-indigo-"],
+.admin-theme [class*="focus:ring-purple-"],
+.admin-theme [class*="focus:ring-blue-"],
+.admin-theme [class*="focus:ring-pink-"],
+.admin-theme [class*="focus:ring-violet-"] {
+  --tw-ring-color: rgba(var(--admin-primary-rgb), 0.28) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-indigo-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-indigo-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-indigo-800"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-purple-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-purple-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-blue-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-blue-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-blue-800"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-violet-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-violet-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-pink-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="text-pink-700"] {
+  color: var(--admin-primary) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-indigo-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-indigo-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-indigo-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-purple-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-purple-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-purple-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-blue-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-blue-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-violet-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-violet-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-violet-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-pink-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-pink-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="bg-pink-700"] {
+  background-color: var(--admin-primary) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-indigo-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-indigo-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-purple-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-purple-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-blue-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-blue-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-blue-700"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-violet-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-violet-600"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-pink-500"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="border-pink-600"] {
+  border-color: rgba(var(--admin-primary-rgb), 0.55) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-indigo-500"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-indigo-600"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-purple-500"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-purple-600"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-blue-600"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-violet-500"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-violet-600"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-pink-500"]:hover,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="hover:bg-pink-600"]:hover {
+  background-color: rgba(var(--admin-primary-rgb), 0.18) !important;
+}
+
+/* Sidebar / shell: headings stay readable on tinted rail */
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme aside .text-slate-900,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme aside .text-slate-800 {
+  color: var(--admin-heading) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme aside .text-slate-600,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme aside .text-slate-500 {
+  color: var(--admin-muted) !important;
+}
+
+/*
+  Theme picker accent: teal / emerald Tailwind hues used across admin JSX
+  map to --admin-primary so Rose / Ocean / etc. apply consistently without
+  editing every screen.
+*/
+.admin-theme [class*="focus:border-teal-"],
+.admin-theme [class*="dark:focus:border-teal-"],
+.admin-theme [class*="focus:ring-teal-"],
+.admin-theme [class*="dark:focus:ring-teal-"] {
+  border-color: rgba(var(--admin-primary-rgb), 0.62) !important;
+  --tw-ring-color: rgba(var(--admin-primary-rgb), 0.22) !important;
+}
+
+.admin-theme [class*="bg-teal-500"],
+.admin-theme [class*="bg-teal-600"],
+.admin-theme [class*="hover:bg-teal-600"] {
+  background-color: var(--admin-primary) !important;
+}
+
+.admin-theme [class*="border-teal-400"],
+.admin-theme [class*="border-teal-500"],
+.admin-theme [class*="dark:border-teal-400"],
+.admin-theme [class*="dark:border-teal-600"],
+.admin-theme [class*="border-teal-300"],
+.admin-theme [class*="hover:border-teal-300"],
+.admin-theme [class*="dark:hover:border-teal-600"] {
+  border-color: rgba(var(--admin-primary-rgb), 0.5) !important;
+}
+
+.admin-theme [class*="ring-teal-300"] {
+  --tw-ring-color: rgba(var(--admin-primary-rgb), 0.45) !important;
+}
+
+.admin-theme [class*="ring-teal-500"],
+.admin-theme [class*="dark:ring-teal-400"] {
+  --tw-ring-color: rgba(var(--admin-primary-rgb), 0.34) !important;
+}
+
+.admin-theme [class*="text-teal-600"],
+.admin-theme [class*="text-teal-700"],
+.admin-theme [class*="text-teal-800"],
+.admin-theme [class*="dark:text-teal-300"],
+.admin-theme [class*="dark:text-teal-200"],
+.admin-theme [class*="dark:text-teal-400"] {
+  color: var(--admin-primary) !important;
+}
+
+.admin-theme [class*="bg-teal-50"],
+.admin-theme [class*="hover:bg-teal-50"],
+.admin-theme [class*="dark:bg-teal-950/50"],
+.admin-theme [class*="dark:bg-teal-950/45"],
+.admin-theme [class*="dark:hover:bg-teal-950/40"] {
+  background-color: rgba(var(--admin-primary-rgb), 0.1) !important;
+}
+
+.admin-theme [class*="bg-teal-100"],
+.admin-theme [class*="dark:bg-teal-950/60"] {
+  background-color: rgba(var(--admin-primary-rgb), 0.15) !important;
+}
+
+.admin-theme [class*="from-teal-800"],
+.admin-theme [class*="dark:from-teal-900"] {
+  --tw-gradient-from: var(--admin-primary) var(--tw-gradient-from-position);
+}
+
+.admin-theme [class*="bg-emerald-500"],
+.admin-theme [class*="bg-emerald-600"],
+.admin-theme [class*="hover:bg-emerald-600"],
+.admin-theme [class*="dark:bg-emerald-600"],
+.admin-theme [class*="dark:hover:bg-emerald-500"] {
+  background-color: var(--admin-primary) !important;
+}
+
+.admin-theme [class*="border-emerald-100"],
+.admin-theme [class*="border-emerald-200"],
+.admin-theme [class*="border-emerald-400"],
+.admin-theme [class*="border-emerald-800"],
+.admin-theme [class*="dark:border-emerald-400"],
+.admin-theme [class*="dark:border-emerald-700"],
+.admin-theme [class*="dark:border-emerald-800"] {
+  border-color: rgba(var(--admin-primary-rgb), 0.35) !important;
+}
+
+.admin-theme [class*="bg-emerald-50"] {
+  background-color: rgba(var(--admin-primary-rgb), 0.095) !important;
+}
+
+.admin-theme [class*="border-emerald-400/30"],
+.admin-theme [class*="dark:border-emerald-400/30"] {
+  border-color: rgba(var(--admin-primary-rgb), 0.32) !important;
+}
+
+.admin-theme [class*="bg-emerald-100"] {
+  background-color: rgba(var(--admin-primary-rgb), 0.12) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-emerald-900/20"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-emerald-900/30"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-emerald-900/40"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-emerald-950/40"],
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme [class*="dark:bg-emerald-500/10"] {
+  background-color: rgba(var(--admin-primary-rgb), 0.14) !important;
+}
+
+.admin-theme [class*="text-emerald-500"],
+.admin-theme [class*="text-emerald-600"],
+.admin-theme [class*="text-emerald-700"],
+.admin-theme [class*="text-emerald-800"],
+.admin-theme [class*="dark:text-emerald-200"],
+.admin-theme [class*="dark:text-emerald-300"],
+.admin-theme [class*="dark:text-emerald-400"],
+.admin-theme [class*="hover:text-emerald-600"],
+.admin-theme [class*="hover:text-emerald-700"] {
+  color: var(--admin-primary) !important;
+}
+
+/* Admin surfaces */
+.admin-theme .admin-surface {
+  background-color: var(--admin-card-bg) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: inherit;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-surface {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.admin-theme .admin-border {
+  border-color: var(--admin-card-border) !important;
+}
+
+.admin-theme .admin-soft {
+  background-color: var(--admin-soft-bg) !important;
+}
+
+/* Reports dashboard — inherit admin canvas; chart panels keep their own surfaces */
+.admin-theme .reports-dashboard {
+  background: transparent !important;
+}
+
+.admin-theme .reports-dashboard .report-chart-panel {
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.admin-theme .reports-dashboard .report-chart-panel:hover {
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .reports-dashboard .report-chart-panel:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
+}
+
+.admin-theme .reports-dashboard .admin-stat-grid>.admin-surface {
+  background: #ffffff !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(99, 102, 241, 0.06);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .reports-dashboard .admin-stat-grid>.admin-surface {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(148, 163, 184, 0.1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Shell rail / topbar (dark: canvas color). Light: rely on bg-white on the same node. */
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-bg-canvas {
+  background-color: var(--admin-canvas) !important;
+}
+
+/* Flyouts / menus / panels above card level */
+.admin-theme .admin-bg-elevated {
+  background-color: var(--admin-elevated) !important;
+}
+
+.admin-theme .admin-gemini-shell {
+  position: relative;
+}
+
+.admin-theme .admin-gemini-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(560px 420px at 18% 12%, var(--admin-glow), transparent 70%),
+    radial-gradient(520px 420px at 84% 22%, rgba(var(--admin-primary-rgb), 0.12), transparent 72%);
+  z-index: 0;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-gemini-shell::before {
+  background:
+    radial-gradient(520px 400px at 16% 10%, var(--admin-glow), transparent 72%),
+    radial-gradient(480px 380px at 88% 18%, rgba(var(--admin-primary-rgb), 0.05), transparent 74%);
+}
+
+/* Light Muted Palette preset: soft sage canvas (solid hues, like analytics dashboards) */
+html.admin-dashboard[data-admin-preset="light-muted-palette"] .admin-theme {
+  --admin-soft-bg: #f0f4f2;
+  --admin-soft-alt: #e4ebe7;
+  --admin-glow: rgba(var(--admin-spectrum-1-rgb), 0.12);
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"] .admin-theme .admin-gemini-shell::before {
+  background:
+    radial-gradient(640px 480px at 6% 4%, rgba(var(--admin-spectrum-1-rgb), 0.16), transparent 66%),
+    radial-gradient(520px 400px at 94% 10%, rgba(var(--admin-spectrum-2-rgb), 0.14), transparent 68%),
+    radial-gradient(460px 340px at 88% 92%, rgba(var(--admin-spectrum-3-rgb), 0.1), transparent 70%),
+    radial-gradient(420px 320px at 10% 88%, rgba(var(--admin-spectrum-5-rgb), 0.12), transparent 72%);
+}
+
+html.admin-dashboard[data-admin-theme="dark"][data-admin-preset="light-muted-palette"] .admin-theme {
+  --admin-soft-bg: var(--admin-canvas);
+  --admin-soft-alt: #010409;
+  --admin-glow: rgba(var(--admin-spectrum-1-rgb), 0.08);
+}
+
+html.admin-dashboard[data-admin-theme="dark"][data-admin-preset="light-muted-palette"] .admin-theme .admin-gemini-shell::before {
+  background:
+    radial-gradient(520px 400px at 8% 6%, rgba(var(--admin-spectrum-1-rgb), 0.11), transparent 70%),
+    radial-gradient(480px 360px at 92% 8%, rgba(var(--admin-spectrum-2-rgb), 0.09), transparent 72%),
+    radial-gradient(400px 300px at 85% 90%, rgba(var(--admin-spectrum-4-rgb), 0.08), transparent 74%),
+    radial-gradient(380px 280px at 12% 85%, rgba(var(--admin-spectrum-6-rgb), 0.07), transparent 72%);
+}
+
+/* Global KPI cards across ALL presets & customizer options — ALWAYS preserve the top colored stripe ("ឆូត") */
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(1) {
+  --admin-kpi-accent: var(--admin-spectrum-1, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-1-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(2) {
+  --admin-kpi-accent: var(--admin-spectrum-2, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-2-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(3) {
+  --admin-kpi-accent: var(--admin-spectrum-3, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-3-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(4) {
+  --admin-kpi-accent: var(--admin-spectrum-4, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-4-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(5) {
+  --admin-kpi-accent: var(--admin-spectrum-5, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-5-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(6) {
+  --admin-kpi-accent: var(--admin-spectrum-6, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-6-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(7) {
+  --admin-kpi-accent: var(--admin-spectrum-7, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-7-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(8) {
+  --admin-kpi-accent: var(--admin-spectrum-1, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-1-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(9) {
+  --admin-kpi-accent: var(--admin-spectrum-2, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-2-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(10) {
+  --admin-kpi-accent: var(--admin-spectrum-3, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-3-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(11) {
+  --admin-kpi-accent: var(--admin-spectrum-4, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-4-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid> :nth-child(12) {
+  --admin-kpi-accent: var(--admin-spectrum-5, var(--admin-primary));
+  --admin-kpi-accent-rgb: var(--admin-spectrum-5-rgb, var(--admin-primary-rgb));
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid .admin-stat-icon {
+  background-color: rgba(var(--admin-kpi-accent-rgb, var(--admin-primary-rgb)), 0.14) !important;
+  color: var(--admin-kpi-accent, var(--admin-primary)) !important;
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid .admin-spectrum-kpi,
+html.admin-dashboard .admin-theme .admin-spectrum-kpi {
+  border-top: 3px solid var(--admin-kpi-accent, var(--admin-primary)) !important;
+}
+
+html.admin-dashboard .admin-theme .admin-stat-grid .admin-spectrum-icon {
+  background: var(--admin-kpi-accent, var(--admin-primary)) !important;
+  color: #fff !important;
+}
+
+/* Global KPI card top border & background gradient (Light & Dark) */
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme .admin-spectrum-kpi {
+  background-image: linear-gradient(145deg,
+      #ffffff 0%,
+      rgba(var(--admin-kpi-accent-rgb, var(--admin-primary-rgb)), 0.07) 100%) !important;
+  border-top: 3px solid var(--admin-kpi-accent, var(--admin-primary)) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-spectrum-kpi {
+  background-image: linear-gradient(145deg,
+      rgba(15, 23, 42, 0.95) 0%,
+      rgba(var(--admin-kpi-accent-rgb, var(--admin-primary-rgb)), 0.12) 100%) !important;
+  border-top: 3px solid var(--admin-kpi-accent, var(--admin-primary)) !important;
+}
+
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme .admin-sidebar {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme aside .border-slate-200,
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme header .border-slate-200 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Table headers & dividers in Light mode — crisp visible rows ("border ឆូតៗ តូច") */
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme table thead tr {
+  border-bottom: 1px solid #cbd5e1 !important;
+  background-color: #f8fafc !important;
+}
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme table thead th {
+  border-bottom: 1px solid #cbd5e1 !important;
+  color: #64748b !important;
+}
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme table tbody tr {
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme table tbody td {
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+html.admin-dashboard:not([data-admin-theme="dark"]) .admin-theme table tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+/* Table headers & dividers in Dark mode — crisp visible rows ("border ឆូតៗ តូច") */
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme table thead tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25) !important;
+  background-color: rgba(15, 23, 42, 0.75) !important;
+}
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme table thead th {
+  color: #94a3b8 !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme table tbody tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme table tbody td {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme table tbody tr:hover {
+  background-color: rgba(148, 163, 184, 0.08) !important;
+}
+
+/* Card and container boundary borders in Dark mode */
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .border-slate-800,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .border-slate-700,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-border {
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+/* High contrast safeguards for buttons with primary background */
+html.admin-dashboard .admin-theme button.bg-primary,
+html.admin-dashboard .admin-theme .bg-\[color\:var\(--admin-primary\)\],
+html.admin-dashboard .admin-theme .bg-\[var\(--admin-primary\)\] {
+  color: #ffffff !important;
+}
+html.admin-dashboard .admin-theme button.bg-primary svg,
+html.admin-dashboard .admin-theme .bg-\[color\:var\(--admin-primary\)\] svg,
+html.admin-dashboard .admin-theme .bg-\[var\(--admin-primary\)\] svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-slate-50,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-slate-50\/90,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-slate-100 {
+  background-color: #f8fafc !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .text-slate-600 {
+  color: #475569 !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .text-slate-500 {
+  color: #64748b !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .text-slate-900 {
+  color: #0f172a !important;
+}
+
+/* Status badges — Dasher-style muted pills (orders, inventory, reports, …) */
+html.admin-dashboard[data-admin-preset="light-muted-palette"] .admin-theme .admin-badge {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-blue-100,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-sky-100 {
+  background-color: var(--admin-status-info-bg) !important;
+  color: var(--admin-status-info) !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-amber-100,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-yellow-100,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-orange-100 {
+  background-color: var(--admin-status-warning-bg) !important;
+  color: var(--admin-status-warning) !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-red-100,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-rose-100 {
+  background-color: var(--admin-status-danger-bg) !important;
+  color: var(--admin-status-danger) !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-green-100,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme .bg-emerald-100 {
+  background-color: var(--admin-status-success-bg) !important;
+  color: var(--admin-status-success) !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme input:not([type="checkbox"]):not([type="radio"]),
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme textarea,
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme select {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme [role="dialog"],
+html.admin-dashboard[data-admin-preset="light-muted-palette"]:not([data-admin-theme="dark"]) .admin-theme [data-radix-popper-content-wrapper]>* {
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1) !important;
+}
+
+/* Utility: hide scrollbar but keep scroll functionality */
+.scrollbar-hide,
+.fs-no-scrollbar,
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar,
+.fs-no-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scrollable panels: same thin blue bar as page (admin sidebar, modals, lists) */
+.fs-scrollbar,
+.scrollbar-hover {
+  scrollbar-width: thin;
+  scrollbar-color: var(--fs-scrollbar-thumb) var(--fs-scrollbar-track);
+  -ms-overflow-style: auto;
+}
+
+.fs-scrollbar::-webkit-scrollbar,
+.scrollbar-hover::-webkit-scrollbar {
+  width: var(--fs-scrollbar-size);
+  height: var(--fs-scrollbar-size);
+}
+
+.fs-scrollbar::-webkit-scrollbar-track,
+.scrollbar-hover::-webkit-scrollbar-track {
+  background: var(--fs-scrollbar-track);
+  border-radius: 9999px;
+}
+
+.fs-scrollbar::-webkit-scrollbar-thumb,
+.scrollbar-hover::-webkit-scrollbar-thumb {
+  background-color: var(--fs-scrollbar-thumb);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.fs-scrollbar::-webkit-scrollbar-thumb:hover,
+.scrollbar-hover::-webkit-scrollbar-thumb:hover {
+  background-color: var(--fs-scrollbar-thumb-hover);
+}
+
+/*
+  Login / register: standard international corner radii (modal > controls > tabs).
+  Uses --fs-radius-md (14px) for the shell, --fs-radius-sm (10px) for fields/buttons.
+*/
+.auth-dialog-shell {
+  border-radius: var(--fs-radius-md);
+}
+
+.auth-dialog-shell .auth-dialog-control,
+.auth-dialog-shell input:not([type="checkbox"]):not([type="radio"]),
+.auth-dialog-shell select,
+.auth-dialog-shell textarea {
+  border-radius: var(--fs-radius-sm);
+}
+
+.auth-dialog-shell .auth-dialog-tabs {
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  height: auto;
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.auth-dialog-shell .auth-dialog-tab {
+  border-radius: 0;
+  flex: 1;
+  padding: 0.875rem 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.45);
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+.auth-dialog-shell .auth-dialog-tab:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.auth-dialog-shell .auth-dialog-tab[data-state="active"] {
+  color: #ffffff;
+  font-weight: 700;
+  border-bottom-color: #ffffff;
+  background: transparent !important;
+}
+
+.auth-dialog-shell .auth-dialog-notice {
+  border-radius: var(--fs-radius-sm);
+}
+
+/*
+  Login / register: scroll the full viewport (Zandokh-style thin blue bar at the
+  browser edge), not a scrollbar inside the white modal panel.
+*/
+.dialog-viewport-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--fs-scrollbar-thumb) var(--fs-scrollbar-track);
+}
+
+.dialog-viewport-scroll::-webkit-scrollbar {
+  width: var(--fs-scrollbar-size);
+  height: var(--fs-scrollbar-size);
+}
+
+.dialog-viewport-scroll::-webkit-scrollbar-track {
+  background: var(--fs-scrollbar-track);
+  border-radius: 9999px;
+}
+
+.dialog-viewport-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--fs-scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+.dialog-viewport-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--fs-scrollbar-thumb-hover);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .fs-scrollbar,
+html.admin-dashboard[data-admin-theme="dark"] .scrollbar-hover,
+html.admin-dashboard[data-admin-theme="dark"] .dialog-viewport-scroll {
+  scrollbar-color: #60a5fa rgba(59, 130, 246, 0.18);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .fs-scrollbar::-webkit-scrollbar-track,
+html.admin-dashboard[data-admin-theme="dark"] .scrollbar-hover::-webkit-scrollbar-track,
+html.admin-dashboard[data-admin-theme="dark"] .dialog-viewport-scroll::-webkit-scrollbar-track {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .fs-scrollbar::-webkit-scrollbar-thumb,
+html.admin-dashboard[data-admin-theme="dark"] .scrollbar-hover::-webkit-scrollbar-thumb,
+html.admin-dashboard[data-admin-theme="dark"] .dialog-viewport-scroll::-webkit-scrollbar-thumb {
+  background-color: #60a5fa;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .fs-scrollbar::-webkit-scrollbar-thumb:hover,
+html.admin-dashboard[data-admin-theme="dark"] .scrollbar-hover::-webkit-scrollbar-thumb:hover,
+html.admin-dashboard[data-admin-theme="dark"] .dialog-viewport-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #3b82f6;
+}
+
+/* ─── Admin dashboard: clip-path ring loader (scoped — not used on storefront) ─── */
+@keyframes fs-admin-loader-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fs-admin-loader-prix {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0);
+  }
+
+  25% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0);
+  }
+
+  50% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%);
+  }
+
+  75% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
+  }
+
+  100% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0);
+  }
+}
+
+html.admin-dashboard .admin-dashboard-loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  position: relative;
+  box-sizing: border-box;
+  display: block;
+  animation: fs-admin-loader-rotate 1s linear infinite;
+}
+
+html.admin-dashboard .admin-dashboard-loader::before,
+html.admin-dashboard .admin-dashboard-loader::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 5px solid #e2e8f0;
+  animation: fs-admin-loader-prix 2s linear infinite;
+}
+
+html.admin-dashboard .admin-dashboard-loader::after {
+  border-color: var(--admin-primary, #6b7e73);
+  animation:
+    fs-admin-loader-prix 2s linear infinite,
+    fs-admin-loader-rotate 0.5s linear infinite reverse;
+  inset: 6px;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-dashboard-loader::before {
+  border-color: #30363d;
+}
+
+/* Admin page modals: keep overlay on main content; de-emphasize sidebar (no focus) */
+html.admin-dashboard[data-admin-modal] .admin-sidebar {
+  pointer-events: none;
+  user-select: none;
+  filter: blur(5px);
+  opacity: 0.35;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+/* ================================================================
+   STOREFRONT DARK MODE
+   Activated by: html[data-storefront-theme="dark"]
+   Layout scope: .fs-site (SiteLayout root wrapper)
+   Mirrors the GitHub-style dark palette used in the admin dashboard.
+   ================================================================ */
+
+/* -- 1. Root CSS variable overrides ------------------------------ */
+html[data-storefront-theme="dark"] {
+  --fs-bg: 13 17 23;
+  --fs-fg: 240 246 252;
+  --fs-muted: 139 148 158;
+  --fs-border: 48 54 61;
+  color-scheme: dark;
+}
+
+/* -- 2. Skeleton shimmer ----------------------------------------- */
+html[data-storefront-theme="dark"] .fs-skeleton-block {
+  background: linear-gradient(90deg, #1f2937 25%, #111827 50%, #1f2937 75%);
+  background-size: 200% 100%;
+}
+
+/* -- 3. Site canvas ------------------------------------------------ */
+html[data-storefront-theme="dark"] .fs-site {
+  background-color: rgb(13 17 23);
+  color: rgb(240 246 252);
+}
+
+/* -- 4. White backgrounds → dark card surface --------------------- */
+/* Match exact bg-white token only (not opacity variants like bg-white/95) */
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white"] {
+  background-color: #161b22 !important;
+}
+
+/* Responsive prefix variants */
+html[data-storefront-theme="dark"] .fs-site [class~="sm:bg-white"],
+html[data-storefront-theme="dark"] .fs-site [class~="md:bg-white"],
+html[data-storefront-theme="dark"] .fs-site [class~="lg:bg-white"] {
+  background-color: #161b22 !important;
+}
+
+/* hover:bg-white → dark elevated */
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-white"]:hover {
+  background-color: #21262d !important;
+}
+
+/* -- 5. Light gray backgrounds ------------------------------------ */
+/* Use ~= (word) for exact -50 match AND *="bg-*-50/" for opacity variants.
+   This avoids matching -500, -50/80 → -500 false positive is prevented
+   because "bg-slate-50/" is NOT a substring of "bg-slate-500". */
+html[data-storefront-theme="dark"] .fs-site [class~="bg-slate-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-slate-50\/"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-gray-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gray-50\/"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-neutral-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-neutral-50\/"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-zinc-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-zinc-50\/"] {
+  background-color: #0d1117 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="bg-slate-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gray-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-zinc-100"] {
+  background-color: #21262d !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="bg-slate-200"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gray-200"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-zinc-200"] {
+  background-color: #30363d !important;
+}
+
+/* Hover light gray → subtle elevated */
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-zinc-50"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:bg-zinc-50\/"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-zinc-100"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-slate-50"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:bg-slate-50\/"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-slate-100"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-gray-50"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:bg-gray-50\/"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-gray-100"]:hover {
+  background-color: rgba(240, 246, 252, 0.06) !important;
+}
+
+/* group-hover variants */
+html[data-storefront-theme="dark"] .fs-site .group:hover [class~="group-hover:bg-zinc-50"],
+html[data-storefront-theme="dark"] .fs-site .group:hover [class*="group-hover:bg-zinc-50\/"],
+html[data-storefront-theme="dark"] .fs-site .group:hover [class~="group-hover:bg-zinc-100"],
+html[data-storefront-theme="dark"] .fs-site .group:hover [class~="group-hover:bg-slate-50"],
+html[data-storefront-theme="dark"] .fs-site .group:hover [class*="group-hover:bg-slate-50\/"] {
+  background-color: rgba(240, 246, 252, 0.06) !important;
+}
+
+/* -- 6. Mobile bottom nav gradient (from-white → from dark) ------- */
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient-to-t"][class*="from-white"] {
+  background-image: linear-gradient(to top, #0d1117, rgba(13, 17, 23, 0.96), rgba(13, 17, 23, 0.8)) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient-to-b"][class*="from-white"] {
+  background-image: linear-gradient(to bottom, #0d1117, rgba(13, 17, 23, 0.96), rgba(13, 17, 23, 0.8)) !important;
+}
+
+/* -- 7. Dark text colors → light ---------------------------------- */
+html[data-storefront-theme="dark"] .fs-site [class~="text-black"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-slate-900"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-zinc-900"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-gray-900"] {
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="text-slate-800"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-zinc-800"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-gray-800"] {
+  color: #e6edf3 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="text-slate-700"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-zinc-700"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-gray-700"] {
+  color: #c9d1d9 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="text-slate-600"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-zinc-600"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-gray-600"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-slate-500"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-zinc-500"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-gray-500"] {
+  color: #8b949e !important;
+}
+
+/* hover:text overrides */
+html[data-storefront-theme="dark"] .fs-site [class*="hover:text-zinc-900"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:text-slate-900"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:text-black"]:hover {
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="hover:text-zinc-700"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:text-slate-700"]:hover {
+  color: #c9d1d9 !important;
+}
+
+/* group-hover text */
+html[data-storefront-theme="dark"] .fs-site .group:hover [class*="group-hover:text-zinc-900"],
+html[data-storefront-theme="dark"] .fs-site .group:hover [class*="group-hover:text-slate-900"] {
+  color: #f0f6fc !important;
+}
+
+/* -- 8. Borders ---------------------------------------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="border-slate-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-slate-200"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-zinc-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-zinc-200"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-gray-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-gray-200"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-neutral-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-neutral-200"] {
+  border-color: #30363d !important;
+}
+
+/* -- 9. Shadows ---------------------------------------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="shadow-2xl"],
+html[data-storefront-theme="dark"] .fs-site [class*="shadow-xl"] {
+  box-shadow: 0 12px 48px rgba(1, 4, 9, 0.6) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="shadow-lg"] {
+  box-shadow: 0 10px 36px rgba(1, 4, 9, 0.45) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="shadow-md"],
+html[data-storefront-theme="dark"] .fs-site [class*="shadow-sm"] {
+  box-shadow: 0 2px 10px rgba(1, 4, 9, 0.35) !important;
+}
+
+/* -- 10. Form inputs ----------------------------------------------- */
+html[data-storefront-theme="dark"] .fs-site input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-storefront-theme="dark"] .fs-site textarea,
+html[data-storefront-theme="dark"] .fs-site select {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site input::placeholder,
+html[data-storefront-theme="dark"] .fs-site textarea::placeholder {
+  color: #8b949e !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site input:focus,
+html[data-storefront-theme="dark"] .fs-site textarea:focus,
+html[data-storefront-theme="dark"] .fs-site select:focus {
+  border-color: #58a6ff !important;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15) !important;
+}
+
+/* -- 11. Custom fs-* components ----------------------------------- */
+html[data-storefront-theme="dark"] .fs-site .fs-input {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-input::placeholder {
+  color: #8b949e !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-input:focus {
+  border-color: #58a6ff !important;
+  box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.12) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-card {
+  background: #161b22 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-pill {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #c9d1d9 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-iconbtn {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #c9d1d9 !important;
+  box-shadow: 0 2px 8px rgba(1, 4, 9, 0.3) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-btn-secondary {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-btn-outline {
+  border-color: #30363d !important;
+  color: #c9d1d9 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-btn-ghost {
+  color: #c9d1d9;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-btn-ghost:hover {
+  background: rgba(240, 246, 252, 0.06);
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-btn-icon {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #c9d1d9 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-menu-item {
+  color: #8b949e;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-menu-item:hover {
+  color: #f0f6fc;
+  background: rgba(240, 246, 252, 0.06);
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-label {
+  color: #8b949e !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-helper {
+  color: #8b949e !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-error {
+  background: rgba(244, 63, 94, 0.1) !important;
+  border-color: rgba(244, 63, 94, 0.25) !important;
+  color: #f87171 !important;
+}
+
+/* -- 12. Badge ring – dark background ring instead of white ------- */
+html[data-storefront-theme="dark"] .fs-site .fs-header-badge {
+  box-shadow: 0 0 0 2px #161b22, 0 4px 10px -2px rgba(0, 0, 0, 0.5);
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-header-badge-accent {
+  box-shadow: 0 0 0 2px #161b22, 0 4px 12px -2px rgba(244, 63, 94, 0.55);
+}
+
+/* -- 13. Avatar status dot ring ------------------------------------ */
+html[data-storefront-theme="dark"] .fs-site .fs-avatar-ring__status {
+  border-color: #0d1117;
+}
+
+/* -- 14. Mobile bottom nav active indicator ----------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="bg-zinc-900"][class*="text-white"][class*="border-zinc-900"] {
+  background-color: #58a6ff !important;
+  border-color: #58a6ff !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="text-zinc-900"][class*="hover:text-zinc-900"] {
+  color: #f0f6fc !important;
+}
+
+/* -- 15. Divider lines -------------------------------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="divide-slate-100"]>*+*,
+html[data-storefront-theme="dark"] .fs-site [class*="divide-slate-200"]>*+*,
+html[data-storefront-theme="dark"] .fs-site [class*="divide-zinc-100"]>*+*,
+html[data-storefront-theme="dark"] .fs-site [class*="divide-zinc-200"]>*+* {
+  border-color: #30363d !important;
+}
+
+/* -- 16. Topbar bar ------------------------------------------------ */
+html[data-storefront-theme="dark"] .fs-site .border-b.border-zinc-200.bg-white,
+html[data-storefront-theme="dark"] .fs-site .border-b.border-zinc-200 {
+  border-color: #30363d !important;
+}
+
+/* -- 17. Transition for smooth mode switch ------------------------- */
+html[data-storefront-theme="dark"] .fs-site,
+html[data-storefront-theme="dark"] .fs-site * {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 180ms ease,
+    box-shadow 220ms ease !important;
+}
+
+/* Disable transition on images and SVGs (avoid color flash artifacts) */
+html[data-storefront-theme="dark"] .fs-site img,
+html[data-storefront-theme="dark"] .fs-site svg {
+  transition: none !important;
+}
+
+/* -- 18. Alert / toast colors ------------------------------------ */
+/* IMPORTANT: use ~= (exact word token) not *= (substring) to avoid
+   matching -500 variants — e.g. "bg-amber-50" is a substring of
+   "bg-amber-500", so *= would incorrectly wipe vivid badge colors. */
+html[data-storefront-theme="dark"] .fs-site [class~="bg-green-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-green-100"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-emerald-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-emerald-100"] {
+  background-color: rgba(16, 163, 127, 0.12) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class~="bg-red-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-red-100"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-rose-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-rose-100"] {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class~="bg-yellow-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-yellow-100"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-amber-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-amber-100"] {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class~="bg-blue-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-blue-100"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-indigo-50"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-indigo-100"] {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+}
+
+/* -- 19. Smooth light ↔ dark transition on body ------------------- */
+html[data-storefront-theme="dark"] body,
+html:not([data-storefront-theme]) body {
+  transition: background-color 250ms ease, color 200ms ease;
+}
+
+/* -- 20. Page wrapper gradient backgrounds (min-h-screen) ----------
+   Most pages use `min-h-screen bg-gradient-to-br from-slate-50 to-slate-100`
+   as their outermost div. Eliminate the gradient and apply dark canvas. */
+html[data-storefront-theme="dark"] .fs-site [class*="min-h-screen"] {
+  background-color: rgb(13 17 23) !important;
+  background-image: none !important;
+}
+
+/* -- 21. Gradient from-* / to-* CSS variable overrides -------------
+   Covers inline gradient sections: card headers, search rows, filter bars. */
+html[data-storefront-theme="dark"] .fs-site [class*="from-slate-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="from-slate-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="from-gray-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="from-gray-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="from-zinc-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="from-zinc-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="from-neutral-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="from-neutral-100"] {
+  --tw-gradient-from: #161b22 !important;
+  --tw-gradient-to: rgb(22 27 34 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="to-slate-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="to-slate-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="to-gray-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="to-gray-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="to-zinc-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="to-zinc-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="to-neutral-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="to-neutral-100"] {
+  --tw-gradient-to: #0d1117 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class*="via-slate-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="via-slate-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="via-gray-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="via-gray-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="via-zinc-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="via-zinc-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="via-white\/"] {
+  --tw-gradient-stops: var(--tw-gradient-from), rgba(13, 17, 23, 0.92) var(--tw-gradient-via-position, 50%), var(--tw-gradient-to) !important;
+}
+
+/* -- 22. Medium gray borders (300-level) not covered above --------- */
+html[data-storefront-theme="dark"] .fs-site [class*="border-slate-300"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-zinc-300"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-gray-300"],
+html[data-storefront-theme="dark"] .fs-site [class*="border-neutral-300"] {
+  border-color: #30363d !important;
+}
+
+/* -- 23. Lighter muted text (400-level) ---------------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="text-slate-400"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-zinc-400"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-gray-400"],
+html[data-storefront-theme="dark"] .fs-site [class*="text-neutral-400"] {
+  color: #6e7681 !important;
+}
+
+/* -- 24. Medium gray background (300-level) ----------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="bg-slate-300"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-zinc-300"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gray-300"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-neutral-300"] {
+  background-color: #30363d !important;
+}
+
+/* Hover 300-level */
+html[data-storefront-theme="dark"] .fs-site [class*="hover:bg-slate-300"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:bg-zinc-300"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class*="hover:bg-gray-300"]:hover {
+  background-color: #30363d !important;
+}
+
+/* -- 25. Dark-colored backgrounds that should stay dark ------------ */
+html[data-storefront-theme="dark"] .fs-site [class*="bg-slate-800"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-slate-900"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-zinc-800"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-zinc-900"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gray-800"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gray-900"] {
+  background-color: #21262d !important;
+}
+
+/* -- 26. Inline bg-gradient-to-* with white via stop -------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient"][class*="from-slate-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient"][class*="from-gray-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient"][class*="from-zinc-50"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient"][class*="from-slate-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient"][class*="from-gray-100"],
+html[data-storefront-theme="dark"] .fs-site [class*="bg-gradient"][class*="from-zinc-100"] {
+  background-color: #161b22 !important;
+  background-image: none !important;
+}
+
+/* -- 27. Divide (border between children) 300-level --------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="divide-slate-300"]>*+*,
+html[data-storefront-theme="dark"] .fs-site [class*="divide-zinc-300"]>*+*,
+html[data-storefront-theme="dark"] .fs-site [class*="divide-gray-300"]>*+* {
+  border-color: #30363d !important;
+}
+
+/* -- 28. Ring colors (focus/active ring) -------------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="ring-slate-200"],
+html[data-storefront-theme="dark"] .fs-site [class*="ring-zinc-200"],
+html[data-storefront-theme="dark"] .fs-site [class*="ring-gray-200"] {
+  --tw-ring-color: #30363d !important;
+}
+
+/* -- 29. Placeholder text color ----------------------------------- */
+html[data-storefront-theme="dark"] .fs-site [class*="placeholder-slate"],
+html[data-storefront-theme="dark"] .fs-site [class*="placeholder-zinc"],
+html[data-storefront-theme="dark"] .fs-site [class*="placeholder-gray"] {
+  color: #8b949e !important;
+}
+
+/* -- 28. Semantic status colors — alert banners & badges ----------
+   Tailwind dark: classes are scoped to admin-only (see tailwind.config.js).
+   Storefront must override semantic color shades via data-storefront-theme.
+   Only targeting storefront pages (non-admin prefix). */
+
+/* Amber / warning */
+html[data-storefront-theme="dark"] .fs-site [class~="text-amber-950"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-amber-900"] {
+  color: #fbbf24 !important;
+  /* amber-400 */
+}
+
+html[data-storefront-theme="dark"] .fs-site [class~="text-amber-800"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-amber-700"] {
+  color: #f59e0b !important;
+  /* amber-500 */
+}
+
+/* Emerald / success */
+html[data-storefront-theme="dark"] .fs-site [class~="text-emerald-900"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-emerald-800"] {
+  color: #6ee7b7 !important;
+  /* emerald-300 */
+}
+
+/* Green / success */
+html[data-storefront-theme="dark"] .fs-site [class~="text-green-900"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-green-800"] {
+  color: #86efac !important;
+  /* green-300 */
+}
+
+/* Red / error */
+html[data-storefront-theme="dark"] .fs-site [class~="text-red-900"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-red-800"] {
+  color: #fca5a5 !important;
+  /* red-300 */
+}
+
+/* Blue / info */
+html[data-storefront-theme="dark"] .fs-site [class~="text-blue-900"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-blue-800"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-blue-700"] {
+  color: #93c5fd !important;
+  /* blue-300 */
+}
+
+/* Emerald / green dark shades — add 700 */
+html[data-storefront-theme="dark"] .fs-site [class~="text-emerald-700"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-green-700"] {
+  color: #a7f3d0 !important;
+  /* emerald/green-200 */
+}
+
+/* Red dark shades — add 700 */
+html[data-storefront-theme="dark"] .fs-site [class~="text-red-700"] {
+  color: #fca5a5 !important;
+  /* red-300 */
+}
+
+/* Teal / brand accent used in storefront */
+html[data-storefront-theme="dark"] .fs-site [class~="text-teal-900"],
+html[data-storefront-theme="dark"] .fs-site [class~="text-teal-800"] {
+  color: #5eead4 !important;
+  /* teal-300 */
+}
+
+/* -- 29. Semantic border colors for alert containers -------------- */
+html[data-storefront-theme="dark"] .fs-site [class~="border-emerald-200"],
+html[data-storefront-theme="dark"] .fs-site [class~="border-emerald-200\/80"],
+html[data-storefront-theme="dark"] .fs-site [class~="border-emerald-300"] {
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site [class~="border-amber-200"],
+html[data-storefront-theme="dark"] .fs-site [class~="border-amber-200\/80"],
+html[data-storefront-theme="dark"] .fs-site [class~="border-amber-300"],
+html[data-storefront-theme="dark"] .fs-site [class~="border-amber-300\/80"] {
+  border-color: rgba(217, 119, 6, 0.4) !important;
+}
+
+/* -- 30. High-opacity white variants → dark card surface ----------
+   bg-white/95, /90, /80, /98 are used on product card hover buttons,
+   gallery arrows, search modal, promo slider nav — they must be dark.
+   Low-opacity variants (bg-white/10, /15, /20) are glass effects on
+   colored headers and must NOT be overridden. */
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/95"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/90"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/85"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/80"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/70"],
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/98"] {
+  background-color: rgba(22, 27, 34, 0.97) !important;
+}
+
+/* focus-within:bg-white — SmartSearchModal input wrapper flashes white on focus */
+html[data-storefront-theme="dark"] .fs-site [class~="focus-within:bg-white"]:focus-within {
+  background-color: #21262d !important;
+}
+
+/* focus:bg-white — any input/element that transitions to white on focus */
+html[data-storefront-theme="dark"] .fs-site [class~="focus:bg-white"]:focus {
+  background-color: #21262d !important;
+  color: #f0f6fc !important;
+}
+
+/* hover:bg-white/XX — high-opacity white hover states (e.g. promo slider arrows) */
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-white\/98"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-white\/95"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-white\/90"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-white\/85"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-white\/80"]:hover,
+html[data-storefront-theme="dark"] .fs-site [class~="hover:bg-white\/70"]:hover {
+  background-color: rgba(33, 38, 45, 0.97) !important;
+}
+
+/* -- 31. Icon color for hover-reveal buttons ----------------------
+   Buttons that appear on hover (product card wishlist, gallery arrows)
+   inherit light text from .fs-site, which makes them visible on dark
+   card backgrounds — no extra rule needed. But ensure text-zinc-800
+   on these glass buttons becomes light. */
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/95"] *,
+html[data-storefront-theme="dark"] .fs-site [class~="bg-white\/90"] * {
+  color: inherit;
+}
+
+/* ================================================================
+   STOREFRONT DARK MODE — PORTAL / GLOBAL SCOPE
+   For elements rendered via createPortal (outside .fs-site):
+   zoom modals, sweetalert2 dialogs, etc.
+   Safe because data-storefront-theme is NEVER set on admin routes.
+   ================================================================ */
+
+html[data-storefront-theme="dark"] [class~="bg-white"] {
+  background-color: #161b22 !important;
+}
+
+/* High-opacity white variants in portal scope */
+html[data-storefront-theme="dark"] [class~="bg-white\/95"],
+html[data-storefront-theme="dark"] [class~="bg-white\/90"],
+html[data-storefront-theme="dark"] [class~="bg-white\/85"],
+html[data-storefront-theme="dark"] [class~="bg-white\/80"],
+html[data-storefront-theme="dark"] [class~="bg-white\/70"],
+html[data-storefront-theme="dark"] [class~="bg-white\/98"] {
+  background-color: rgba(22, 27, 34, 0.97) !important;
+}
+
+html[data-storefront-theme="dark"] [class~="focus-within:bg-white"]:focus-within {
+  background-color: #21262d !important;
+}
+
+html[data-storefront-theme="dark"] [class~="focus:bg-white"]:focus {
+  background-color: #21262d !important;
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] [class~="bg-slate-50"],
+html[data-storefront-theme="dark"] [class*="bg-slate-50\/"],
+html[data-storefront-theme="dark"] [class~="bg-gray-50"],
+html[data-storefront-theme="dark"] [class*="bg-gray-50\/"],
+html[data-storefront-theme="dark"] [class~="bg-zinc-50"],
+html[data-storefront-theme="dark"] [class*="bg-zinc-50\/"] {
+  background-color: #0d1117 !important;
+}
+
+html[data-storefront-theme="dark"] [class*="bg-slate-100"],
+html[data-storefront-theme="dark"] [class*="bg-gray-100"],
+html[data-storefront-theme="dark"] [class*="bg-zinc-100"] {
+  background-color: #21262d !important;
+}
+
+html[data-storefront-theme="dark"] [class*="text-slate-900"],
+html[data-storefront-theme="dark"] [class*="text-zinc-900"],
+html[data-storefront-theme="dark"] [class*="text-gray-900"] {
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] [class*="text-slate-800"],
+html[data-storefront-theme="dark"] [class*="text-zinc-800"],
+html[data-storefront-theme="dark"] [class*="text-gray-800"] {
+  color: #e6edf3 !important;
+}
+
+html[data-storefront-theme="dark"] [class*="text-slate-700"],
+html[data-storefront-theme="dark"] [class*="text-zinc-700"],
+html[data-storefront-theme="dark"] [class*="text-gray-700"] {
+  color: #c9d1d9 !important;
+}
+
+html[data-storefront-theme="dark"] [class*="text-slate-600"],
+html[data-storefront-theme="dark"] [class*="text-zinc-600"],
+html[data-storefront-theme="dark"] [class*="text-gray-600"],
+html[data-storefront-theme="dark"] [class*="text-slate-500"],
+html[data-storefront-theme="dark"] [class*="text-zinc-500"],
+html[data-storefront-theme="dark"] [class*="text-gray-500"] {
+  color: #8b949e !important;
+}
+
+html[data-storefront-theme="dark"] [class*="border-slate-100"],
+html[data-storefront-theme="dark"] [class*="border-slate-200"],
+html[data-storefront-theme="dark"] [class*="border-zinc-100"],
+html[data-storefront-theme="dark"] [class*="border-zinc-200"],
+html[data-storefront-theme="dark"] [class*="border-gray-100"],
+html[data-storefront-theme="dark"] [class*="border-gray-200"] {
+  border-color: #30363d !important;
+}
+
+/* Portal inputs */
+html[data-storefront-theme="dark"] [class*="shadow-2xl"][class~="bg-white"],
+html[data-storefront-theme="dark"] [class*="shadow-xl"][class~="bg-white"] {
+  background-color: #161b22 !important;
+  box-shadow: 0 12px 48px rgba(1, 4, 9, 0.6) !important;
+}
+
+/* Customer profile page: explicit dark-mode hooks for address cards */
+html[data-storefront-theme="dark"] .fs-site .fs-customer-profile .fs-profile-address-card {
+  background-color: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-customer-profile .fs-profile-address-card--default {
+  background-color: #1f2a23 !important;
+  border-color: #3f5a4d !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-customer-profile .fs-profile-address-default-badge {
+  background-color: #4f7d67 !important;
+  color: #f0f6fc !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-customer-profile .fs-profile-address-text {
+  color: #d0d7de !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-customer-profile .fs-profile-address-link {
+  color: #9ecbb6 !important;
+}
+
+html[data-storefront-theme="dark"] .fs-site .fs-customer-profile .fs-profile-address-link:hover {
+  color: #b8decc !important;
+}

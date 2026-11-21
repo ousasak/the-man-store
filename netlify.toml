@@ -1,0 +1,17 @@
+# The Man Store Netlify Configuration
+# Netlify site should build the Vite app (do not publish stale committed frontend/dist).
+[build]
+  base = "frontend"
+  command = "npm ci && npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://fitandsleek-official-v2-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
