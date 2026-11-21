@@ -6,7 +6,6 @@ import '../../core/api_client.dart';
 import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/admin_service.dart';
-import '../../theme/admin_theme.dart';
 import '../../widgets/admin/admin_ui_kit.dart';
 
 class AdminProfileEditScreen extends StatefulWidget {

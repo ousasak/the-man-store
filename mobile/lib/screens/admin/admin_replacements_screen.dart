@@ -99,15 +99,16 @@ class _AdminReplacementsScreenState extends State<AdminReplacementsScreen> {
         );
       },
     );
-    if (notes == null || notes.isEmpty) return;
+    if (!mounted || notes == null || notes.isEmpty) return;
+    final api = context.read<ApiClient>();
     try {
-      await AdminService(context.read<ApiClient>()).rejectReplacement(row.id, notes: notes);
+      await AdminService(api).rejectReplacement(row.id, notes: notes);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Replacement rejected')));
       _load(reset: true);
     } on DioException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.read<ApiClient>().apiMessage(e))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(api.apiMessage(e))));
     }
   }
 

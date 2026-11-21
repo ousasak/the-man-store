@@ -68,7 +68,7 @@ Future<void> main() async {
   }
 
   runApp(
-    The Man StoreApp(
+    TheManStoreApp(
       apiClient: apiClient,
       authProvider: authProvider,
       appSettingsProvider: appSettingsProvider,

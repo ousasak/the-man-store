@@ -375,7 +375,7 @@ class StorefrontL10n {
 
   // Misc
   String get shopTitle => _t('Shop', 'ហាង');
-  String get footerBrand => 'The Man Store · Cambodia Fashion App';
+  String get footerBrand => 'The Man Store · Premier Shopping App';
   String get clear => _t('Clear', 'លុប');
   String get noProductsFound => _t('No products found', 'រកមិនឃើញផលិតផល');
   String get searchUnavailable => _t('Search unavailable', 'មិនអាចស្វែងរកបាន');

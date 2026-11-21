@@ -21,8 +21,8 @@ import 'services/telegram_service.dart';
 import 'services/wishlist_service.dart';
 import 'theme/app_theme.dart';
 
-class The Man StoreApp extends StatelessWidget {
-  const The Man StoreApp({
+class TheManStoreApp extends StatelessWidget {
+  const TheManStoreApp({
     super.key,
     required this.apiClient,
     required this.authProvider,

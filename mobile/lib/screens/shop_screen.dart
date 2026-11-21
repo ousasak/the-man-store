@@ -53,11 +53,9 @@ class ShopScreenState extends State<ShopScreen> {
   List<BrandModel> _brands = [];
   bool _bannersLoading = true;
   int? _selectedBrandId;
-  String? _selectedBrandName;
   bool _filterByCategoryId = false;
   ProductFilters _filters = ProductFilters();
   FilterOptionsModel? _filterOptions;
-  int? _totalProducts;
   HomeSectionBrowse? _sectionBrowse;
 
   List<HomepageSectionData> _homeSections = [];
@@ -150,7 +148,6 @@ class ShopScreenState extends State<ShopScreen> {
         _filters.sort = 'recommend';
       }
       _selectedBrandId = null;
-      _selectedBrandName = browse.title;
     });
     _loadProducts(reset: true);
   }
@@ -211,7 +208,6 @@ class ShopScreenState extends State<ShopScreen> {
       if (_filterByCategoryId && !widget.isHomeTab) {
         setState(() {
           _selectedBrandId = null;
-          _selectedBrandName = null;
         });
         _loadProducts(reset: true);
       }
@@ -231,7 +227,6 @@ class ShopScreenState extends State<ShopScreen> {
       setState(() {
         _sectionBrowse = null;
         _selectedBrandId = id;
-        _selectedBrandName = match!.name;
       });
       _loadProducts(reset: true);
       return;
@@ -274,7 +269,6 @@ class ShopScreenState extends State<ShopScreen> {
           ..addAll(page.items);
         _page = page.currentPage;
         _hasMore = page.hasMore;
-        _totalProducts = page.total;
         _loading = false;
       });
     } on DioException catch (e) {
@@ -311,7 +305,6 @@ class ShopScreenState extends State<ShopScreen> {
         _products.addAll(page.items);
         _page = page.currentPage;
         _hasMore = page.hasMore;
-        _totalProducts = page.total;
         _loadingMore = false;
       });
     } catch (_) {

@@ -119,7 +119,7 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
                       contentPadding: EdgeInsets.zero,
                       value: _draft.isDefault,
                       activeTrackColor: AppColors.storeHeader.withValues(alpha: 0.45),
-                      activeColor: AppColors.storeHeader,
+                      activeThumbColor: AppColors.storeHeader,
                       title: Text(l10n.setDefaultAddress, style: TextStyle(color: onSurface)),
                       onChanged: (value) => setState(() => _draft.isDefault = value),
                     ),

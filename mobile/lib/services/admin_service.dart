@@ -1512,9 +1512,7 @@ class AdminContactPage {
       items: items,
       currentPage: current,
       hasMore: current < last,
-      stats: statsRaw != null
-          ? statsRaw.map((k, v) => MapEntry(k.toString(), AdminDashboardStats._toInt(v)))
-          : null,
+      stats: statsRaw?.map((k, v) => MapEntry(k.toString(), AdminDashboardStats._toInt(v))),
     );
   }
 }

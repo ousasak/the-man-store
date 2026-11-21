@@ -87,15 +87,16 @@ class _AdminShipmentsScreenState extends State<AdminShipmentsScreen> {
         ),
       ),
     );
-    if (next == null) return;
+    if (!mounted || next == null) return;
+    final api = context.read<ApiClient>();
     try {
-      await AdminService(context.read<ApiClient>()).updateShipmentStatus(row.id, next);
+      await AdminService(api).updateShipmentStatus(row.id, next);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Shipment → $next')));
       _load(reset: true);
     } on DioException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.read<ApiClient>().apiMessage(e))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(api.apiMessage(e))));
     }
   }
 

@@ -86,10 +86,11 @@ class _AdminPaymentDetailScreenState extends State<AdminPaymentDetailScreen> {
         );
       },
     );
-    if (notes == null) return;
+    if (!mounted || notes == null) return;
+    final api = context.read<ApiClient>();
     setState(() => _busy = true);
     try {
-      final payment = await AdminService(context.read<ApiClient>()).rejectPayment(widget.paymentId, notes: notes.isEmpty ? null : notes);
+      final payment = await AdminService(api).rejectPayment(widget.paymentId, notes: notes.isEmpty ? null : notes);
       if (!mounted) return;
       setState(() {
         _payment = payment;
@@ -99,7 +100,7 @@ class _AdminPaymentDetailScreenState extends State<AdminPaymentDetailScreen> {
     } on DioException catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.read<ApiClient>().apiMessage(e))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(api.apiMessage(e))));
     }
   }
 

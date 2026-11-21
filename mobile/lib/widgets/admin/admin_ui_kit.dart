@@ -100,7 +100,7 @@ class _AdminAppearState extends State<AdminAppear> with SingleTickerProviderStat
     _scale = Tween<double>(begin: 0.96, end: 1).animate(curve);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (!TickerMode.of(context)) return;
+      if (!TickerMode.valuesOf(context).enabled) return;
       _controller.value = 0;
       Future<void>.delayed(Duration(milliseconds: widget.index * widget.delayMs), () {
         if (mounted) _controller.forward();
