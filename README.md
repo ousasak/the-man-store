@@ -128,7 +128,7 @@ the-man-store/
 │       ├── services/           # API service layer
 │       └── widgets/            # Shared widgets
 │
-├── fitandsleekAIchat/      # Python AI chatbot service
+├── themanstoreAIchat/      # Python AI chatbot service
 │   └── services/               # RAG, NLU, session memory, analytics
 │
 ├── fitandsleek_vector/     # Vector search microservice
@@ -259,14 +259,14 @@ flutter run -d web-server --web-port=3000 --web-hostname=0.0.0.0
 <summary><strong>AI Chatbot Service</strong></summary>
 
 ```bash
-cd fitandsleekAIchat
+cd themanstoreAIchat
 pip install -r requirements.txt
 python app.py
 ```
 
 Or via Docker:
 ```bash
-cd fitandsleekAIchat
+cd themanstoreAIchat
 docker compose up -d
 ```
 
