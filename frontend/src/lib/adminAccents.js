@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import {
   ADMIN_LIGHT_MUTED_PALETTE_PRESET_ID,
   ADMIN_SPECTRUM_COLORS,
+  ADMIN_SPECTRUM_COLORS_DARK,
   useTheme,
 } from "../state/theme.jsx";
 
@@ -13,33 +14,29 @@ export function spectrumHexToRgb(hex) {
 
 /** Shared Light Muted Palette / primary accent helpers for admin KPIs and charts. */
 export function useAdminAccents() {
-  const { presetId, primaryColor } = useTheme();
+  const { presetId, primaryColor, mode } = useTheme();
+  const isDark = mode === "dark";
   const isSpectrum = presetId === ADMIN_LIGHT_MUTED_PALETTE_PRESET_ID;
+  const spectrumList = isDark ? ADMIN_SPECTRUM_COLORS_DARK : ADMIN_SPECTRUM_COLORS;
 
   const accentAt = useCallback(
     (index = 0) => {
-      if (!isSpectrum) return primaryColor;
-      const n = ADMIN_SPECTRUM_COLORS.length;
-      return ADMIN_SPECTRUM_COLORS[((index % n) + n) % n];
+      const n = spectrumList.length;
+      return spectrumList[((index % n) + n) % n];
     },
-    [isSpectrum, primaryColor],
+    [spectrumList],
   );
 
   const iconBoxStyle = useCallback(
     (index = 0) => {
-      if (!isSpectrum) {
-        return {
-          backgroundColor: "rgba(var(--admin-primary-rgb), 0.14)",
-          color: "var(--admin-primary)",
-        };
-      }
       const hex = accentAt(index);
       return {
-        backgroundColor: `rgba(${spectrumHexToRgb(hex)}, 0.14)`,
+        backgroundColor: `rgba(${spectrumHexToRgb(hex)}, ${isDark ? 0.18 : 0.14})`,
         color: hex,
+        borderColor: isDark ? `rgba(${spectrumHexToRgb(hex)}, 0.35)` : undefined,
       };
     },
-    [isSpectrum, accentAt],
+    [isDark, accentAt],
   );
 
   const barFill = useCallback(
@@ -47,7 +44,7 @@ export function useAdminAccents() {
     [isSpectrum, accentAt],
   );
 
-  const colors = useMemo(() => (isSpectrum ? ADMIN_SPECTRUM_COLORS : [primaryColor]), [isSpectrum, primaryColor]);
+  const colors = useMemo(() => spectrumList, [spectrumList]);
 
   return { isSpectrum, primaryColor, presetId, accentAt, iconBoxStyle, barFill, colors };
 }

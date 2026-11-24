@@ -1,0 +1,264 @@
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/state/cart";
+import { useAuth } from "@/state/auth";
+import { resolveImageUrl } from "@/lib/images";
+import { useLanguage } from "@/lib/i18n.jsx";
+import { canPlaceStorefrontOrder } from "@/app/redirectAfterAuth.js";
+import { continueTelegramMiniAppCheckout, isTelegramMiniApp, rememberCheckoutAfterLogin } from "@/lib/telegramMiniApp.js";
+import { remainingSellableQty, sellableQtyForVariantLine } from "@/lib/variantMatrix.js";
+import { showStockLimitAlert } from "@/lib/stockLimitAlert.js";
+import api from "@/lib/api";
+function Money({ value }) {
+  const n = Number(value || 0);
+  return <span>${n.toFixed(2)}</span>;
+}
+
+export default function CartPage() {
+  const { cart, total, loading, updateQty, remove } = useCart();
+  const items = cart?.items || [];
+  const { t } = useLanguage();
+  const { user, loginWithTelegramWebApp } = useAuth();
+  const nav = useNavigate();
+  const storefrontCheckout = canPlaceStorefrontOrder(user);
+  const [loyalty, setLoyalty] = React.useState(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+    if (!user) {
+      setLoyalty(null);
+      return undefined;
+    }
+    (async () => {
+      try {
+        const { data } = await api.get("/user/loyalty");
+        if (!mounted) return;
+        setLoyalty(data?.data || null);
+      } catch {
+        if (!mounted) return;
+        setLoyalty(null);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  const loyaltyPercent = Number(loyalty?.discount_percent || 0);
+  const loyaltyDiscountAmount = loyaltyPercent > 0 ? (Number(total || 0) * loyaltyPercent) / 100 : 0;
+  const loyaltyTotal = Math.max(Number(total || 0) - loyaltyDiscountAmount, 0);
+
+  const changeQty = async (item, nextQty) => {
+    const safeNext = Math.max(1, Number(nextQty) || 1);
+    const product = item?.product;
+    if (product && safeNext > (item.quantity || 1)) {
+      const cap = sellableQtyForVariantLine(product, item.color, item.size);
+      const remaining = remainingSellableQty(
+        product,
+        item.color,
+        item.size,
+        items.filter((row) => row.id !== item.id)
+      );
+      if (safeNext > remaining) {
+        await showStockLimitAlert({ stock: cap, requestedQuantity: safeNext });
+        return;
+      }
+    }
+    try {
+      await updateQty(item.id, safeNext);
+    } catch (err) {
+      const msg = String(err?.message || "");
+      if (msg.includes("STOCK_LIMIT") || msg.toLowerCase().includes("stock")) {
+        const cap = sellableQtyForVariantLine(product, item.color, item.size);
+        await showStockLimitAlert({ stock: cap, requestedQuantity: safeNext });
+      }
+    }
+  };
+
+  const getPriceMeta = (item) => {
+    const unitPaid = Number(item?.unit_price || item?.product?.final_price || item?.product?.price || 0);
+    const unitOriginal = Number(item?.product?.price || unitPaid);
+    const qty = Number(item?.quantity) || 0;
+    const hasDiscount = unitOriginal > unitPaid;
+
+    return {
+      qty,
+      unitPaid,
+      unitOriginal,
+      linePaid: unitPaid * qty,
+      lineOriginal: unitOriginal * qty,
+      hasDiscount,
+    };
+  };
+
+  return (
+    <div className="container-safe-inset py-8">
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight">Cart</h1>
+          <p className="mt-1 text-sm text-zinc-600">{t('cartSubtitle')}</p>
+        </div>
+        <Link to="/search" className="text-sm font-semibold text-zinc-700 hover:underline">
+          {t('continueShopping')}
+        </Link>
+      </div>
+
+      <div className="mt-6 grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 fs-card p-5">
+          {loading ? (
+            <div className="space-y-3 animate-pulse">
+              {[1, 2].map((i) => (
+                <div key={i} className="flex gap-3 rounded-xl border border-zinc-200 p-3">
+                  <div className="h-16 w-16 rounded-lg bg-zinc-100" />
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-3 w-2/3 bg-zinc-100 rounded" />
+                    <div className="h-3 w-1/3 bg-zinc-100 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : items.length === 0 ? (
+            <div className="text-sm text-zinc-600">
+              {t('cartEmpty')} <Link to="/search" className="underline">{t('shopProducts')}</Link>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {items.map((it) => {
+                const pricing = getPriceMeta(it);
+                return (
+                <div key={it.id} className="flex gap-4 border-b border-zinc-200 pb-4 last:border-b-0 last:pb-0">
+                  <Link
+                    to={it.product?.slug ? `/p/${it.product.slug}` : "/search"}
+                    className="h-20 w-20 rounded-2xl border border-zinc-200 overflow-hidden bg-zinc-50 shrink-0"
+                  >
+                    <img
+                      src={resolveImageUrl(it.product?.image_url)}
+                      onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+                      alt={it.product?.name || ""}
+                      className="w-full h-full object-cover"
+                    />
+                  </Link>
+
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <Link
+                          to={it.product?.slug ? `/p/${it.product.slug}` : "/search"}
+                          className="font-semibold hover:text-zinc-600"
+                        >
+                          {it.product?.name}
+                        </Link>
+                        <div className="mt-1 text-xs text-zinc-600">{it.product?.category?.name}</div>
+                        {it.size ? (
+                          <div className="mt-1 text-xs text-zinc-500">
+                            {t('size')} {it.size}
+                          </div>
+                        ) : null}
+                        {it.color ? (
+                          <div className="mt-1 text-xs text-zinc-500">
+                            Color: {it.color}
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <button className="text-xs text-rose-600 hover:underline" onClick={() => remove(it.id)}>
+                        {t('remove')}
+                      </button>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="inline-flex items-center rounded-full border border-zinc-200">
+                        <button className="h-10 sm:h-12 w-10 sm:w-12 text-base" onClick={() => changeQty(it, Math.max(1, (it.quantity || 1) - 1))}>−</button>
+                        <div className="w-10 sm:w-12 text-center text-sm sm:text-base font-semibold">{it.quantity}</div>
+                        <button className="h-10 sm:h-12 w-10 sm:w-12 text-base" onClick={() => changeQty(it, (it.quantity || 1) + 1)}>+</button>
+                      </div>
+
+                      <div className="text-right">
+                        {pricing.hasDiscount && (
+                          <div className="text-xs text-zinc-400 line-through">
+                            <Money value={pricing.lineOriginal} />
+                          </div>
+                        )}
+                        <div className="text-sm sm:text-base font-black">
+                          <Money value={pricing.linePaid} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )})}
+            </div>
+          )}
+        </div>
+
+        <div className="fs-card p-5 h-fit">
+          <div className="text-xs font-black tracking-wide">{t('summary')}</div>
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <span className="text-zinc-600">{t('subtotal')}</span>
+            <span className="font-black"><Money value={total} /></span>
+          </div>
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <span className="text-zinc-600">{t('shipping')}</span>
+            <span className="font-semibold text-zinc-500">{t('calculatedAtCheckout') || "At checkout"}</span>
+          </div>
+          <div className="mt-4 border-t border-zinc-200 pt-4 flex items-center justify-between">
+            <span className="text-sm font-semibold text-zinc-700">{t('total')}</span>
+            <span className="text-lg font-black"><Money value={loyaltyPercent > 0 ? loyaltyTotal : total} /></span>
+          </div>
+          {loyaltyPercent > 0 ? (
+            <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+              {String(loyalty?.tier || "member").toUpperCase()} loyalty discount ({loyaltyPercent}%): -${loyaltyDiscountAmount.toFixed(2)}
+            </div>
+          ) : null}
+
+          {storefrontCheckout || !user ? (
+            <Link
+              to="/checkout"
+              onClick={async (e) => {
+                if (user) return;
+                e.preventDefault();
+                rememberCheckoutAfterLogin("/checkout");
+                if (isTelegramMiniApp()) {
+                  await continueTelegramMiniAppCheckout({
+                    user,
+                    loginWithTelegramWebApp,
+                    navigate: nav,
+                    path: "/checkout",
+                  });
+                  return;
+                }
+                window.dispatchEvent(new Event("fs:open-login"));
+              }}
+              className="mt-5 w-full rounded-xl bg-black text-white py-4 font-bold hover:opacity-90 active:scale-95 transition-all duration-200 flex items-center justify-center"
+            >
+              {t('checkout')}
+            </Link>
+          ) : (
+            <>
+              <button
+                type="button"
+                disabled
+                className="mt-5 w-full rounded-xl bg-zinc-300 text-zinc-600 py-4 font-bold cursor-not-allowed flex items-center justify-center"
+              >
+                {t('checkout')}
+              </button>
+              <p className="mt-3 text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                {t('adminCannotCheckout')}
+              </p>
+              <Link
+                to="/admin/checkout"
+                className="mt-2 block text-center text-xs font-semibold text-zinc-700 underline"
+              >
+                {t('adminUsePosCheckout')}
+              </Link>
+            </>
+          )}
+
+          <p className="mt-3 text-xs text-zinc-500">
+            {t('checkoutNoteStart')} <code className="font-mono">POST /api/checkout</code> {t('checkoutNoteEnd')}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,9 +1,9 @@
 /** Variant row barcode formats (react-barcode / JsBarcode names). */
 
 export const VARIANT_BARCODE_FORMAT_OPTIONS = [
-  { value: "EAN13", label: "EAN-13 (The Most Popular Globally)" },
-  { value: "UPC", label: "UPC-A (The North American Standard)" },
-  { value: "CODE128", label: "Code 128" },
+  { value: "EAN13", label: "EAN-13 (The Most Popular Globally)", shortLabel: "EAN-13" },
+  { value: "UPC", label: "UPC-A (The North American Standard)", shortLabel: "UPC-A" },
+  { value: "CODE128", label: "Code 128", shortLabel: "Code 128" },
 ];
 
 export const DEFAULT_VARIANT_BARCODE_FORMAT = "EAN13";

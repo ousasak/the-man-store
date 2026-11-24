@@ -2,6 +2,10 @@ import React, { useEffect, useId, useRef } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pushAdminModalChrome, popAdminModalChrome } from "../../lib/adminDarkChrome.js";
+import { useLanguage } from "../../lib/i18n.jsx";
+import { AdminCloseButton, CloseButton } from "./AdminCloseButton.jsx";
+
+export { AdminCloseButton, CloseButton };
 
 /**
  * Shared admin dialog shell: blurred page overlay + dimmed sidebar (data-admin-modal).
@@ -23,6 +27,7 @@ export default function AdminModal({
   variant = "default",
 }) {
   const autoId = useId();
+  const { t } = useLanguage();
   const titleId = titleIdProp || `admin-modal-title-${autoId}`;
   const ref = useRef(null);
 
@@ -89,14 +94,7 @@ export default function AdminModal({
                   {title}
                 </h2>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="shrink-0 rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                aria-label="Close"
-              >
-                <X className="h-5 w-5" aria-hidden />
-              </button>
+              <AdminCloseButton onClose={onClose} size="md" variant="default" />
             </div>
           ) : null}
           {children}
@@ -112,11 +110,15 @@ export function AdminConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   destructive = false,
   busy = false,
 }) {
+  const { t } = useLanguage();
+  const resolvedConfirm = confirmLabel || t("common.actions.confirm", "Confirm");
+  const resolvedCancel = cancelLabel || t("common.actions.cancel", "Cancel");
+
   return (
     <AdminModal
       open={open}
@@ -136,7 +138,7 @@ export function AdminConfirmDialog({
           variant="outline"
           onClick={onClose}
         >
-          {cancelLabel}
+          {resolvedCancel}
         </Button>
         <Button
           type="button"
@@ -144,7 +146,7 @@ export function AdminConfirmDialog({
           variant={destructive ? "destructive" : "default"}
           onClick={onConfirm}
         >
-          {confirmLabel}
+          {resolvedConfirm}
         </Button>
       </div>
     </AdminModal>

@@ -2,7 +2,8 @@ import React, { useMemo, useState } from "react";
 import api from "../../lib/api";
 import { resolveImageUrl } from "../../lib/images";
 import { useTheme } from "../../state/theme.jsx";
-import { closeSwal, errorAlert, loadingAlert, toastSuccess } from "../../lib/swal";
+import { useLanguage } from "../../lib/i18n.jsx";
+import adminToast, { adminMessages } from "../../lib/adminMessages.jsx";
 import { getAdminValidationMessage } from "../../lib/adminValidation.js";
 
 const EMPTY = {
@@ -31,6 +32,7 @@ function brandLogoSrc(url) {
 
 export default function BrandCreateForm({ onSuccess, onCancel, showToast = true }) {
   const { primaryColor, mode } = useTheme();
+  const { t } = useLanguage();
   const accentColor = mode === "dark" ? "#FFFFFF" : primaryColor;
   const accentIsWhite = (accentColor || "").toUpperCase() === "#FFFFFF";
   const [form, setForm] = useState(EMPTY);
@@ -52,11 +54,11 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
     if (isCreating) return;
     setCreateError("");
     setIsCreating(true);
-    loadingAlert({
-      khTitle: "កំពុងបង្កើតម៉ាក",
-      enTitle: "Creating brand",
-      khText: "សូមរង់ចាំបន្តិច",
-      enText: "Please wait",
+    adminToast.loading({
+      khTitle: adminMessages.creating(t("brands.brand", "Brand"), "km"),
+      enTitle: adminMessages.creating(t("brands.brand", "Brand"), "en"),
+      khText: adminMessages.pleaseWait("km"),
+      enText: adminMessages.pleaseWait("en"),
     });
     try {
       const fd = new FormData();
@@ -75,26 +77,21 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
         throw new Error("Create failed.");
       }
       const created = response?.data?.data || response?.data;
-      closeSwal();
+      adminToast.close();
       if (showToast) {
-        await toastSuccess({
-          khText: "បានបង្កើតម៉ាកដោយជោគជ័យ",
-          enText: "Brand created!",
-        });
+        adminToast.created(t("brands.brand", "Brand"));
       }
       onSuccess?.(created);
     } catch (e2) {
-      closeSwal();
+      adminToast.close();
       const detail = getAdminValidationMessage(e2);
-      const slugHint = String(detail).toLowerCase().includes("slug") ? `សូមបំពេញ Slug - ${detail}` : detail;
+      const slugHint = String(detail).toLowerCase().includes("slug")
+        ? adminMessages.slugRequired(detail)
+        : detail;
       setCreateError(slugHint);
-      await errorAlert({
-        khTitle: "បង្កើតម៉ាកបរាជ័យ",
-        enTitle: "Create failed",
-        detail: slugHint,
-      });
+      await adminToast.createFailed(t("brands.brand", "Brand"), slugHint);
     } finally {
-      closeSwal();
+      adminToast.close();
       setIsCreating(false);
     }
   };
@@ -105,27 +102,33 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
   return (
     <form onSubmit={create} className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Name</label>
+        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+          {t("brands.form.name", "Brand Name")}
+        </label>
         <input
           className={inputClass}
           value={form.name}
           onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-          placeholder="Nike"
+          placeholder={t("brands.form.namePlaceholder", "e.g., Nike, Zara, Apple")}
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Slug (optional)</label>
+        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+          {t("brands.form.slugOptional", "Slug (Optional)")}
+        </label>
         <input
           className={inputClass}
           value={form.slug}
           onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
-          placeholder="nike"
+          placeholder={t("brands.form.slugPlaceholder", "e.g., nike")}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Sort order</label>
+        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+          {t("brands.form.sortOrder", "Sort Order")}
+        </label>
         <input
           type="number"
           min={0}
@@ -143,37 +146,42 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
             style={{
               backgroundColor: form.is_active ? (mode === "dark" ? "#3b82f6" : "#2563eb") : (mode === "dark" ? "#334155" : "#e2e8f0"),
             }}
+            aria-label={t("brands.form.activeStatus", "Active Status")}
           >
             <span
               className="w-6 h-6 bg-white rounded-full shadow-lg transform transition-transform duration-300"
               style={{ transform: form.is_active ? "translateX(24px)" : "translateX(4px)" }}
             />
           </button>
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Active</span>
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            {form.is_active ? t("common.status.active", "Active") : t("common.status.hidden", "Hidden")}
+          </span>
         </label>
       </div>
 
       <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
         <div className="md:col-span-2">
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Logo (optional)</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+            {t("brands.form.logoOptional", "Logo (Optional)")}
+          </label>
           <div className="flex items-center gap-4 mb-3">
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
               <input
                 type="radio"
                 name="brand-create-logo-source"
                 checked={form.logo_source === "local"}
                 onChange={() => setForm((p) => ({ ...p, logo_source: "local", logo_url: "" }))}
               />
-              Upload local file
+              {t("brands.form.uploadLocalFile", "Upload local file")}
             </label>
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
               <input
                 type="radio"
                 name="brand-create-logo-source"
                 checked={form.logo_source === "url"}
                 onChange={() => setForm((p) => ({ ...p, logo_source: "url", logo: null }))}
               />
-              Use image URL
+              {t("brands.form.useImageUrl", "Use image URL")}
             </label>
           </div>
 
@@ -182,7 +190,7 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
               type="url"
               value={form.logo_url}
               onChange={(e) => setForm((p) => ({ ...p, logo_url: e.target.value }))}
-              placeholder="https://example.com/brand-logo.png"
+              placeholder={t("brands.form.imageUrlPlaceholder", "https://example.com/brand-logo.png")}
               className={inputClass}
             />
           ) : (
@@ -190,18 +198,18 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
               type="file"
               accept="image/png,image/jpeg,image/webp,image/svg+xml"
               onChange={(e) => onPickFile(e.target.files?.[0] || null)}
-              className="block w-full text-sm text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border file:border-black file:bg-white file:text-black"
+              className="block w-full text-sm text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border file:border-slate-300 dark:file:border-slate-600 file:bg-white dark:file:bg-slate-900 file:text-slate-800 dark:file:text-slate-100 cursor-pointer"
             />
           )}
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            Optional — upload a file or paste a public image URL.
+            {t("brands.form.brandLogoHint", "Optional — upload an image file or paste a public URL.")}
           </p>
         </div>
         <div className="h-24 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
           {previewCreate ? (
-            <img src={previewCreate} alt="Preview" className="h-16 w-auto object-contain" />
+            <img src={previewCreate} alt={t("brands.form.logo", "Brand Logo")} className="h-16 w-auto object-contain" />
           ) : (
-            <span className="text-slate-400 text-sm">No logo</span>
+            <span className="text-slate-400 text-sm">{t("brands.form.noLogo", "No logo")}</span>
           )}
         </div>
       </div>
@@ -219,7 +227,7 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
             disabled={isCreating}
             className="px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-600 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-60"
           >
-            Cancel
+            {t("common.actions.cancel", "Cancel")}
           </button>
         ) : null}
         <button
@@ -232,7 +240,7 @@ export default function BrandCreateForm({ onSuccess, onCancel, showToast = true 
             borderColor: accentIsWhite ? "#cbd5e1" : accentColor,
           }}
         >
-          {isCreating ? "Creating..." : "Add Brand"}
+          {isCreating ? (t("brands.form.creating", "Creating...")) : (t("brands.addBrand", "Add New Brand"))}
         </button>
       </div>
     </form>

@@ -1,0 +1,19 @@
+{
+  "Unauthenticated.": "មិនទាន់បានចូលគណនីទេ។",
+  "Unauthorized.": "គ្មានសិទ្ធិចូលប្រើប្រាស់ទេ។",
+  "Forbidden.": "ត្រូវបានហាមឃាត់។",
+  "Not Found.": "រកមិនឃើញទេ។",
+  "The given data was invalid.": "ទិន្នន័យដែលបានផ្តល់មិនត្រឹមត្រូវទេ។",
+  "Service temporarily unavailable. Please try again shortly.": "សេវាកម្មមិនទាន់ដំណើរការបណ្តោះអាសន្ន។ សូមព្យាយាមម្តងទៀតក្នុងពេលបន្តិចទៀត។",
+  "Order already paid.": "ការបញ្ជាទិញបានទូទាត់រួចហើយ។",
+  "Order payment method is not Bakong KHQR.": "វិធីសាស្ត្រទូទាត់មិនមែនជា Bakong KHQR ទេ។",
+  "Payment order not found": "រកមិនឃើញការបញ្ជាទិញសម្រាប់ការទូទាត់ទេ",
+  "Collection not found": "រកមិនឃើញបណ្តុំទំនិញទេ",
+  "Product not found": "រកមិនឃើញផលិតផលទេ",
+  "User not found": "រកមិនឃើញអ្នកប្រើប្រាស់ទេ",
+  "Success": "ជោគជ័យ",
+  "Operation completed successfully.": "ប្រតិបត្តិការបានបញ្ចប់ដោយជោគជ័យ។",
+  "Saved successfully": "រក្សាទុកដោយជោគជ័យ",
+  "Deleted successfully": "លុបដោយជោគជ័យ",
+  "Updated successfully": "បានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ"
+}

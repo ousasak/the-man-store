@@ -1,0 +1,1268 @@
+import { useTranslation } from "@/lib/i18n.jsx";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Navigate } from "react-router-dom";
+import api from "@/lib/api";
+import AdminModal, { AdminConfirmDialog } from "@/components/admin/AdminModal.jsx";
+import AdminFilterDrawer, { AdminFilterToolbarButton } from "@/components/admin/AdminFilterDrawer.jsx";
+import { countFilterSelections, matchesSection } from "@/lib/adminListFilters.js";
+import { useAdminFilterDrawer } from "@/lib/useAdminFilterDrawer.js";
+import { useAdminYearMonthFilter } from "@/lib/useAdminYearMonthFilter.js";
+import { AdminSectionLoader, AdminDashboardLoader } from "@/components/admin/AdminLoading";
+import AdminEmptyState from "@/components/admin/AdminEmptyState.jsx";
+import AdminRefreshButton from "@/components/admin/AdminRefreshButton.jsx";
+import { Button } from "@/components/ui/button";
+import {
+ buildAllColumnsVisibility,
+ loadTableColumnVisibility,
+ TableColumnVisibilityMenu,
+} from "@/components/admin/TableColumnVisibilityMenu.jsx";
+import { useTheme } from "@/state/theme.jsx";
+import { useAdminPermissions } from "@/hooks/useAdminPermissions.js";
+import { getFirstAccessibleAdminPath } from "@/lib/adminPermissions.js";
+import AdminListPaginationBar from "@/components/admin/AdminListPaginationBar.jsx";
+import { ADMIN_LIST_PAGE_SIZE, ADMIN_LIST_PAGINATE_AT } from "@/lib/adminListQuery.js";
+import { listingStatusLabel, lotTierLabel } from "@/lib/inventoryLotHelpers.js";
+import OrderShipmentPanel from "@/components/admin/OrderShipmentPanel.jsx";
+import OrderDriverTelegramQr from "@/components/admin/OrderDriverTelegramQr.jsx";
+import OrderCodCollectionPanel from "@/components/admin/OrderCodCollectionPanel.jsx";
+import AdminSearchSelect from "@/components/admin/AdminSearchSelect.jsx";
+import AdminRowActions from "@/components/admin/AdminRowActions.jsx";
+import { adminCacheKey, readAdminCache, writeAdminCache } from "@/lib/adminPageCache.js";
+import { resolveImageUrl } from "@/lib/images";
+
+const ORDER_STATUS_OPTIONS = [
+  { value: "pending_payment", label: "Awaiting payment" },
+  { value: "processing", label: "Processing" },
+  { value: "shipped", label: "Shipped" },
+  { value: "in_transit", label: "In transit" },
+  { value: "arrived", label: "Arrived" },
+  { value: "completed", label: "Goods received" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+const ORDERS_TABLE_COLUMNS = [
+  { id: "select", label: "Select", labelKey: "orders.select" },
+  { id: "orderId", label: "Order ID", labelKey: "orders.orderId" },
+  { id: "customer", label: "Customer", labelKey: "orders.customer" },
+  { id: "status", label: "Status", labelKey: "orders.orderStatus" },
+  { id: "payment", label: "Payment", labelKey: "orders.payment" },
+  { id: "items", label: "Items", labelKey: "orders.itemsCol" },
+  { id: "total", label: "Total", labelKey: "orders.total" },
+  { id: "date", label: "Date", labelKey: "orders.date" },
+  { id: "actions", label: "Actions", labelKey: "orders.actionsCol" },
+];
+
+const ORDERS_COLUMNS_STORAGE_KEY = "themanstore-orders-columns";
+
+function currentYearMonthDefault() {
+ const now = new Date();
+ return { year: String(now.getFullYear()), month: String(now.getMonth() + 1) };
+}
+
+function Money({ value }) {
+ const n = Number(value || 0);
+ return <span>${n.toFixed(2)}</span>;
+}
+
+const textOnBackground = (bgHex) => {
+ const hex = String(bgHex || '').replace('#', '');
+ if (hex.length !== 6) return '#FFFFFF';
+ const r = parseInt(hex.slice(0, 2), 16) / 255;
+ const g = parseInt(hex.slice(2, 4), 16) / 255;
+ const b = parseInt(hex.slice(4, 6), 16) / 255;
+ const channel = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+ const luminance = 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+ return luminance > 0.55 ? '#0b0b0f' : '#FFFFFF';
+};
+
+// Status badge colors via inline styles (theme-aware, no Tailwind colors)
+const getStatusStyle = (status, mode, primaryColor) => {
+ const s = (status || '').toLowerCase();
+ const isDark = mode === 'dark';
+
+ if (s === 'completed' || s === 'delivered') {
+ if (isDark) {
+ const bg = primaryColor || '#16a34a';
+ return {
+ backgroundColor: bg,
+ color: textOnBackground(bg),
+ borderColor: bg,
+ };
+ }
+ return {
+ backgroundColor: '#DCFCE7',
+ color: '#166534',
+ borderColor: '#86EFAC',
+ };
+ }
+
+ if (s === 'pending') {
+ return {
+ backgroundColor: isDark ? '#B45309' : '#FEF3C7',
+ color: isDark ? '#FFF7ED' : '#92400E',
+ borderColor: isDark ? '#D97706' : '#FCD34D',
+ };
+ }
+
+ if (s === 'processing' || s === 'shipped' || s === 'preparing' || s === 'in_transit' || s === 'arrived') {
+ return {
+ backgroundColor: isDark ? '#0EA5E9' : '#E0F2FE',
+ color: isDark ? '#E0F2FE' : '#075985',
+ borderColor: isDark ? '#38BDF8' : '#7DD3FC',
+ };
+ }
+
+ if (s === 'cancelled') {
+ return {
+ backgroundColor: isDark ? '#7F1D1D' : '#FEF2F2',
+ color: isDark ? '#FEE2E2' : '#991B1B',
+ borderColor: isDark ? '#F87171' : '#FCA5A5',
+ textDecoration: 'line-through',
+ };
+ }
+
+ return {
+ backgroundColor: isDark ? '#334155' : '#F1F5F9',
+ color: isDark ? '#E2E8F0' : '#0F172A',
+ borderColor: isDark ? '#475569' : '#CBD5E1',
+ };
+};
+
+function CustomerAvatar({ user, sizeClass = "w-10 h-10", textClass = "text-sm" }) {
+  const [failed, setFailed] = useState(false);
+  const src = !failed && user?.profile_image_url
+    ? resolveImageUrl(user.profile_image_url)
+    : "";
+  const initial = (user?.name || user?.email || "U").charAt(0).toUpperCase();
+
+  return (
+    <div className={`${sizeClass} bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold ${textClass} overflow-hidden flex-shrink-0`}>
+      {src ? (
+        <img
+          src={src}
+          alt={user?.name || "Customer"}
+          className="w-full h-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        initial
+      )}
+    </div>
+  );
+}
+
+const isOrderPaid = (paymentStatus) => (paymentStatus || '').toLowerCase() === 'paid';
+
+const isCodOrder = (order) => String(order?.payment_method || '').toLowerCase() === 'cod';
+
+const getPaymentMethodStyle = (order, mode) => {
+ const isDark = mode === 'dark';
+ if (isCodOrder(order)) {
+  return {
+   backgroundColor: isDark ? '#7C2D12' : '#FFF7ED',
+   color: isDark ? '#FFEDD5' : '#9A3412',
+   borderColor: isDark ? '#EA580C' : '#FDBA74',
+  };
+ }
+ return {
+  backgroundColor: isDark ? '#1E3A5F' : '#EFF6FF',
+  color: isDark ? '#DBEAFE' : '#1E40AF',
+  borderColor: isDark ? '#3B82F6' : '#93C5FD',
+ };
+};
+
+function OrderPaymentBadge({ order, mode }) {
+  const { t } = useTranslation();
+  const cod = isCodOrder(order);
+  const paid = isOrderPaid(order.payment_status);
+  const label = cod
+    ? (paid ? t("orders.codCollected", "COD · Collected") : t("orders.codCourier", "COD · Courier"))
+    : (paid ? t("orders.payNowPaid", "Pay now · Paid") : t("orders.payNowKhqr", "Pay now · KHQR"));
+  const title = cod
+    ? (paid ? t("orders.codCollectedTooltip", "Cash on delivery — collected") : t("orders.codCourierTooltip", "Pay with courier on delivery"))
+    : (paid ? t("orders.paidOnlineTooltip", "Paid online (KHQR / prepaid)") : t("orders.payOnlineTooltip", "Pay immediately online (KHQR)"));
+
+  return (
+    <span
+      className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border whitespace-nowrap"
+      style={getPaymentMethodStyle(order, mode)}
+      title={title}
+    >
+      {label}
+    </span>
+  );
+}
+
+const getPaymentStatusStyle = (paymentStatus, mode, primaryColor) => {
+  if (isOrderPaid(paymentStatus)) {
+    const isDark = mode === 'dark';
+    if (isDark) {
+      const bg = primaryColor || '#16a34a';
+      return {
+        backgroundColor: bg,
+        color: textOnBackground(bg),
+        borderColor: bg,
+      };
+    }
+    return {
+      backgroundColor: '#DCFCE7',
+      color: '#166534',
+      borderColor: '#86EFAC',
+    };
+  }
+  const isDark = mode === 'dark';
+  return {
+    backgroundColor: isDark ? '#B45309' : '#FEF3C7',
+    color: isDark ? '#FFF7ED' : '#92400E',
+    borderColor: isDark ? '#D97706' : '#FCD34D',
+  };
+};
+
+const formatFulfillmentStatus = (status, paymentStatus, t) => {
+  const s = (status || 'pending').toLowerCase();
+  if (s === 'paid') return isOrderPaid(paymentStatus) ? (t ? t('orders.processing', 'Processing') : 'Processing') : (t ? t('orders.paid', 'Paid') : 'Paid');
+  const labels = {
+    pending: t ? t('orders.awaitingPayment', 'Awaiting payment') : 'Awaiting payment',
+    pending_payment: t ? t('orders.awaitingPayment', 'Awaiting payment') : 'Awaiting payment',
+    processing: t ? t('orders.processing', 'Processing') : 'Processing',
+    preparing: t ? t('orders.processing', 'Processing') : 'Preparing',
+    shipped: t ? t('orders.shipped', 'Shipped') : 'Shipped',
+    in_transit: t ? t('orders.inTransit', 'In transit') : 'In transit',
+    arrived: t ? t('orders.arrived', 'Arrived') : 'Arrived',
+    completed: t ? t('orders.goodsReceived', 'Goods received') : 'Goods received',
+    delivered: t ? t('orders.goodsReceived', 'Goods received') : 'Goods received',
+    cancelled: t ? t('orders.cancelled', 'Cancelled') : 'Cancelled',
+  };
+  return labels[s] || status || (t ? t('orders.pending', 'Pending') : 'Pending');
+};
+
+const isAwaitingPayment = (order) => {
+  if (isOrderPaid(order.payment_status)) return false;
+  const s = (order.status || '').toLowerCase();
+  return s === 'pending' || s === 'pending_payment' || s === '';
+};
+
+function OrderStatusBadges({ order, mode, primaryColor }) {
+  const { t } = useTranslation();
+  const paid = isOrderPaid(order.payment_status);
+  const fulfillment = order.status || 'pending';
+  const fulfillmentLabel = formatFulfillmentStatus(fulfillment, order.payment_status, t);
+
+  // Checkout: payment not received yet — one badge (status + payment_status say the same thing)
+  // COD is never "awaiting online payment" at placement.
+  if (isAwaitingPayment(order) && !isCodOrder(order)) {
+    return (
+      <span
+        className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+        style={getPaymentStatusStyle(order.payment_status, mode, primaryColor)}
+        title={t("orders.waitingPaymentTooltip", "Waiting for customer payment")}
+      >
+        {t("orders.awaitingPayment", "Awaiting payment")}
+      </span>
+    );
+  }
+
+  // Paid and being prepared — one combined badge (avoids looking like two conflicting statuses)
+  if (paid && (fulfillment || '').toLowerCase() === 'processing') {
+    return (
+      <span
+        className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+        style={getPaymentStatusStyle(order.payment_status, mode, primaryColor)}
+        title={t("orders.paymentReceivedPrepTooltip", "Payment received; order is being prepared")}
+      >
+        {t("orders.paidProcessing", "Paid · Processing")}
+      </span>
+    );
+  }
+
+  // Paid with other fulfillment step (shipped, completed, etc.)
+  if (paid) {
+    return (
+      <span
+        className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+        style={getStatusStyle(fulfillment, mode, primaryColor)}
+        title={t("orders.paymentReceivedFulfillment", "Payment received · {fulfillment}", { fulfillment: fulfillmentLabel })}
+      >
+        {t("orders.paid", "Paid")} · {fulfillmentLabel}
+      </span>
+    );
+  }
+
+  // Unpaid but past checkout (unusual)
+  return (
+    <span
+      className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+      style={getStatusStyle(fulfillment, mode, primaryColor)}
+    >
+      {fulfillmentLabel}
+    </span>
+  );
+}
+
+// Format date
+const formatOrderDate = (dateString, lang = "en") => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString(lang === 'km' || lang === 'kh' ? 'km-KH' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const QUICK_DATE_OPTIONS = [
+  { value: "today", labelKey: "orders.today", fallback: "Today", daysAgo: 0 },
+  { value: "yesterday", labelKey: "orders.yesterday", fallback: "Yesterday", daysAgo: 1 },
+];
+
+const localDateDaysAgo = (daysAgo) => {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export default function AdminOrders() {
+  const { t, language } = useTranslation();
+  const { primaryColor, mode } = useTheme();
+  const { user, can, permissionsReady } = useAdminPermissions();
+  const canViewOrders = can("orders", "view");
+  const canEditOrders = can("orders", "edit");
+  const canEditShipments = can("shipments", "edit") || can("shipments", "create");
+  const canDeleteOrders = can("orders", "delete");
+  const defaultOrdersCache = readAdminCache(adminCacheKey("orders", JSON.stringify({ page: 1, refresh: 0 })));
+  const [rows, setRows] = useState(() => defaultOrdersCache?.rows ?? []);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(() => defaultOrdersCache?.totalPages ?? 1);
+  const [orderTotal, setOrderTotal] = useState(() => defaultOrdersCache?.orderTotal ?? 0);
+  const [loading, setLoading] = useState(() => !defaultOrdersCache?.rows?.length);
+  const [selected, setSelected] = useState(null);
+  const [status, setStatus] = useState("");
+  const [err, setErr] = useState("");
+  const [search, setSearch] = useState("");
+  const [searchDebounced, setSearchDebounced] = useState("");
+  const [summary, setSummary] = useState({
+    order_count: 0,
+    total_items: 0,
+    total_revenue: 0,
+  });
+  const listFilters = useAdminFilterDrawer(["status", "payment"]);
+  const yearMonthFilter = useAdminYearMonthFilter(2020, currentYearMonthDefault());
+  const [quickDate, setQuickDate] = useState("");
+  const selectedDateRange = useMemo(() => {
+    const option = QUICK_DATE_OPTIONS.find((item) => item.value === quickDate);
+    if (!option) return yearMonthFilter.dateRange;
+    const date = localDateDaysAgo(option.daysAgo);
+    return { from: date, to: date };
+  }, [quickDate, yearMonthFilter.dateRange]);
+  const fetchAbortRef = useRef(null);
+  const hasLoadedOnceRef = useRef(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [viewMode, setViewMode] = useState("list");
+  const [viewLoading, setViewLoading] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [pendingBulkDelete, setPendingBulkDelete] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [columnVisibility, setColumnVisibility] = useState(() =>
+    loadTableColumnVisibility(ORDERS_COLUMNS_STORAGE_KEY, ORDERS_TABLE_COLUMNS),
+  );
+
+  const orderStatusOptions = useMemo(
+    () => [
+      { value: "pending_payment", label: t("orders.awaitingPayment", "Awaiting payment") },
+      { value: "processing", label: t("orders.processing", "Processing") },
+      { value: "shipped", label: t("orders.shipped", "Shipped") },
+      { value: "in_transit", label: t("orders.inTransit", "In transit") },
+      { value: "arrived", label: t("orders.arrived", "Arrived") },
+      { value: "completed", label: t("orders.goodsReceived", "Goods received") },
+      { value: "cancelled", label: t("orders.cancelled", "Cancelled") },
+    ],
+    [t],
+  );
+
+  const tableColumns = useMemo(
+    () => [
+      { id: "select", label: t("orders.select", "Select"), labelKey: "orders.select" },
+      { id: "orderId", label: t("orders.orderId", "Order ID"), labelKey: "orders.orderId" },
+      { id: "customer", label: t("orders.customer", "Customer"), labelKey: "orders.customer" },
+      { id: "status", label: t("orders.orderStatus", "Status"), labelKey: "orders.orderStatus" },
+      { id: "payment", label: t("orders.payment", "Payment"), labelKey: "orders.payment" },
+      { id: "items", label: t("orders.itemsCol", "Items"), labelKey: "orders.itemsCol" },
+      { id: "total", label: t("orders.total", "Total"), labelKey: "orders.total" },
+      { id: "date", label: t("orders.date", "Date"), labelKey: "orders.date" },
+      { id: "actions", label: t("orders.actionsCol", "Actions"), labelKey: "orders.actionsCol" },
+    ],
+    [t],
+  );
+
+ const ordersQueryKey = useMemo(
+ () =>
+ JSON.stringify({
+ from: selectedDateRange.from,
+ to: selectedDateRange.to,
+ status: listFilters.applied.status || [],
+ payment: listFilters.applied.payment || [],
+ search: searchDebounced,
+ page: currentPage,
+ refresh: refreshCounter,
+ }),
+ [
+ selectedDateRange.from,
+ selectedDateRange.to,
+ listFilters.applied,
+ searchDebounced,
+ currentPage,
+ refreshCounter,
+ ],
+ );
+
+ const refetchOrders = () => setRefreshCounter((c) => c + 1);
+
+ useEffect(() => {
+ const t = window.setTimeout(() => setSearchDebounced(search.trim()), 350);
+ return () => window.clearTimeout(t);
+ }, [search]);
+
+ useEffect(() => {
+ setCurrentPage(1);
+ }, [
+ selectedDateRange.from,
+ selectedDateRange.to,
+ listFilters.applied,
+ searchDebounced,
+ ]);
+
+ useEffect(() => {
+ if (!permissionsReady || !canViewOrders) {
+  setLoading(false);
+  setRows([]);
+  return undefined;
+ }
+
+ fetchAbortRef.current?.abort();
+ const ac = new AbortController();
+ fetchAbortRef.current = ac;
+
+ const parsed = JSON.parse(ordersQueryKey);
+ const cacheKey = adminCacheKey("orders", ordersQueryKey);
+ const cached = readAdminCache(cacheKey);
+ if (cached?.rows) {
+  setRows(cached.rows);
+  setTotalPages(cached.totalPages ?? 1);
+  setOrderTotal(cached.orderTotal ?? cached.rows.length);
+  if (cached.summary) setSummary(cached.summary);
+  setLoading(false);
+ } else if (!hasLoadedOnceRef.current) {
+  setLoading(true);
+ }
+
+ (async () => {
+ try {
+ const params = { per_page: ADMIN_LIST_PAGE_SIZE, compact: 1, page: parsed.page || 1, include_summary: 1 };
+ if (parsed.from) params.from_date = parsed.from;
+ if (parsed.to) params.to_date = parsed.to;
+ if (parsed.status?.length) params.statuses = parsed.status;
+ if (parsed.payment?.length) params.payment = parsed.payment;
+ if (parsed.search) params.search = parsed.search;
+
+ const { data } = await api.get("/admin/orders", { params, signal: ac.signal });
+ if (ac.signal.aborted) return;
+
+ const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+ const nextSummary =
+ data?.summary ?? {
+ order_count: Number(data?.total) || list.length,
+ total_items: list.reduce((acc, o) => acc + (Number(o.items_count) || 0), 0),
+ total_revenue: list.reduce((acc, o) => acc + (Number(o.total) || 0), 0),
+ };
+ setRows(list);
+ setTotalPages(Math.max(1, Number(data?.last_page) || 1));
+ setOrderTotal(Number(data?.total) || list.length);
+ setSummary(nextSummary);
+ writeAdminCache(cacheKey, {
+ rows: list,
+ totalPages: Math.max(1, Number(data?.last_page) || 1),
+ orderTotal: Number(data?.total) || list.length,
+ summary: nextSummary,
+ });
+ setErr("");
+ } catch (error) {
+ if (ac.signal.aborted || error?.code === "ERR_CANCELED") return;
+ console.error("Failed to load orders:", error.response?.data || error.message);
+ setErr(error.response?.data?.message || t("orders.failedToLoadOrders", "Failed to load orders"));
+ } finally {
+ if (!ac.signal.aborted) {
+ hasLoadedOnceRef.current = true;
+ setLoading(false);
+ }
+ }
+ })();
+
+ return () => ac.abort();
+ }, [ordersQueryKey, permissionsReady, canViewOrders]);
+
+ const openFilterDrawer = () => {
+ yearMonthFilter.syncDraftFromApplied();
+ listFilters.openDrawer();
+ };
+
+ const applyAllFilters = () => {
+ setQuickDate("");
+ yearMonthFilter.apply();
+ listFilters.apply();
+ };
+
+ const clearAllFilters = () => {
+ setQuickDate("");
+ yearMonthFilter.clear();
+ listFilters.clearAll();
+ setSearch("");
+ setSearchDebounced("");
+ };
+
+ const toolbarFilterCount =
+ countFilterSelections(listFilters.applied) + (quickDate ? 1 : yearMonthFilter.activeCount);
+
+ useEffect(() => {
+ try {
+ localStorage.setItem(ORDERS_COLUMNS_STORAGE_KEY, JSON.stringify(columnVisibility));
+ } catch { /* ignore quota */ }
+ }, [columnVisibility]);
+
+ const isColVisible = (columnId) => columnVisibility[columnId] !== false;
+
+ const toggleTableColumn = (columnId) => {
+ setColumnVisibility((prev) => ({ ...prev, [columnId]: !isColVisible(columnId) }));
+ };
+
+ const setAllTableColumnsVisible = (visible) => {
+ setColumnVisibility(buildAllColumnsVisibility(ORDERS_TABLE_COLUMNS, visible, "orderId"));
+ };
+
+ useEffect(() => {
+ setSelectedIds((prev) => prev.filter((id) => rows.some((o) => o.id === id)));
+ }, [rows]);
+
+ const closeView = () => {
+ setSelected(null);
+ setViewLoading(false);
+ };
+
+ const open = async (id) => {
+ setViewLoading(true);
+ setSelected({ id });
+ setErr("");
+ try {
+ const { data } = await api.get(`/admin/orders/${id}`);
+ setSelected(data);
+ const fulfillment = data.status || "";
+ setStatus(
+  fulfillment === "paid" ? "processing"
+  : fulfillment === "pending" ? "pending_payment"
+  : fulfillment === "delivered" ? "completed"
+  : fulfillment
+ );
+ } catch (e) {
+ setErr(e?.response?.data?.message || t("orders.failedToLoadOrder", "Failed to load order."));
+ setSelected(null);
+ } finally {
+ setViewLoading(false);
+ }
+ };
+
+ const save = async () => {
+ if (!canEditOrders || viewLoading || !selected?.id) return;
+ setErr("");
+ try {
+ const { data } = await api.patch(`/admin/orders/${selected.id}`, { status });
+ setSelected(data);
+ refetchOrders();
+ } catch (e) {
+ setErr(e?.response?.data?.message || t("orders.updateFailed", "Update failed."));
+ }
+ };
+
+ const del = (id) => {
+ setPendingDeleteId(id);
+ };
+
+ const confirmDelete = async () => {
+ setDeleteBusy(true);
+ setErr("");
+ try {
+ if (pendingBulkDelete) {
+ await Promise.all(selectedIds.map((id) => api.delete(`/admin/orders/${id}`)));
+ setSelectedIds([]);
+ } else if (pendingDeleteId != null) {
+ await api.delete(`/admin/orders/${pendingDeleteId}`);
+ if (selected?.id === pendingDeleteId) closeView();
+ }
+ refetchOrders();
+ } catch (e) {
+ setErr(e?.response?.data?.message || t("orders.deleteFailed", "Delete failed."));
+ } finally {
+ setDeleteBusy(false);
+ setPendingDeleteId(null);
+ setPendingBulkDelete(false);
+ }
+ };
+
+ const hasActiveFilters = toolbarFilterCount > 0 || search.trim() !== "";
+
+ const allSelected =
+ rows.length > 0 && rows.every((o) => selectedIds.includes(o.id));
+
+ const toggleSelectAll = () => {
+ if (allSelected) {
+ const filteredIds = new Set(rows.map((o) => o.id));
+ setSelectedIds((prev) => prev.filter((id) => !filteredIds.has(id)));
+ return;
+ }
+ const next = new Set(selectedIds);
+ rows.forEach((o) => next.add(o.id));
+ setSelectedIds(Array.from(next));
+ };
+
+ const toggleSelect = (id) => {
+ setSelectedIds((prev) =>
+ prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+ );
+ };
+
+ const deleteSelected = () => {
+ if (selectedIds.length === 0) return;
+ setPendingBulkDelete(true);
+ };
+
+ const printSelectedInvoices = async () => {
+ if (selectedIds.length === 0) return;
+ try {
+ const res = await api.post(
+ "/admin/orders/invoices/bulk-pdf",
+ { order_ids: selectedIds },
+ { responseType: "blob" }
+ );
+
+ const blob = new Blob([res.data], { type: "application/pdf" });
+ const url = window.URL.createObjectURL(blob);
+ const a = document.createElement("a");
+ a.href = url;
+ a.download = `invoices-bulk-${Date.now()}.pdf`;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ window.URL.revokeObjectURL(url);
+ } catch (e) {
+ setErr(e?.response?.data?.message || t("orders.bulkPrintFailed", "Bulk print failed."));
+ }
+ };
+
+ const accentColor = primaryColor;
+
+  const orderFilterSections = useMemo(() => {
+    const statusOpts = [
+      { value: "awaiting_payment", label: t("orders.awaitingPayment", "Awaiting payment") },
+      { value: "processing", label: t("orders.processing", "Processing") },
+      { value: "shipped", label: t("orders.shipped", "Shipped") },
+      { value: "in_transit", label: t("orders.inTransit", "In transit") },
+      { value: "arrived", label: t("orders.arrived", "Arrived") },
+      { value: "completed", label: t("orders.goodsReceived", "Goods received") },
+      { value: "cancelled", label: t("orders.cancelled", "Cancelled") },
+    ].map((opt) => ({
+      ...opt,
+      count: rows.filter((o) => {
+        const fulfillment = String(o.status || "").toLowerCase();
+        if (opt.value === "awaiting_payment") return isAwaitingPayment(o);
+        if (opt.value === "processing") return fulfillment === "processing" || fulfillment === "preparing" || fulfillment === "paid";
+        if (opt.value === "shipped") return fulfillment === "shipped";
+        if (opt.value === "in_transit") return fulfillment === "in_transit";
+        if (opt.value === "arrived") return fulfillment === "arrived";
+        if (opt.value === "completed") return fulfillment === "completed" || fulfillment === "delivered";
+        if (opt.value === "cancelled") return fulfillment === "cancelled";
+        return false;
+      }).length,
+    }));
+
+    const paymentOpts = [
+      { value: "prepaid", label: t("orders.payNowKhqr", "Pay now · KHQR") },
+      { value: "cod", label: t("orders.codCourier", "COD · Courier") },
+      { value: "paid", label: t("orders.paid", "Paid") },
+      { value: "unpaid", label: t("orders.unpaid", "Unpaid") },
+    ].map((opt) => ({
+      ...opt,
+      count: rows.filter((o) => {
+        if (opt.value === "cod") return isCodOrder(o);
+        if (opt.value === "prepaid") return !isCodOrder(o);
+        if (opt.value === "paid") return isOrderPaid(o.payment_status);
+        return !isOrderPaid(o.payment_status);
+      }).length,
+    }));
+
+    return [
+      { id: "status", title: t("orders.orderStatus", "Order status"), options: statusOpts },
+      { id: "payment", title: t("orders.payment", "Payment"), options: paymentOpts },
+    ];
+  }, [rows, t]);
+
+ if (!permissionsReady) {
+ return <AdminSectionLoader />;
+ }
+
+ if (!canViewOrders) {
+ return <Navigate to={getFirstAccessibleAdminPath(user)} replace />;
+ }
+
+ return (
+ <div className="min-h-full admin-soft text-slate-800 dark:text-slate-100">
+ <div className="w-full min-w-0">
+ {/* Header */}
+ <div className="mb-8">
+ <h1 className="text-2xl md:text-4xl font-semibold text-slate-800 dark:text-white mb-2">
+ {t("orders.title", "Orders")}
+ </h1>
+ <p className="text-slate-500 dark:text-slate-400 text-lg">{t("orders.subtitle", "Manage and track all customer orders")}</p>
+ </div>
+
+ {/* Error Alert */}
+ {err && (
+ <div className="mb-6 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center gap-3 animate-shake">
+ <svg className="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+ </svg>
+ <span className="text-red-700 dark:text-red-100 font-medium">{err}</span>
+ <button onClick={() => setErr("")} className="ml-auto text-red-400 dark:text-red-300 hover:text-red-600 dark:hover:text-red-200 transition-colors">
+ <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
+ )}
+
+ {/* Orders Table */}
+ <div className="admin-surface rounded-2xl border admin-border">
+ <div className="relative z-10 admin-surface border-b admin-border px-4 md:px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+ <div className="flex items-center gap-3">
+ <div className="w-10 h-10 border admin-border rounded-lg flex items-center justify-center admin-surface">
+ <svg className="w-6 h-6 text-slate-700 dark:text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+ </svg>
+ </div>
+ <div>
+ <h3 className="text-slate-800 dark:text-white font-semibold">
+ {hasActiveFilters ? t("orders.filteredOrders", "Filtered orders") : t("orders.allOrders", "All Orders")}
+ </h3>
+ <p className="text-slate-500 dark:text-slate-400 text-sm">
+ {hasActiveFilters ? (
+ <>
+ <span className="font-medium text-slate-700 dark:text-slate-200">
+ {summary.order_count} {summary.order_count === 1 ? t("orders.order", "order") : t("orders.orders", "orders")}
+ </span>
+ <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+ <span>{summary.total_items} {summary.total_items === 1 ? t("orders.item", "item") : t("orders.items", "items")}</span>
+ <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+ <span className="font-semibold text-slate-800 dark:text-slate-100">
+ <Money value={summary.total_revenue} />
+ </span>
+ {orderTotal >= ADMIN_LIST_PAGINATE_AT && rows.length > 0 ? (
+ <>
+ <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+ <span>{rows.length} {t("orders.onThisPage", "on this page")}</span>
+ </>
+ ) : null}
+ </>
+ ) : (
+ <>
+ {summary.order_count} {t("orders.totalOrders", "total orders")}
+ {orderTotal >= ADMIN_LIST_PAGINATE_AT && rows.length > 0 ? (
+ <span className="text-slate-400"> · {rows.length} {t("orders.onThisPage", "on this page")}</span>
+ ) : null}
+ </>
+ )}
+ </p>
+ </div>
+ </div>
+ <div className="flex flex-wrap items-center gap-2 md:gap-3 justify-end w-full md:w-auto">
+ <div className="flex flex-wrap items-center gap-1 h-10 rounded-lg border admin-border admin-surface p-1">
+ {QUICK_DATE_OPTIONS.map((option) => (
+ <button
+ key={option.value}
+ type="button"
+ onClick={() => setQuickDate((current) => current === option.value ? "" : option.value)}
+ className={
+  "h-8 rounded-md px-3 text-xs font-semibold transition-all " +
+  (quickDate === option.value
+   ? "bg-[color:var(--admin-primary)] text-white shadow-sm"
+   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white")
+ }
+ >
+ {option.labelKey ? t(option.labelKey, option.fallback) : option.label}
+ </button>
+ ))}
+ </div>
+ <input
+ value={search}
+ onChange={(e) => setSearch(e.target.value)}
+ placeholder={t("orders.searchPlaceholder", "Search orders...")}
+ className="h-10 w-full md:w-64 rounded-lg border admin-border admin-surface px-3 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 outline-none focus:border-[var(--admin-primary)] focus:bg-transparent"
+ />
+ <AdminFilterToolbarButton activeCount={toolbarFilterCount} onClick={openFilterDrawer} />
+ <AdminFilterDrawer
+ open={listFilters.open}
+ onClose={listFilters.closeDrawer}
+ sections={orderFilterSections}
+ selected={listFilters.draft}
+ onToggle={listFilters.toggleDraft}
+ onApply={applyAllFilters}
+ onClearAll={clearAllFilters}
+ yearMonth={{
+ value: yearMonthFilter.draft,
+ onChange: yearMonthFilter.setDraft,
+ startYear: 2020,
+ title: t("orders.orderDate", "Order date"),
+ }}
+ />
+ {/* View Toggle */}
+ <div className="inline-flex h-10 items-center rounded-lg border admin-border admin-surface p-1 gap-1 order-2 md:order-none">
+ <button
+ type="button"
+ title={t("orders.listView", "List view")}
+ onClick={() => setViewMode("list")}
+ className={"h-8 w-8 rounded-md transition-colors inline-flex items-center justify-center " + (viewMode === "list" ? "bg-[color:var(--admin-primary)] text-white shadow-sm" : "text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800")}
+ >
+ <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+ </svg>
+ </button>
+ <button
+ type="button"
+ title={t("orders.gridView", "Grid view")}
+ onClick={() => setViewMode("grid")}
+ className={"h-8 w-8 rounded-md transition-colors inline-flex items-center justify-center " + (viewMode === "grid" ? "bg-[color:var(--admin-primary)] text-white shadow-sm" : "text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800")}
+ >
+ <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={2} />
+ <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={2} />
+ <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={2} />
+ <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={2} />
+ </svg>
+ </button>
+ <button
+ type="button"
+ title={t("orders.splitView", "Split view")}
+ onClick={() => setViewMode("split")}
+ className={"h-8 w-8 rounded-md transition-colors inline-flex items-center justify-center " + (viewMode === "split" ? "bg-[color:var(--admin-primary)] text-white shadow-sm" : "text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800")}
+ >
+ <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <rect x="3" y="3" width="8" height="18" rx="1" strokeWidth={2} />
+ <rect x="13" y="3" width="8" height="18" rx="1" strokeWidth={2} />
+ </svg>
+ </button>
+ </div>
+ {selectedIds.length > 0 && (
+ <>
+ <Button
+ type="button"
+ onClick={printSelectedInvoices}
+ className="gap-2"
+ >
+ <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z" />
+ </svg>
+ {t("orders.printSelected", "Print Selected Invoices")} ({selectedIds.length})
+ </Button>
+ {canDeleteOrders ? (
+ <Button
+ type="button"
+ variant="destructive"
+ onClick={deleteSelected}
+ className="gap-2"
+ >
+ <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+ </svg>
+ {t("orders.deleteSelected", "Delete Selected")} ({selectedIds.length})
+ </Button>
+ ) : null}
+ </>
+ )}
+ <AdminRefreshButton
+   onClick={refetchOrders}
+   loading={loading}
+   size="md"
+ />
+ <TableColumnVisibilityMenu
+ columns={tableColumns}
+ visibility={columnVisibility}
+ onToggle={toggleTableColumn}
+ onShowAll={() => setAllTableColumnsVisible(true)}
+ onHideAll={() => setAllTableColumnsVisible(false)}
+ />
+ </div>
+ </div>
+
+ {loading && rows.length === 0 ? (
+ <AdminSectionLoader rows={8} />
+ ) : rows.length === 0 ? (
+ <AdminEmptyState
+   type="orders"
+   isSearch={Boolean(search?.trim() || toolbarFilterCount > 0)}
+   searchQuery={search}
+   onClearFilters={() => {
+     setSearch("");
+     clearAllFilters();
+   }}
+ />
+ ) : (
+ <>
+ {viewMode === "list" ? (
+ <div className="overflow-x-auto rounded-b-2xl">
+ <table className="w-full">
+ <thead>
+ <tr className="bg-slate-50 dark:bg-slate-900/70 text-left text-xs font-semibold text-slate-600 dark:text-slate-200 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700/70">
+ {isColVisible("select") ? (
+ <th className="px-4 md:px-6 py-3 md:py-4">
+ <input
+ type="checkbox"
+ onChange={toggleSelectAll}
+ checked={allSelected}
+ className="rounded"
+ />
+ </th>
+ ) : null}
+ {isColVisible("orderId") ? <th className="px-4 md:px-6 py-3 md:py-4">{t("orders.orderId", "Order ID")}</th> : null}
+ {isColVisible("customer") ? <th className="px-4 md:px-6 py-3 md:py-4">{t("orders.customer", "Customer")}</th> : null}
+ {isColVisible("status") ? <th className="px-4 md:px-6 py-3 md:py-4">{t("orders.orderStatus", "Status")}</th> : null}
+ {isColVisible("payment") ? <th className="px-4 md:px-6 py-3 md:py-4">{t("orders.payment", "Payment")}</th> : null}
+ {isColVisible("items") ? <th className="px-4 md:px-6 py-3 md:py-4">{t("orders.itemsCol", "Items")}</th> : null}
+ {isColVisible("total") ? <th className="px-4 md:px-6 py-3 md:py-4">{t("orders.total", "Total")}</th> : null}
+ {isColVisible("date") ? <th className="px-4 md:px-6 py-3 md:py-4">{t("orders.date", "Date")}</th> : null}
+ {isColVisible("actions") ? <th className="px-4 md:px-6 py-3 md:py-4 text-right">{t("orders.actionsCol", "Actions")}</th> : null}
+ </tr>
+ </thead>
+ <tbody className="divide-y divide-slate-200 dark:divide-slate-700/60">
+ {rows.map((o) => (
+ <tr key={o.id} className="hover:bg-[rgba(var(--admin-primary-rgb),0.08)] dark:hover:bg-[rgba(var(--admin-primary-rgb),0.12)] transition-colors">
+ {isColVisible("select") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <input
+ type="checkbox"
+ checked={selectedIds.includes(o.id)}
+ onChange={() => toggleSelect(o.id)}
+ className="rounded"
+ />
+ </td>
+ ) : null}
+ {isColVisible("orderId") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <span className="text-sm font-bold text-slate-800 dark:text-slate-100">#{o.id}</span>
+ </td>
+ ) : null}
+ {isColVisible("customer") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <div className="flex items-center gap-3">
+ <CustomerAvatar user={o.user} />
+ <div>
+ <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{o.user?.name || t("orders.guest", "Guest")}</p>
+ <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px]">{o.user?.email}</p>
+ </div>
+ </div>
+ </td>
+ ) : null}
+ {isColVisible("status") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <OrderStatusBadges order={o} mode={mode} primaryColor={primaryColor} />
+ </td>
+ ) : null}
+ {isColVisible("payment") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <OrderPaymentBadge order={o} mode={mode} />
+ </td>
+ ) : null}
+ {isColVisible("items") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <span className="text-sm text-slate-600 dark:text-slate-300">{Number(o.items_count ?? o.items?.length ?? 0)} {Number(o.items_count ?? o.items?.length ?? 0) === 1 ? t("orders.item", "item") : t("orders.items", "items")}</span>
+ </td>
+ ) : null}
+ {isColVisible("total") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <span className="text-sm font-bold text-slate-900 dark:text-slate-100"><Money value={o.total} /></span>
+ </td>
+ ) : null}
+ {isColVisible("date") ? (
+ <td className="px-4 md:px-6 py-3 md:py-4">
+ <span className="text-sm text-slate-500 dark:text-slate-400">{formatOrderDate(o.created_at, language)}</span>
+ </td>
+ ) : null}
+                  {isColVisible("actions") ? (
+                    <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                      <AdminRowActions
+                        onView={() => open(o.id)}
+                        onInvoice={() => window.open(`/admin/orders/${o.id}/invoice`, "_blank")}
+                        onDelete={() => del(o.id)}
+                        canDelete={canDeleteOrders}
+                        viewTitle={t("common.actions.view", "View")}
+                        invoiceTitle={t("orders.viewInvoice", "View Invoice")}
+                        deleteTitle={t("common.actions.delete", "Delete")}
+                      />
+                    </td>
+                  ) : null}
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ ) : (
+ <div className={"p-6 " + (viewMode === "grid" ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3" : "grid gap-4 lg:grid-cols-2")}>
+ {rows.map((o) => (
+ <div key={o.id} className="rounded-xl border admin-border admin-surface p-4 flex flex-col gap-3">
+ <div className="flex items-center justify-between">
+ <div className="flex items-center gap-2">
+ <input
+ type="checkbox"
+ checked={selectedIds.includes(o.id)}
+ onChange={() => toggleSelect(o.id)}
+ className="rounded"
+ />
+ <span className="text-sm font-bold text-slate-800 dark:text-slate-100">#{o.id}</span>
+ </div>
+ <div className="flex flex-wrap items-center justify-end gap-1.5">
+ <OrderPaymentBadge order={o} mode={mode} />
+ <OrderStatusBadges order={o} mode={mode} primaryColor={primaryColor} />
+ </div>
+ </div>
+ <div className="flex items-center gap-3">
+ <CustomerAvatar user={o.user} sizeClass="w-9 h-9" />
+ <div className="min-w-0">
+ <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">{o.user?.name || t("orders.guest", "Guest")}</p>
+ <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{o.user?.email}</p>
+ </div>
+ </div>
+ <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-2">
+ <span>{Number(o.items_count ?? o.items?.length ?? 0)} {Number(o.items_count ?? o.items?.length ?? 0) === 1 ? t("orders.item", "item") : t("orders.items", "items")}</span>
+ <span className="font-bold text-slate-900 dark:text-slate-100 text-sm"><Money value={o.total} /></span>
+ <span>{formatOrderDate(o.created_at, language)}</span>
+ </div>
+                  <AdminRowActions
+                    className="w-full pt-1"
+                    align="center"
+                    onView={() => open(o.id)}
+                    onInvoice={() => window.open(`/admin/orders/${o.id}/invoice`, "_blank")}
+                    onDelete={() => del(o.id)}
+                    canDelete={canDeleteOrders}
+                    viewTitle={t("common.actions.view", "View")}
+                    invoiceTitle={t("orders.viewInvoice", "View Invoice")}
+                    deleteTitle={t("common.actions.delete", "Delete")}
+                  />
+ </div>
+ ))}
+ </div>
+ )}
+ <AdminListPaginationBar
+ page={currentPage}
+ lastPage={totalPages}
+ total={orderTotal}
+ onPageChange={setCurrentPage}
+ />
+ </>
+ )}
+ </div>
+ </div>
+
+ <AdminConfirmDialog
+ open={pendingDeleteId != null || pendingBulkDelete}
+ onClose={() => {
+ if (deleteBusy) return;
+ setPendingDeleteId(null);
+ setPendingBulkDelete(false);
+ }}
+ onConfirm={confirmDelete}
+ title={pendingBulkDelete ? t("orders.deleteSelectedOrdersPrompt", "Delete selected orders?") : t("orders.deleteThisOrderPrompt", "Delete this order?")}
+ message={
+ pendingBulkDelete
+ ? t("orders.deleteSelectedOrdersMessage", "Permanently remove {count} order(s)? This cannot be undone.", { count: selectedIds.length })
+ : t("orders.deleteThisOrderMessage", "This action cannot be undone.")
+ }
+ confirmLabel={t("common.actions.delete", "Delete")}
+ cancelLabel={t("common.actions.cancel", "Cancel")}
+ destructive
+ busy={deleteBusy}
+ />
+
+ <AdminModal
+ open={!!selected}
+ onClose={closeView}
+ title={selected ? `${t("orders.order", "Order")} #${selected.id}` : ""}
+ titleId="order-view-title"
+ maxWidthClass="max-w-7xl"
+ maxHeightClass="max-h-[96vh]"
+ >
+ {viewLoading || !selected ? (
+ <AdminSectionLoader />
+ ) : (
+ <>
+ <div className="mb-6 flex flex-wrap items-center gap-3">
+ <OrderPaymentBadge order={selected} mode={mode} />
+ <OrderStatusBadges order={selected} mode={mode} primaryColor={primaryColor} />
+ <span className="text-sm text-slate-500 dark:text-slate-400">
+ {formatOrderDate(selected?.created_at, language)}
+ </span>
+ </div>
+
+ <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
+ <div>
+{/* Customer Info */}
+ <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+ <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">{t("orders.customerInformation", "Customer Information")}</h4>
+ <div className="flex items-center gap-3">
+ <CustomerAvatar user={selected?.user} />
+ <div>
+ <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{selected?.user?.name || t("orders.guest", "Guest")}</p>
+ <p className="text-xs text-slate-500 dark:text-slate-400">{selected?.user?.email}</p>
+ </div>
+ </div>
+ </div>
+
+ {/* Order Items */}
+ <div className="mb-6">
+ <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">{t("orders.orderItems", "Order Items")}</h4>
+ <div className="space-y-3">
+ {(selected?.items || []).map((it) => (
+ <div key={it.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+ <div className="flex items-center gap-3">
+ <div className="w-12 h-12 bg-white dark:bg-slate-900 rounded-lg flex items-center justify-center text-slate-400 dark:text-slate-500 font-bold overflow-hidden">
+ {it.product?.image_url ? (
+ <img src={it.product.image_url} alt={it.product.name} className="w-full h-full object-cover" />
+ ) : (
+ <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+ </svg>
+ )}
+ </div>
+ <div>
+ <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
+ {it.name || it.product?.name}
+ </p>
+ <p className="text-xs text-slate-500 dark:text-slate-400">
+ {t("orders.qty", "Qty")}: {Number(it.qty ?? it.quantity ?? 0)}
+ {it.lot_tier_at_sale ? (
+ <span className="ml-2 rounded bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+ {lotTierLabel(it.lot_tier_at_sale)}
+ </span>
+ ) : null}
+ </p>
+ {it.lot_number_at_sale || it.listing_status_at_sale ? (
+ <p className="text-[11px] text-slate-500 dark:text-slate-400">
+ {it.lot_number_at_sale ? <span className="font-mono">{it.lot_number_at_sale}</span> : null}
+ {it.lot_number_at_sale && it.listing_status_at_sale ? " · " : null}
+ {it.listing_status_at_sale ? listingStatusLabel(it.listing_status_at_sale) : null}
+ </p>
+ ) : null}
+ <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+ {t("orders.paidLabel", "Paid")}: <Money value={it.price} />
+ {Number(it.product?.price || 0) > Number(it.price || 0) && (
+ <span className="ml-1 line-through text-slate-400">
+ <Money value={it.product?.price} />
+ </span>
+ )}
+ </p>
+ </div>
+ </div>
+ <span className="text-sm font-bold text-slate-900 dark:text-slate-100"><Money value={it.line_total} /></span>
+ </div>
+ ))}
+ </div>
+ </div>
+
+ <div className="border-t border-slate-200 dark:border-slate-800 pt-4 flex justify-between items-center mb-6">
+ <span className="text-lg font-semibold text-slate-700 dark:text-slate-200">{t("orders.totalAmount", "Total Amount")}</span>
+ <span className="text-2xl font-bold text-slate-900 dark:text-white"><Money value={selected?.total} /></span>
+ </div>
+
+ {canEditOrders ? (
+ <div className="mb-6">
+ <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">{t("orders.updateFulfillmentStatus", "Update fulfillment status")}</label>
+ <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+ {t("orders.fulfillmentStepsHelp", "Same steps as the courier Telegram job: Processing → Shipped → In transit → Arrived → Goods received.")}
+ </p>
+ <div className="flex gap-3">
+ <AdminSearchSelect
+ value={status === 'paid' ? 'processing' : (status === 'pending' ? 'pending_payment' : (status === 'delivered' ? 'completed' : status))}
+ onChange={setStatus}
+ options={orderStatusOptions}
+ inputClassName="flex-1 h-12 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-[var(--admin-primary)] dark:focus:border-[rgba(var(--admin-primary-rgb),0.7)] focus:ring-2 focus:ring-[rgba(var(--admin-primary-rgb),0.2)] focus:bg-white dark:focus:bg-slate-950 transition-all"
+ className="flex-1 min-w-0"
+ ariaLabel={t("orders.orderStatus", "Order status")}
+ placeholder={t("orders.searchStatusPlaceholder", "Search status…")}
+ allowEmpty={false}
+ />
+ <button
+ onClick={save}
+ className="h-12 px-6 rounded-xl bg-[color:var(--admin-primary)] text-white font-semibold hover:brightness-110 transition-colors"
+ >
+ {t("common.actions.save", "Save")}
+ </button>
+ </div>
+ </div>
+ ) : null}
+ </div>
+
+ <div>
+ {(canEditShipments || selected?.shipment) ? (
+ <OrderShipmentPanel
+ orderId={selected?.id}
+ shipment={selected?.shipment}
+ canEdit={canEditShipments}
+ onSaved={(shipment) => {
+ setSelected((prev) => (prev ? { ...prev, shipment, status: "shipped" } : prev));
+ setStatus("shipped");
+ refetchOrders();
+ }}
+ />
+ ) : null}
+
+ {selected?.id && (canEditShipments || canEditOrders) ? (
+ <OrderDriverTelegramQr
+ orderId={selected.id}
+ orderNumber={selected.order_number}
+ shipment={selected?.shipment}
+ canEdit={canEditShipments || canEditOrders}
+ onShipmentChange={(shipment) => {
+ setSelected((prev) => (prev ? { ...prev, shipment } : prev));
+ }}
+ />
+ ) : null}
+
+ <OrderCodCollectionPanel
+ order={selected}
+ canEdit={canEditOrders}
+ onCollected={(order) => {
+ setSelected((prev) => (prev ? { ...prev, ...order, payment_status: "paid" } : prev));
+ refetchOrders();
+ }}
+ />
+ </div>
+ </div>
+ </>
+ )}
+ </AdminModal>
+
+ <style>{`
+ @keyframes shake {
+ 0%, 100% { transform: translateX(0); }
+ 25% { transform: translateX(-5px); }
+ 75% { transform: translateX(5px); }
+ }
+ .animate-shake {
+ animation: shake 0.5s ease-in-out;
+ }
+ `}</style>
+ </div>
+ );
+}
+

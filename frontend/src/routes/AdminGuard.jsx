@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../app/auth";
+import { useAuth } from "../state/auth.jsx";
 import { isAdminUser } from "../app/redirectAfterAuth";
 
 export default function AdminGuard({ children }) {

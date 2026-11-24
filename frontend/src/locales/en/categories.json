@@ -1,0 +1,107 @@
+{
+  "category": "Category",
+  "title": "Categories Management",
+  "subtitle": "Manage your product categories with full CRUD operations",
+  "categoriesTitle": "Categories",
+  "categoriesSubtitle": "Manage your product categories with full CRUD operations",
+  "addCategory": "Add New Category",
+  "createCategory": "Create Category",
+  "editCategory": "Edit Category",
+  "allCategories": "All Categories",
+  "totalCategories": "total categories",
+  "searchPlaceholder": "Search categories...",
+  "selectAll": "Select all",
+  "deleteSelectedCount": "Delete Selected ({count})",
+  "gender": {
+    "allGenders": "All Genders",
+    "all": "All",
+    "men": "Men",
+    "women": "Women",
+    "boy": "Boy",
+    "girl": "Girl"
+  },
+  "type": {
+    "selectType": "Select type",
+    "clothes": "Clothes",
+    "shoes": "Shoes",
+    "belt": "Belt",
+    "hat": "Hat",
+    "bag": "Bag",
+    "accessory": "Accessory",
+    "other": "Other"
+  },
+  "form": {
+    "createTitle": "Add New Category",
+    "editTitle": "Edit Category",
+    "name": "Category Name",
+    "namePlaceholder": "e.g., Summer Collection",
+    "gender": "Gender",
+    "genderOptional": "Gender (Optional)",
+    "searchGender": "Search gender…",
+    "type": "Category Type",
+    "typeAria": "Category type",
+    "searchType": "Search type…",
+    "activeStatus": "Active Status",
+    "addCategory": "Add Category",
+    "creating": "Creating...",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "table": {
+    "allCategories": "All Categories",
+    "totalCategories": "total categories",
+    "name": "Category Name",
+    "slug": "Slug",
+    "gender": "Gender",
+    "type": "Type",
+    "status": "Status",
+    "actions": "Actions",
+    "filteredCategories": "Filtered Categories"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "actions": {
+    "editCategory": "Edit category",
+    "deleteCategory": "Delete category",
+    "viewDetails": "View Details",
+    "refresh": "Refresh"
+  },
+  "dialogs": {
+    "deleteTitle": "Delete this category?",
+    "deleteMessage": "This action cannot be undone. Ensure no products rely on this category.",
+    "deleteSelectedTitle": "Delete selected categories?",
+    "deleteSelectedMessage": "Permanently remove {count} selected category/categories? This cannot be undone."
+  },
+  "messages": {
+    "created": "Category created successfully!",
+    "updated": "Category updated successfully!",
+    "deleted": "Category deleted successfully!",
+    "bulkDeleted": "Selected categories deleted successfully!",
+    "noPermissionCreate": "You don't have permission to create categories.",
+    "noPermissionEdit": "You don't have permission to edit categories.",
+    "noPermissionDelete": "You don't have permission to delete categories.",
+    "creating": "Creating category",
+    "pleaseWait": "Please wait",
+    "createFailed": "Create failed",
+    "validationFailed": "Validation failed."
+  },
+  "empty": {
+    "noCategoriesYet": "No categories yet",
+    "createFirstCategory": "Create your first category above"
+  },
+  "picker": {
+    "label": "Category",
+    "emptyMessage": "No catalog categories yet. Add categories under Admin → Categories.",
+    "placeholder": "Search category…",
+    "emptyLabel": "— Select category —",
+    "helpText": "Type to search · {count} available"
+  },
+  "totalCategoriesSingle": "{count} category",
+  "totalCategoriesMultiple": "{count} total categories"
+}

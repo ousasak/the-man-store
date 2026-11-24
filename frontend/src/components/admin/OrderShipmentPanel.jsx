@@ -6,6 +6,7 @@ import {
   applyCourierTemplate,
   COURIER_URL_PRESETS,
 } from "../../lib/courierTracking.js";
+import { useTranslation } from "../../lib/i18n.jsx";
 
 const DEFAULT_PROVIDERS = [
   "J&T Express",
@@ -20,15 +21,8 @@ const PROVIDER_OPTIONS = mapAdminSelectOptions(
   DEFAULT_PROVIDERS.map((p) => ({ id: p, label: p })),
 );
 
-const PRESET_OPTIONS = [
-  { value: "", label: "Manual URL" },
-  ...COURIER_URL_PRESETS.map((p) => ({
-    value: p.id,
-    label: `${p.label} template`,
-  })),
-];
-
 export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved }) {
+  const { t } = useTranslation();
   const [provider, setProvider] = useState("J&T Express");
   const [trackingCode, setTrackingCode] = useState("");
   const [externalUrl, setExternalUrl] = useState("");
@@ -38,6 +32,14 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
   const [pickedUpByPhone, setPickedUpByPhone] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const presetOptions = React.useMemo(() => [
+    { value: "", label: t("sales.manualUrl", "Manual URL") },
+    ...COURIER_URL_PRESETS.map((p) => ({
+      value: p.id,
+      label: `${p.label} ${t("sales.template", "template")}`,
+    })),
+  ], [t]);
 
   useEffect(() => {
     if (!shipment) return;
@@ -71,11 +73,11 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
     const code = trackingCode.trim();
     const url = externalUrl.trim();
     if (!code) {
-      setError("Tracking number is required.");
+      setError(t("sales.trackingNumberRequired", "Tracking number is required."));
       return;
     }
     if (!url) {
-      setError("Courier tracking URL is required to mark the order as shipped.");
+      setError(t("sales.trackingUrlRequired", "Courier tracking URL is required to mark the order as shipped."));
       return;
     }
 
@@ -92,10 +94,10 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
         picked_up_by_name: pickedUpByName.trim() || null,
         picked_up_by_phone: pickedUpByPhone.trim() || null,
       });
-      setSuccess("Courier tracking saved. Order marked as shipped.");
+      setSuccess(t("sales.courierTrackingSaved", "Courier tracking saved. Order marked as shipped."));
       onSaved?.(data?.data);
     } catch (e) {
-      setError(e?.response?.data?.message || "Failed to save courier tracking.");
+      setError(e?.response?.data?.message || t("sales.courierTrackingFailed", "Failed to save courier tracking."));
     } finally {
       setSaving(false);
     }
@@ -105,22 +107,27 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
 
   return (
     <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-      <h4 className="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Courier tracking</h4>
+      <h4 className="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">
+        {t("sales.courierTrackingTitle", "Courier tracking")}
+      </h4>
       <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
-        Paste the courier tracking link from J&amp;T, Vireak Buntham, etc. Customers will see a &quot;Track package&quot; button on My Orders.
+        {t(
+          "sales.courierTrackingDesc",
+          "Paste the courier tracking link from J&T, Vireak Buntham, etc. Customers will see a \"Track package\" button on My Orders."
+        )}
       </p>
 
       {shipment?.status ? (
         <p className="mb-3 text-xs text-slate-600 dark:text-slate-300">
-          Shipment status: <span className="font-semibold capitalize">{shipment.status}</span>
+          {t("sales.shipmentStatus", "Shipment status:")} <span className="font-semibold capitalize">{shipment.status}</span>
           {shipment.tracking_code ? (
             <span className="ml-2 font-mono text-[11px]">{shipment.tracking_code}</span>
           ) : null}
           {shipment.courier_provider || (shipment.provider && shipment.provider !== "Internal") ? (
-            <span className="ml-2">· Courier: <span className="font-semibold">{shipment.courier_provider || shipment.provider}</span></span>
+            <span className="ml-2">· {t("sales.courier", "Courier")}: <span className="font-semibold">{shipment.courier_provider || shipment.provider}</span></span>
           ) : null}
           {shipment.picked_up_by_name ? (
-            <span className="ml-2">· Picked up by: <span className="font-semibold">{shipment.picked_up_by_name}</span>
+            <span className="ml-2">· {t("sales.pickedUpBy", "Picked up by:")} <span className="font-semibold">{shipment.picked_up_by_name}</span>
               {shipment.picked_up_by_phone ? (
                 <span className="font-normal"> · {shipment.picked_up_by_phone}</span>
               ) : null}
@@ -133,44 +140,52 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Courier</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">
+                {t("sales.courier", "Courier")}
+              </label>
               <AdminSearchSelect
                 value={provider}
                 onChange={setProvider}
                 options={PROVIDER_OPTIONS}
                 inputClassName="h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[var(--admin-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                ariaLabel="Courier"
-                placeholder="Search or type courier…"
+                ariaLabel={t("sales.courier", "Courier")}
+                placeholder={t("sales.courier", "Search or type courier…")}
                 allowEmpty={false}
                 allowCustomValue
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">URL preset</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">
+                {t("sales.urlPreset", "URL preset")}
+              </label>
               <AdminSearchSelect
                 value={presetId}
                 onChange={applyPreset}
-                options={PRESET_OPTIONS}
+                options={presetOptions}
                 inputClassName="h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[var(--admin-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                ariaLabel="URL preset"
-                placeholder="Search preset…"
+                ariaLabel={t("sales.urlPreset", "URL preset")}
+                placeholder={t("sales.urlPreset", "Search preset…")}
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Tracking number</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">
+              {t("sales.trackingNumber", "Tracking number")}
+            </label>
             <input
               type="text"
               value={trackingCode}
               onChange={(e) => setTrackingCode(e.target.value)}
-              placeholder="e.g. JT1234567890"
+              placeholder={t("sales.trackingNumberPlaceholder", "e.g. JT1234567890")}
               className="h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-sm font-mono text-slate-900 outline-none focus:border-[var(--admin-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Courier tracking URL</label>
+            <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">
+              {t("sales.courierTrackingUrl", "Courier tracking URL")}
+            </label>
             <input
               type="url"
               value={externalUrl}
@@ -178,36 +193,40 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
                 setPresetId("");
                 setExternalUrl(e.target.value);
               }}
-              placeholder="https://..."
+              placeholder={t("sales.trackingUrlPlaceholder", "https://...")}
               className="h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[var(--admin-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
           <div className="rounded-lg border border-dashed border-slate-300 bg-white/80 p-3 dark:border-slate-600 dark:bg-slate-900/40">
             <p className="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
-              Courier pickup at shop / អ្នកដឹកមកយកពីហាង
+              {t("sales.courierPickupShopTitle", "Courier pickup at shop")}
             </p>
             <p className="mb-3 text-[11px] text-slate-500 dark:text-slate-400">
-              កត់ឈ្មោះ + ទូរស័ព្ទពេលប្រគល់ទំនិញ — ជាអ្នកទទួលខុសត្រូវ (បង្ហាញលើ delivery note ហាង).
+              {t("sales.courierPickupShopDesc", "Note driver name and phone when handing over items.")}
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Driver name</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  {t("sales.driverName", "Driver name")}
+                </label>
                 <input
                   type="text"
                   value={pickedUpByName}
                   onChange={(e) => setPickedUpByName(e.target.value)}
-                  placeholder="Courier driver name"
+                  placeholder={t("sales.driverNamePlaceholder", "Courier driver name")}
                   className="h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[var(--admin-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Driver phone</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  {t("sales.driverPhone", "Driver phone")}
+                </label>
                 <input
                   type="text"
                   value={pickedUpByPhone}
                   onChange={(e) => setPickedUpByPhone(e.target.value)}
-                  placeholder="e.g. 012 345 678"
+                  placeholder={t("sales.driverPhonePlaceholder", "e.g. 012 345 678")}
                   className="h-11 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[var(--admin-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />
               </div>
@@ -223,7 +242,7 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
             disabled={saving}
             className="h-11 rounded-xl bg-[color:var(--admin-primary)] px-5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save & mark shipped"}
+            {saving ? t("common.messages.saving", "Saving…") : t("sales.saveAndMarkShipped", "Save & mark shipped")}
           </button>
         </div>
       ) : shipment?.external_tracking_url ? (
@@ -233,10 +252,12 @@ export default function OrderShipmentPanel({ orderId, shipment, canEdit, onSaved
           rel="noopener noreferrer"
           className="text-sm font-semibold text-[color:var(--admin-primary)] hover:underline"
         >
-          Open courier tracking
+          {t("sales.openCourierTracking", "Open courier tracking")}
         </a>
       ) : (
-        <p className="text-xs text-slate-500 dark:text-slate-400">No external courier link yet.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          {t("sales.noCourierLink", "No external courier link yet.")}
+        </p>
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { resolveImageUrl } from "../../lib/images";
 import { useWishlist } from "../../state/wishlist";
+import { useLanguage } from "../../lib/i18n";
 import {
   hasStorefrontAdminDiscount,
   hasStorefrontLotDiscount,
@@ -34,6 +35,7 @@ function primaryImageUrl(product) {
 }
 
 export default function ProductCard({ p }) {
+  const { t } = useLanguage();
   const [imgOk, setImgOk] = useState(true);
   const wishlist = useWishlist();
 
@@ -63,14 +65,15 @@ export default function ProductCard({ p }) {
     Boolean(p.has_discount) ||
     (discountPrice !== null && Number(discountPrice) > 0 && Number(discountPrice) < Number(p.price || 0));
 
+  const discountLabel = t("discount", "Discount");
   const badge = hasDiscount
     ? discountPercentage && Number(discountPercentage) > 0
-      ? `Discount ${Math.round(Number(discountPercentage))}%`
+      ? `${discountLabel} ${Math.round(Number(discountPercentage))}%`
       : pctLabel
-        ? `Discount ${pctLabel.replace(/^-/, "")}`
-        : "Discount"
+        ? `${discountLabel} ${pctLabel.replace(/^-/, "")}`
+        : discountLabel
     : p.old_price
-      ? "SALE"
+      ? t("sale", "SALE")
       : null;
   const originalPrice = discountCompare ?? (hasDiscount ? null : p.old_price ?? null);
   const saleBadge = badge;
@@ -100,8 +103,8 @@ export default function ProductCard({ p }) {
               : "border-zinc-200 bg-white/95") +
             " pointer-events-none translate-y-1 opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100"
           }
-          aria-label="Wishlist"
-          title="Wishlist"
+          aria-label={t("wishlist", "Wishlist")}
+          title={t("wishlist", "Wishlist")}
         >
           <Heart
             className="h-4 w-4 sm:h-5 sm:w-5"
@@ -119,7 +122,7 @@ export default function ProductCard({ p }) {
 
           {hasDiscount && (p.discount?.end_date || p.active_discount?.end_date || p.activeDiscount?.end_date) && (
             <div className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold leading-tight text-white shadow-sm whitespace-nowrap">
-              Limited Time
+              {t("limitedTime", "Limited Time")}
             </div>
           )}
         </div>

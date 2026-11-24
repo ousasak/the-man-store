@@ -1,0 +1,19 @@
+{
+  "Unauthenticated.": "Unauthenticated.",
+  "Unauthorized.": "Unauthorized.",
+  "Forbidden.": "Forbidden.",
+  "Not Found.": "Not Found.",
+  "The given data was invalid.": "The given data was invalid.",
+  "Service temporarily unavailable. Please try again shortly.": "Service temporarily unavailable. Please try again shortly.",
+  "Order already paid.": "Order already paid.",
+  "Order payment method is not Bakong KHQR.": "Order payment method is not Bakong KHQR.",
+  "Payment order not found": "Payment order not found",
+  "Collection not found": "Collection not found",
+  "Product not found": "Product not found",
+  "User not found": "User not found",
+  "Success": "Success",
+  "Operation completed successfully.": "Operation completed successfully.",
+  "Saved successfully": "Saved successfully",
+  "Deleted successfully": "Deleted successfully",
+  "Updated successfully": "Updated successfully"
+}

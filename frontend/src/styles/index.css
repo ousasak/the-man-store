@@ -43,8 +43,8 @@ html.admin-dashboard[data-admin-theme="dark"] .fs-skeleton-block {
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
+  --primary: 44 67% 46%;
+  --primary-foreground: 0 0% 100%;
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
   --muted: 210 40% 96.1%;
@@ -55,7 +55,7 @@ html.admin-dashboard[data-admin-theme="dark"] .fs-skeleton-block {
   --destructive-foreground: 210 40% 98%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  --ring: 44 67% 46%;
   --radius: 0.75rem;
 }
 
@@ -86,10 +86,10 @@ html.admin-dashboard[data-admin-theme="dark"] body {
 :root {
 
   /* Admin dashboard accent (inherits to `.admin-theme`; overridden on html via ThemeProvider) */
-  --admin-primary: #6E8B7E;
-  --admin-primary-rgb: 110, 139, 126;
-  --admin-spectrum-1: #6E8B7E;
-  --admin-spectrum-1-rgb: 110, 139, 126;
+  --admin-primary: #C59B27;
+  --admin-primary-rgb: 197, 155, 39;
+  --admin-spectrum-1: #C59B27;
+  --admin-spectrum-1-rgb: 197, 155, 39;
   --admin-spectrum-2: #5B8DEF;
   --admin-spectrum-2-rgb: 91, 141, 239;
   --admin-spectrum-3: #7A9A8D;
@@ -108,7 +108,7 @@ html.admin-dashboard[data-admin-theme="dark"] body {
   --fs-fg: 18 18 18;
   --fs-muted: 99 102 106;
   --fs-border: 226 232 240;
-  --fs-brand-primary: 243 156 18;
+  --fs-brand-primary: 197 155 39;
   --fs-primary: 10 10 10;
   --fs-radius-sm: 10px;
   --fs-radius-md: 14px;
@@ -1002,18 +1002,18 @@ html[data-telegram-miniapp="1"]:not([data-telegram-miniapp-desktop="1"]) .fs-her
 
 .fs-btn-primary {
   color: #fff;
-  background: linear-gradient(135deg, #f39c12, #ea8f00);
-  box-shadow: 0 10px 22px rgba(243, 156, 18, .28);
+  background: linear-gradient(135deg, #C59B27, #B0881E);
+  box-shadow: 0 10px 22px rgba(197, 155, 39, .28);
 }
 
 .fs-btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 28px rgba(243, 156, 18, .35);
+  box-shadow: 0 14px 28px rgba(197, 155, 39, .35);
 }
 
 .fs-btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(243, 156, 18, .26);
+  box-shadow: 0 6px 14px rgba(197, 155, 39, .26);
 }
 
 /* Storefront filter toolbar + drawer (portal — not inside .fs-site) */
@@ -3249,6 +3249,83 @@ html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-spectrum-kpi {
   background-image: linear-gradient(145deg,
       rgba(15, 23, 42, 0.95) 0%,
       rgba(var(--admin-kpi-accent-rgb, var(--admin-primary-rgb)), 0.12) 100%) !important;
+  border-top: 3px solid var(--admin-kpi-accent, var(--admin-primary)) !important;
+}
+
+/* Dark mode KPI accent colors — luminous, high-contrast palette so stripes ("ឆូត") and icons are 100% visible */
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(1) {
+  --admin-kpi-accent: var(--admin-spectrum-1, #38bdf8);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-1-rgb, 56, 189, 248);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(2) {
+  --admin-kpi-accent: var(--admin-spectrum-2, #fbbf24);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-2-rgb, 251, 191, 36);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(3) {
+  --admin-kpi-accent: var(--admin-spectrum-3, #34d399);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-3-rgb, 52, 211, 153);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(4) {
+  --admin-kpi-accent: var(--admin-spectrum-4, #f87171);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-4-rgb, 248, 113, 113);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(5) {
+  --admin-kpi-accent: var(--admin-spectrum-5, #c084fc);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-5-rgb, 192, 132, 252);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(6) {
+  --admin-kpi-accent: var(--admin-spectrum-6, #2dd4bf);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-6-rgb, 45, 212, 191);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(7) {
+  --admin-kpi-accent: var(--admin-spectrum-7, #fb923c);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-7-rgb, 251, 146, 60);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(8) {
+  --admin-kpi-accent: var(--admin-spectrum-1, #38bdf8);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-1-rgb, 56, 189, 248);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(9) {
+  --admin-kpi-accent: var(--admin-spectrum-2, #fbbf24);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-2-rgb, 251, 191, 36);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(10) {
+  --admin-kpi-accent: var(--admin-spectrum-3, #34d399);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-3-rgb, 52, 211, 153);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(11) {
+  --admin-kpi-accent: var(--admin-spectrum-4, #f87171);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-4-rgb, 248, 113, 113);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid> :nth-child(12) {
+  --admin-kpi-accent: var(--admin-spectrum-5, #c084fc);
+  --admin-kpi-accent-rgb: var(--admin-spectrum-5-rgb, 192, 132, 252);
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid .admin-stat-icon {
+  background-color: rgba(var(--admin-kpi-accent-rgb, 56, 189, 248), 0.18) !important;
+  color: var(--admin-kpi-accent, #38bdf8) !important;
+  border-color: rgba(var(--admin-kpi-accent-rgb, 56, 189, 248), 0.35) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid .admin-stat-icon svg {
+  color: var(--admin-kpi-accent, #38bdf8) !important;
+  stroke: var(--admin-kpi-accent, #38bdf8) !important;
+}
+
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-stat-grid .admin-spectrum-kpi,
+html.admin-dashboard[data-admin-theme="dark"] .admin-theme .admin-spectrum-kpi {
   border-top: 3px solid var(--admin-kpi-accent, var(--admin-primary)) !important;
 }
 

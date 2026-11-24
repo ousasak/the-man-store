@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 const MotionDiv = React.forwardRef((props, ref) => <motion.div ref={ref} {...props} />);
 MotionDiv.displayName = "MotionDiv";
@@ -42,6 +43,7 @@ const DialogPopup = React.forwardRef(
     },
     ref
   ) => {
+    const { t } = useLanguage();
     const defaultTransition = transition || {
       type: "spring",
       stiffness: 150,
@@ -124,7 +126,7 @@ const DialogPopup = React.forwardRef(
                         {showCloseButton && (
                           <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full bg-white/10 backdrop-blur-md p-2 opacity-80 transition-all hover:opacity-100 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 disabled:pointer-events-none">
                             <X className="h-5 w-5" />
-                            <span className="sr-only">Close</span>
+                            <span className="sr-only">{t("close", "Close")}</span>
                           </DialogPrimitive.Close>
                         )}
                       </div>
@@ -152,7 +154,7 @@ const DialogPopup = React.forwardRef(
                       {showCloseButton && (
                         <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full bg-white/10 backdrop-blur-md p-2 opacity-80 transition-all hover:opacity-100 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 disabled:pointer-events-none">
                           <X className="h-5 w-5" />
-                          <span className="sr-only">Close</span>
+                          <span className="sr-only">{t("close", "Close")}</span>
                         </DialogPrimitive.Close>
                       )}
                     </div>
@@ -174,7 +176,7 @@ const DialogPopup = React.forwardRef(
                   {showCloseButton && (
                     <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full bg-white/10 backdrop-blur-md p-2 opacity-80 transition-all hover:opacity-100 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 disabled:pointer-events-none">
                       <X className="h-5 w-5" />
-                      <span className="sr-only">Close</span>
+                      <span className="sr-only">{t("close", "Close")}</span>
                     </DialogPrimitive.Close>
                   )}
                 </MotionDiv>

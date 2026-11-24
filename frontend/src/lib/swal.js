@@ -1,6 +1,7 @@
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import { isAdminDarkChrome, popAdminModalChrome, pushAdminModalChrome } from "./adminDarkChrome.js";
+import { getLanguage } from "./i18n.jsx";
 
 const DANGER = "#dc2626";
 const FALLBACK_PRIMARY = "#0F172A";
@@ -16,20 +17,40 @@ function isDarkChrome() {
     return isAdminDarkChrome();
 }
 
-/** English-first; Khmer legacy keys used only when English is absent. */
-function englishTitle(parts) {
-    return parts.title || parts.enTitle || parts.khTitle || "";
+function isKhmerLocale() {
+    const lang = (getLanguage() || "en").toLowerCase();
+    return lang === "km" || lang === "kh";
 }
 
-function englishBody(parts) {
-    const { enText, khText } = parts;
+function resolveLocaleTitle(parts = {}, fallbackEn = "", fallbackKh = "") {
+    if (parts.title) return parts.title;
+    const isKm = isKhmerLocale();
+    if (isKm) {
+        return parts.khTitle || parts.enTitle || fallbackKh || fallbackEn || "";
+    }
+    return parts.enTitle || parts.khTitle || fallbackEn || fallbackKh || "";
+}
+
+function resolveLocaleBody(parts = {}, fallbackEn = undefined, fallbackKh = undefined) {
+    const { enText, khText, text } = parts;
+    if (text != null && String(text).length) return String(text);
+    const isKm = isKhmerLocale();
+    if (isKm) {
+        if (khText != null && String(khText).length) return String(khText);
+        if (enText != null && String(enText).length) return String(enText);
+        return fallbackKh || fallbackEn;
+    }
     if (enText != null && String(enText).length) return String(enText);
     if (khText != null && String(khText).length) return String(khText);
-    return undefined;
+    return fallbackEn || fallbackKh;
 }
 
-function englishButton(en, kh) {
-    return en || kh || "";
+function resolveLocaleButton(en, kh, fallbackEn = "", fallbackKh = "") {
+    const isKm = isKhmerLocale();
+    if (isKm) {
+        return kh || en || fallbackKh || fallbackEn || "";
+    }
+    return en || kh || fallbackEn || fallbackKh || "";
 }
 
 const modalChromeColors = () => {
@@ -83,20 +104,50 @@ export const biText = (kh, en) => `${kh} (${en})`;
 
 /** @param {string | object} arg */
 export const toastSuccess = async (arg) => {
-    const opts = typeof arg === "string" ? { enText: arg } : arg || {};
-    const dark = isDarkChrome();
-    const head = englishTitle(opts) || "Success";
-    const text = englishBody(opts);
+    const opts = typeof arg === "string" ? { text: arg } : arg || {};
+    const text = resolveLocaleBody(opts) || resolveLocaleTitle(opts, "Success", "ជោគជ័យ");
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(
+            new CustomEvent("admin:toast", { detail: { type: "success", message: text } })
+        );
+    }
+    return Promise.resolve();
+};
 
-    const col = modalChromeColors();
-    return Swal.fire({
-        ...toastClasses(),
-        icon: "success",
-        iconColor: cssVarHex("--admin-primary", FALLBACK_PRIMARY),
-        title: head,
-        ...(text ? { text } : {}),
-        ...col,
-    });
+/** @param {string | object} arg */
+export const toastError = async (arg) => {
+    const opts = typeof arg === "string" ? { text: arg } : arg || {};
+    const text = resolveLocaleBody(opts) || resolveLocaleTitle(opts, "Error", "កំហុស");
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(
+            new CustomEvent("admin:toast", { detail: { type: "error", message: text } })
+        );
+    }
+    return Promise.resolve();
+};
+
+/** @param {string | object} arg */
+export const toastWarning = async (arg) => {
+    const opts = typeof arg === "string" ? { text: arg } : arg || {};
+    const text = resolveLocaleBody(opts) || resolveLocaleTitle(opts, "Warning", "ការព្រមាន");
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(
+            new CustomEvent("admin:toast", { detail: { type: "warning", message: text } })
+        );
+    }
+    return Promise.resolve();
+};
+
+/** @param {string | object} arg */
+export const toastInfo = async (arg) => {
+    const opts = typeof arg === "string" ? { text: arg } : arg || {};
+    const text = resolveLocaleBody(opts) || resolveLocaleTitle(opts, "Information", "ព័ត៌មាន");
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(
+            new CustomEvent("admin:toast", { detail: { type: "info", message: text } })
+        );
+    }
+    return Promise.resolve();
 };
 
 export const successAlert = async ({
@@ -155,9 +206,10 @@ export const errorAlert = async ({
     enText,
     detail,
 } = {}) => {
+    const isKm = isKhmerLocale();
     const head =
-        englishTitle({ title, enTitle: enTitle ?? undefined, khTitle }) || "Something went wrong";
-    const msg = englishBody({ enText, khText }) || "Please try again.";
+        resolveLocaleTitle({ title, enTitle: enTitle ?? undefined, khTitle }, "Something went wrong", "មានបញ្ហាកើតឡើង");
+    const msg = resolveLocaleBody({ enText, khText }, "Please try again.", "សូមព្យាយាមម្ដងទៀត។");
     const text = detail ? `${msg}\n\n${detail}` : msg;
     const dark = isDarkChrome();
 
@@ -168,7 +220,7 @@ export const errorAlert = async ({
         iconColor: DANGER,
         title: head,
         text,
-        confirmButtonText: "OK",
+        confirmButtonText: isKm ? "យល់ព្រម" : "OK",
         showCancelButton: false,
         focusConfirm: true,
         didRender: () => {
@@ -195,13 +247,14 @@ export const warningConfirm = async ({
     intent = "primary",
     icon,
 } = {}) => {
+    const isKm = isKhmerLocale();
     const head =
-        englishTitle({ title, enTitle: enTitle ?? undefined, khTitle }) || "Please confirm";
-    const body = englishBody({ enText, khText });
+        resolveLocaleTitle({ title, enTitle: enTitle ?? undefined, khTitle }, "Please confirm", "សូមបញ្ជាក់");
+    const body = resolveLocaleBody({ enText, khText });
     const destructive = intent === "destructive";
     const confirmLbl =
-        englishButton(enConfirm, khConfirm) || (destructive ? "Delete" : "Confirm");
-    const cancelResolved = englishButton(enCancel, khCancel) || "Cancel";
+        resolveLocaleButton(enConfirm, khConfirm, destructive ? "Delete" : "Confirm", destructive ? "លុប" : "យល់ព្រម");
+    const cancelResolved = resolveLocaleButton(enCancel, khCancel, "Cancel", "បោះបង់");
 
     const primaryHex = cssVarHex("--admin-primary", FALLBACK_PRIMARY);
     const dark = isDarkChrome();
@@ -249,8 +302,8 @@ export const warningConfirm = async ({
 
 export const loadingAlert = ({ title, khTitle, enTitle: ent, khText, enText: ext } = {}) => {
     const head =
-        englishTitle({ title, enTitle: ent ?? undefined, khTitle }) || "Processing";
-    const body = englishBody({ enText: ext, khText }) || "Please wait.";
+        resolveLocaleTitle({ title, enTitle: ent ?? undefined, khTitle }, "Processing", "កំពុងដំណើរការ");
+    const body = resolveLocaleBody({ enText: ext, khText }, "Please wait.", "សូមរង់ចាំបន្តិច...");
 
     Swal.fire({
         ...modalLayoutClasses(),

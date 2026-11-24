@@ -1,6 +1,7 @@
 import React from "react";
 import { Eye, Pencil, FileText, Printer, Trash2, Copy } from "lucide-react";
 import { useTheme } from "../../state/theme.jsx";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 /**
  * Standard sizes for row action buttons
@@ -102,8 +103,8 @@ export function AdminActionButton({
  */
 export function AdminDeleteButton({
   onClick,
-  title = "Delete",
-  ariaLabel = "Delete",
+  title,
+  ariaLabel,
   disabled = false,
   size = "md",
   className = "",
@@ -111,13 +112,15 @@ export function AdminDeleteButton({
   icon,
   ...rest
 }) {
+  const { t } = useLanguage();
+  const resolvedTitle = title || t("common.actions.delete") || "Delete";
   const sizeConfig = SIZE_CONFIGS[size] || SIZE_CONFIGS.md;
   return (
     <AdminActionButton
       type="button"
       onClick={onClick}
-      title={title}
-      ariaLabel={ariaLabel}
+      title={resolvedTitle}
+      ariaLabel={ariaLabel || resolvedTitle}
       disabled={disabled}
       variant="danger"
       size={size}
@@ -153,12 +156,12 @@ export default function AdminRowActions({
   canDelete = true,
 
   // Tooltitles and Labels
-  viewTitle = "View",
-  editTitle = "Edit",
-  invoiceTitle = "Invoice",
-  printTitle = "Print",
-  copyTitle = "Duplicate",
-  deleteTitle = "Delete",
+  viewTitle,
+  editTitle,
+  invoiceTitle,
+  printTitle,
+  copyTitle,
+  deleteTitle,
 
   // Custom Icons (optional overrides)
   viewIcon,
@@ -187,6 +190,14 @@ export default function AdminRowActions({
   ...props
 }) {
   const sizeConfig = SIZE_CONFIGS[size] || SIZE_CONFIGS.md;
+  const { t } = useLanguage();
+
+  const resolvedViewTitle = viewTitle || t("common.actions.view") || "View";
+  const resolvedEditTitle = editTitle || t("common.actions.edit") || "Edit";
+  const resolvedInvoiceTitle = invoiceTitle || t("invoice") || "Invoice";
+  const resolvedPrintTitle = printTitle || t("common.actions.print") || "Print";
+  const resolvedCopyTitle = copyTitle || t("common.actions.copy") || "Duplicate";
+  const resolvedDeleteTitle = deleteTitle || t("common.actions.delete") || "Delete";
 
   const alignClass =
     align === "start"
@@ -212,7 +223,7 @@ export default function AdminRowActions({
       {onView && canView ? (
         <AdminActionButton
           onClick={onView}
-          title={viewTitle}
+          title={resolvedViewTitle}
           size={size}
           icon={viewIcon || <Eye className={sizeConfig.icon} />}
         />
@@ -222,7 +233,7 @@ export default function AdminRowActions({
       {onEdit && canEdit ? (
         <AdminActionButton
           onClick={onEdit}
-          title={editTitle}
+          title={resolvedEditTitle}
           size={size}
           icon={editIcon || <Pencil className={sizeConfig.icon} />}
         />
@@ -232,7 +243,7 @@ export default function AdminRowActions({
       {onInvoice && canInvoice ? (
         <AdminActionButton
           onClick={onInvoice}
-          title={invoiceTitle}
+          title={resolvedInvoiceTitle}
           size={size}
           icon={invoiceIcon || <FileText className={sizeConfig.icon} />}
         />
@@ -242,7 +253,7 @@ export default function AdminRowActions({
       {onPrint && canPrint ? (
         <AdminActionButton
           onClick={onPrint}
-          title={printTitle}
+          title={resolvedPrintTitle}
           size={size}
           icon={printIcon || <Printer className={sizeConfig.icon} />}
         />
@@ -252,7 +263,7 @@ export default function AdminRowActions({
       {onCopy && canCopy ? (
         <AdminActionButton
           onClick={onCopy}
-          title={copyTitle}
+          title={resolvedCopyTitle}
           size={size}
           icon={copyIcon || <Copy className={sizeConfig.icon} />}
         />
@@ -285,8 +296,8 @@ export default function AdminRowActions({
       {onDelete && canDelete ? (
         <AdminDeleteButton
           onClick={onDelete}
-          title={deleteDisabled && deleteDisabledReason ? deleteDisabledReason : deleteTitle}
-          ariaLabel={deleteTitle}
+          title={deleteDisabled && deleteDisabledReason ? deleteDisabledReason : resolvedDeleteTitle}
+          ariaLabel={resolvedDeleteTitle}
           disabled={deleteDisabled}
           size={size}
           icon={deleteIcon || <Trash2 className={sizeConfig.icon} />}
@@ -295,3 +306,5 @@ export default function AdminRowActions({
     </div>
   );
 }
+
+export { AdminCloseButton, CloseButton } from "./AdminCloseButton.jsx";

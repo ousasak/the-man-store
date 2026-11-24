@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { ADMIN_LIST_FIELD_CLASS, adminListFiltersActive } from "../../lib/adminListQuery.js";
-import { mapIdLabelOptions, SORT_DIR_OPTIONS } from "../../lib/adminSelectHelpers.js";
+import { mapIdLabelOptions, SORT_DIR_OPTIONS, getSortDirOptions } from "../../lib/adminSelectHelpers.js";
 import { useAdminSidebarPinned } from "../../lib/useAdminSidebarPinned.js";
+import { useLanguage } from "../../lib/i18n.jsx";
 import AdminSearchSelect from "./AdminSearchSelect.jsx";
+import AdminDatePicker from "./AdminDatePicker.jsx";
 
 function ToolbarSearchSelect({
   value,
@@ -71,6 +73,7 @@ export default function AdminListQueryToolbar({
   embedded = false,
 }) {
   const sidebarPinned = useAdminSidebarPinned();
+  const { t } = useLanguage();
   const compact = singleRow && sidebarPinned;
   const fieldClass = compact
     ? `${ADMIN_LIST_FIELD_CLASS} h-10 px-2.5 text-sm`
@@ -87,33 +90,37 @@ export default function AdminListQueryToolbar({
   const searchMaxWidth = compact ? "max-w-[12rem]" : "max-w-[16rem]";
   const selectMin = (wide, narrow) => (compact ? narrow : wide);
 
+  const sortDirOptions = useMemo(() => getSortDirOptions(t), [t]);
+
   const sortOptionLabel = (opt) => {
     if (compact) return opt.label;
-    return `Sort: ${opt.label}`;
+    return `${t("common.sort", "Sort")}: ${opt.label}`;
   };
 
   const dateRangeFields = showDateRange ? (
     <>
       <label className={`flex flex-col gap-1 ${singleRow ? "shrink-0" : ""}`}>
-        <span className={dateLabelClass}>From date</span>
-        <input
-          type="date"
+        <span className={dateLabelClass}>{t("common.fromDate", "From date")}</span>
+        <AdminDatePicker
           value={fromDate}
-          onChange={(e) => onFromDateChange(e.target.value)}
+          onChange={onFromDateChange}
           max={toDate || undefined}
+          wrapperClassName={dateInputWidth}
           className={`${fieldClass} ${dateInputWidth} max-w-full`}
-          aria-label="From date"
+          ariaLabel={t("common.fromDate", "From date")}
+          placeholder={t("common.fromDate", "From date")}
         />
       </label>
       <label className={`flex flex-col gap-1 ${singleRow ? "shrink-0" : ""}`}>
-        <span className={dateLabelClass}>To date</span>
-        <input
-          type="date"
+        <span className={dateLabelClass}>{t("common.toDate", "To date")}</span>
+        <AdminDatePicker
           value={toDate}
-          onChange={(e) => onToDateChange(e.target.value)}
+          onChange={onToDateChange}
           min={fromDate || undefined}
+          wrapperClassName={dateInputWidth}
           className={`${fieldClass} ${dateInputWidth} max-w-full`}
-          aria-label="To date"
+          ariaLabel={t("common.toDate", "To date")}
+          placeholder={t("common.toDate", "To date")}
         />
       </label>
     </>
@@ -193,8 +200,8 @@ export default function AdminListQueryToolbar({
             <ToolbarSearchSelect
               value={sortDir}
               onChange={onSortDirChange}
-              options={SORT_DIR_OPTIONS.map((opt) => ({ id: opt.value, label: opt.label }))}
-              ariaLabel="Sort direction"
+              options={sortDirOptions}
+              ariaLabel={t("common.sortDirection", "Sort direction")}
               className={`${fieldClass} ${inlineFieldClass} ${selectMin("sm:min-w-[5.5rem]", "min-w-[5rem] max-w-[5.5rem]")}`}
               wrapperClassName={`${inlineFieldClass} shrink-0`}
               menuMinWidth={120}
@@ -215,8 +222,8 @@ export default function AdminListQueryToolbar({
   const metaRow = (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
       <span>
-        Showing {showingCount} of {totalCount}
-        {filtersActive ? " (filtered)" : ""}
+        {t("common.table.pagination", { start: 1, end: showingCount, total: totalCount }) || `Showing ${showingCount} of ${totalCount}`}
+        {filtersActive ? ` (${t("common.table.filtered", t("common.filtered", "បានចម្រាញ់"))})` : ""}
       </span>
       {filtersActive && onClearFilters ? (
         <button
@@ -224,7 +231,7 @@ export default function AdminListQueryToolbar({
           onClick={onClearFilters}
           className="font-semibold text-primary hover:underline transition-colors"
         >
-          Clear filters
+          {t("common.actions.clearFilters", t("common.resetFilters", "Clear filters"))}
         </button>
       ) : null}
     </div>
@@ -335,7 +342,7 @@ export default function AdminListQueryToolbar({
             <ToolbarSearchSelect
               value={sortBy}
               onChange={onSortByChange}
-              options={sortOptions.map((opt) => ({ id: opt.id, label: `Sort: ${opt.label}` }))}
+              options={sortOptions.map((opt) => ({ id: opt.id, label: `${t("common.sort", "Sort")}: ${opt.label}` }))}
               ariaLabel="Sort by"
               className={`${ADMIN_LIST_FIELD_CLASS} lg:col-span-2`}
               wrapperClassName="lg:col-span-2"
@@ -344,8 +351,8 @@ export default function AdminListQueryToolbar({
               <ToolbarSearchSelect
                 value={sortDir}
                 onChange={onSortDirChange}
-                options={SORT_DIR_OPTIONS.map((opt) => ({ id: opt.value, label: opt.label }))}
-                ariaLabel="Sort direction"
+                options={sortDirOptions}
+                ariaLabel={t("common.sortDirection", "Sort direction")}
                 className={`${ADMIN_LIST_FIELD_CLASS} lg:col-span-1`}
                 wrapperClassName="lg:col-span-1"
               />
@@ -355,25 +362,25 @@ export default function AdminListQueryToolbar({
         {showDateRange ? (
           <>
             <label className="flex flex-col gap-1 lg:col-span-2">
-              <span className={dateLabelClass}>From date</span>
-              <input
-                type="date"
+              <span className={dateLabelClass}>{t("common.fromDate", "From date")}</span>
+              <AdminDatePicker
                 value={fromDate}
-                onChange={(e) => onFromDateChange(e.target.value)}
+                onChange={onFromDateChange}
                 max={toDate || undefined}
                 className={`${ADMIN_LIST_FIELD_CLASS} min-w-0 w-full`}
-                aria-label="From date"
+                ariaLabel={t("common.fromDate", "From date")}
+                placeholder={t("common.fromDate", "From date")}
               />
             </label>
             <label className="flex flex-col gap-1 lg:col-span-2">
-              <span className={dateLabelClass}>To date</span>
-              <input
-                type="date"
+              <span className={dateLabelClass}>{t("common.toDate", "To date")}</span>
+              <AdminDatePicker
                 value={toDate}
-                onChange={(e) => onToDateChange(e.target.value)}
+                onChange={onToDateChange}
                 min={fromDate || undefined}
                 className={`${ADMIN_LIST_FIELD_CLASS} min-w-0 w-full`}
-                aria-label="To date"
+                ariaLabel={t("common.toDate", "To date")}
+                placeholder={t("common.toDate", "To date")}
               />
             </label>
           </>

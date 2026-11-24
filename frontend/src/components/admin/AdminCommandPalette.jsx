@@ -37,6 +37,7 @@ import {
 import api from "../../lib/api";
 import { useTheme } from "../../state/theme.jsx";
 import { useAuth } from "../../state/auth";
+import { useLanguage } from "../../lib/i18n.jsx";
 import { canAccessAdminPath } from "../../lib/adminPermissions.js";
 
 const RECENTS_STORAGE_KEY = "themanstore_admin_command_recents";
@@ -160,6 +161,7 @@ export default function AdminCommandPalette({ open, onClose }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { primaryColor } = useTheme();
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -242,7 +244,7 @@ export default function AdminCommandPalette({ open, onClose }) {
     if (!debouncedQuery && recents.length) {
       out.push({
         id: "recents",
-        label: "Recent",
+        label: t("recentSearches") || "Recent",
         icon: Clock,
         items: recents.map((r) => ({
           id: `recent-${r.id}`,
@@ -259,13 +261,13 @@ export default function AdminCommandPalette({ open, onClose }) {
     if (filteredPages.length) {
       out.push({
         id: "pages",
-        label: "Pages",
+        label: t("navigation.pages") || "Pages",
         icon: PanelsTopLeft,
         items: filteredPages.map((p) => ({
           id: p.id,
           kind: "page",
-          title: p.title,
-          description: p.description,
+          title: p.id === "page-inventory-lots" ? (t("navInventoryLots") || p.title) : p.title,
+          description: p.id === "page-inventory-lots" ? (t("inventory.lotsCommandPaletteDesc") || p.description) : p.description,
           path: p.path,
           icon: p.icon,
         })),
@@ -275,7 +277,7 @@ export default function AdminCommandPalette({ open, onClose }) {
     if (filteredActions.length && !debouncedQuery) {
       out.push({
         id: "actions",
-        label: "Quick actions",
+        label: t("quickActions") || "Quick actions",
         icon: Sparkles,
         items: filteredActions.map((p) => ({
           id: p.id,
@@ -292,7 +294,7 @@ export default function AdminCommandPalette({ open, onClose }) {
       if (remote.products.length) {
         out.push({
           id: "products",
-          label: "Products",
+          label: t("navProducts") || "Products",
           icon: Package,
           items: remote.products.map((p) => ({
             id: `product-${p.id}`,
@@ -308,7 +310,7 @@ export default function AdminCommandPalette({ open, onClose }) {
       if (remote.orders.length) {
         out.push({
           id: "orders",
-          label: "Orders",
+          label: t("navOrders") || "Orders",
           icon: ShoppingBag,
           items: remote.orders.map((o) => ({
             id: `order-${o.id}`,
@@ -325,7 +327,7 @@ export default function AdminCommandPalette({ open, onClose }) {
       if (remote.customers.length) {
         out.push({
           id: "customers",
-          label: "Customers",
+          label: t("navCustomers") || "Customers",
           icon: Users,
           items: remote.customers.map((c) => ({
             id: `customer-${c.id}`,
@@ -448,11 +450,11 @@ export default function AdminCommandPalette({ open, onClose }) {
                   setQuery(e.target.value);
                   setActiveIndex(0);
                 }}
-                placeholder="Search products, orders, customers, pages…"
+                placeholder={t("searchEverything") || "Search products, orders, customers, pages…"}
                 className="h-9 w-full min-w-0 border-0 bg-transparent text-[15px] font-medium text-slate-900 outline-none placeholder:font-normal placeholder:text-slate-400 dark:text-slate-100"
                 autoComplete="off"
                 spellCheck={false}
-                aria-label="Search"
+                aria-label={t("common.actions.search") || "Search"}
               />
               {query && (
                 <button
@@ -462,8 +464,8 @@ export default function AdminCommandPalette({ open, onClose }) {
                     inputRef.current?.focus();
                   }}
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                  aria-label="Clear search"
-                  title="Clear"
+                  aria-label={t("clearSearch") || "Clear search"}
+                  title={t("clear") || "Clear"}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -506,12 +508,12 @@ export default function AdminCommandPalette({ open, onClose }) {
                   <Search className="h-5 w-5" />
                 </div>
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                  {debouncedQuery ? `No results for “${debouncedQuery}”` : "Type to start searching"}
+                  {debouncedQuery ? `${t("noResultsFor") || "No results for"} “${debouncedQuery}”` : (t("typeToSearch") || "Type to start searching")}
                 </p>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   {debouncedQuery
-                    ? "Try a different keyword, SKU, or order number."
-                    : "Find products, orders, customers, and pages."}
+                    ? (t("tryPopularSearch") || "Try a different keyword, SKU, or order number.")
+                    : (t("searchEverything") || "Find products, orders, customers, and pages.")}
                 </p>
               </div>
             )}
@@ -609,24 +611,24 @@ export default function AdminCommandPalette({ open, onClose }) {
                 <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-slate-200 bg-white px-1 font-mono text-[10px] text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   <ArrowDown className="h-2.5 w-2.5" />
                 </kbd>
-                <span>Navigate</span>
+                <span>{t("navigate") || "Navigate"}</span>
               </span>
               <span className="flex items-center gap-1">
                 <kbd className="inline-flex h-5 items-center justify-center rounded border border-slate-200 bg-white px-1.5 font-mono text-[10px] text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   <CornerDownLeft className="h-2.5 w-2.5" />
                 </kbd>
-                <span>Open</span>
+                <span>{t("open") || "Open"}</span>
               </span>
               <span className="hidden items-center gap-1 sm:flex">
                 <kbd className="inline-flex h-5 items-center justify-center rounded border border-slate-200 bg-white px-1.5 font-mono text-[10px] text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   esc
                 </kbd>
-                <span>Close</span>
+                <span>{t("close") || "Close"}</span>
               </span>
             </div>
             <span className="hidden items-center gap-1 sm:flex">
               <Sparkles className="h-3 w-3" style={{ color: primaryColor }} />
-              <span>Smart search</span>
+              <span>{t("smartSearchLabel") || "Smart search"}</span>
             </span>
           </div>
         </div>

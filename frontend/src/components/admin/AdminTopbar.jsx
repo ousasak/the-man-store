@@ -53,7 +53,7 @@ export default function AdminTopbar({
  const onPinToggle = typeof onTogglePinned === "function" ? onTogglePinned : onToggleSidebar;
  const { user, logout } = useAuth();
  const { primaryColor, mode, saveTheme } = useTheme();
- const { language, toggleLanguage } = useLanguage();
+ const { language, toggleLanguage, t } = useLanguage();
  const navigate = useNavigate();
  const location = useLocation();
 
@@ -62,33 +62,69 @@ export default function AdminTopbar({
  const canOpenProfile = canAccessAdminPath(user, "/admin/profile");
  const canOpenGeneralSettings = canAccessAdminPath(user, "/admin/settings");
 
+ const getPageTitle = (path) => {
+   switch (path) {
+     case "/admin": return t("navDashboard") || "Dashboard";
+     case "/admin/purchase-orders": return t("navPurchaseOrders") || "Purchase Orders";
+     case "/admin/products": return t("navProducts") || "Products";
+     case "/admin/orders": return t("navOrders") || "Orders";
+     case "/admin/discounts":
+     case "/admin/sales": return t("navDiscount") || "Discount";
+     case "/admin/checkout":
+     case "/admin/pos": return t("navCheckout") || "Checkout";
+     case "/admin/categories": return t("navCategories") || "Categories";
+     case "/admin/brands": return t("navBrands") || "Brands";
+     case "/admin/suppliers": return t("navSuppliers") || "Suppliers";
+     case "/admin/stock-inventory": return t("navStockInventory") || "Stock & Inventory";
+     case "/admin/inventory-lots": return t("navInventoryLots") || "Inventory Lots";
+     case "/admin/stock-received": return t("navStockReceived") || "Stock Received";
+     case "/admin/reports": return t("navReports") || "Reports";
+     case "/admin/contacts": return t("navContacts") || "Contacts";
+     case "/admin/messages": return t("navMessages") || "Messages";
+     case "/admin/chatbot": return t("navChatbot") || "Chatbot";
+     case "/admin/notifications": return t("navNotifications") || "Notifications";
+     case "/admin/payments": return t("navPayments") || "Payments";
+     case "/admin/payments/sale-history": return t("navSaleHistory") || "Sale History";
+     case "/admin/replacement-cases": return t("navReplacements") || "Replacements";
+     case "/admin/shipments": return t("navShipments") || "Shipments";
+     case "/admin/settings": return t("navSettings") || "Settings";
+     case "/admin/profile": return t("navMyProfile") || "My Profile";
+     case "/admin/customers": return t("navCustomers") || "Customers";
+     case "/admin/administrators": return t("navAdministrators") || "Administrators";
+     case "/admin/homepage": return t("navHomePage") || "Home Page";
+     case "/admin/homepage-complete": return t("navCompleteManager") || "Complete Manager";
+     default: return PAGE_TITLES[path] || null;
+   }
+ };
+
  const breadcrumbs = useMemo(() => {
    if (pathNorm === "/admin/products/new" || pathNorm === "/admin/products/create") {
      return [
-       { label: "Products", path: "/admin/products" },
-       { label: "New Product", path: null },
+       { label: t("navProducts") || t("products.title", "Products"), path: "/admin/products" },
+       { label: t("products.newProduct") || t("newProduct") || "New Product", path: null },
      ];
    }
    if (/^\/admin\/products\/\d+\/edit$/.test(pathNorm)) {
      return [
-       { label: "Products", path: "/admin/products" },
-       { label: "Edit Product", path: null },
+       { label: t("navProducts") || t("products.title", "Products"), path: "/admin/products" },
+       { label: t("products.editProduct") || t("editProduct") || "Edit Product", path: null },
      ];
    }
    if (pathNorm === "/admin/purchase-orders/new") {
      return [
-       { label: "Purchase Orders", path: "/admin/purchase-orders" },
-       { label: "New PO", path: null },
+       { label: t("navPurchaseOrders") || "Purchase Orders", path: "/admin/purchase-orders" },
+       { label: `${t("new") || "New"} PO`, path: null },
      ];
    }
-   if (PAGE_TITLES[pathNorm]) {
-     return [{ label: PAGE_TITLES[pathNorm], path: null }];
+   const resolvedTitle = getPageTitle(pathNorm);
+   if (resolvedTitle) {
+     return [{ label: resolvedTitle, path: null }];
    }
    const matched = Object.keys(PAGE_TITLES)
      .filter((p) => p !== "/admin" && pathNorm.startsWith(p))
      .sort((a, b) => b.length - a.length)[0];
-   return [{ label: matched ? PAGE_TITLES[matched] : "Dashboard", path: null }];
- }, [pathNorm]);
+   return [{ label: matched ? (getPageTitle(matched) || PAGE_TITLES[matched]) : (t("navDashboard") || "Dashboard"), path: null }];
+ }, [pathNorm, t]);
 
  const [paletteOpen, setPaletteOpen] = useState(false);
  const [aiOpen, setAiOpen] = useState(false);
@@ -217,14 +253,14 @@ export default function AdminTopbar({
  <button
  type="button"
  onClick={() => setPaletteOpen(true)}
- title="Search (Ctrl+K)"
- aria-label="Open search"
+ title={`${t("common.actions.search") || "Search"} (Ctrl+K)`}
+ aria-label={t("common.actions.search") || "Open search"}
  className="group hidden md:flex w-[240px] items-center gap-2 h-8 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 pl-2.5 pr-1.5 text-left text-sm text-slate-400 hover:text-slate-600 hover:border-slate-300 dark:hover:border-slate-700 dark:hover:text-slate-300 transition-colors focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-slate-700"
  >
  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
  </svg>
- <span className="flex-1 truncate">Search…</span>
+ <span className="flex-1 truncate">{t("common.actions.search") || "Search…"}</span>
  <kbd className="hidden lg:inline-flex h-5 select-none items-center gap-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-1.5 font-mono text-[10px] font-medium text-slate-500 dark:text-slate-400">
  <span className="text-[11px] leading-none">⌘</span>K
  </kbd>
@@ -234,8 +270,8 @@ export default function AdminTopbar({
  <button
  type="button"
  onClick={() => setPaletteOpen(true)}
- title="Search"
- aria-label="Open search"
+ title={t("common.actions.search") || "Search"}
+ aria-label={t("common.actions.search") || "Open search"}
  className="md:hidden h-8 w-8 rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 transition-colors flex items-center justify-center"
  >
  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -247,7 +283,7 @@ export default function AdminTopbar({
  <AdminAiAssistantButton onClick={() => setAiOpen(true)} className="hidden sm:flex" />
  <button
  type="button"
- aria-label="Ask AI"
+ aria-label={t("askAi") || "Ask AI"}
  onClick={() => setAiOpen(true)}
  className="flex sm:hidden h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-secondary text-secondary-foreground transition-colors hover:bg-slate-100 dark:border-neutral-700 dark:bg-slate-800 dark:hover:bg-neutral-800"
  >
@@ -260,12 +296,12 @@ export default function AdminTopbar({
  <button
  onClick={() => navigate("/")}
  className="hidden lg:inline-flex items-center gap-1.5 h-8 shrink-0 rounded-md px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 transition-colors"
- title="Go to site"
+ title={t("visitSite") || "Visit site"}
  >
  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
  </svg>
- <span>Visit site</span>
+ <span>{t("visitSite") || "Visit site"}</span>
  </button>
 
  {/* Appearance / theme presets */}
@@ -277,7 +313,7 @@ export default function AdminTopbar({
  setShowNotif(false);
  setShowProfile(false);
  }}
- title="Customize appearance"
+ title={t("settings.appearance") || "Customize appearance"}
  className="h-8 w-8 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 transition-colors flex items-center justify-center"
  aria-expanded={showAppearance}
  aria-haspopup="dialog"
@@ -300,7 +336,7 @@ export default function AdminTopbar({
  <div
  className="absolute right-0 mt-1.5 z-50 rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 admin-bg-elevated overflow-hidden max-h-[min(90vh,calc(100vh-6rem))] overflow-y-auto"
  role="dialog"
- aria-label="Appearance settings"
+ aria-label={t("settings.appearance") || "Appearance settings"}
  >
  <AdminAppearancePanel />
  </div>
@@ -350,7 +386,7 @@ export default function AdminTopbar({
  setShowAppearance(false);
  }}
  className="relative h-8 w-8 rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 transition-colors flex items-center justify-center"
- title="Notifications"
+ title={t("notifications.title") || "Notifications"}
  >
  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
  <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V5a2 2 0 10-4 0v.3A6 6 0 006 11v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0m6 0H9" />
@@ -365,9 +401,9 @@ export default function AdminTopbar({
  {showNotif && (
  <div className="absolute right-0 mt-1.5 w-80 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
  <div className="px-3 py-2.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
- <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Notifications</p>
+ <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{t("notifications.title") || "Notifications"}</p>
  <button onClick={markAllRead} className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
- Mark all read
+ {t("notifications.markAllRead") || "Mark all read"}
  </button>
  </div>
  <div className="max-h-72 overflow-y-auto">
@@ -386,7 +422,7 @@ export default function AdminTopbar({
  </button>
  ))
  ) : (
- <p className="px-3 py-5 text-sm text-slate-500 dark:text-slate-400 text-center">No notifications yet.</p>
+ <p className="px-3 py-5 text-sm text-slate-500 dark:text-slate-400 text-center">{t("notifications.empty") || "No notifications yet."}</p>
  )}
  </div>
  </div>
@@ -427,7 +463,7 @@ export default function AdminTopbar({
  }}
  className="w-full text-left px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
  >
- My Profile
+ {t("navMyProfile") || "My Profile"}
  </button>
  ) : null}
  {canOpenGeneralSettings ? (
@@ -438,7 +474,7 @@ export default function AdminTopbar({
  }}
  className="w-full text-left px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
  >
- Settings
+ {t("navSettings") || "Settings"}
  </button>
  ) : null}
  </div>
@@ -447,7 +483,7 @@ export default function AdminTopbar({
  onClick={handleLogout}
  className="w-full text-left px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
  >
- Log out
+ {t("auth.logout") || "Log out"}
  </button>
  </div>
  </div>

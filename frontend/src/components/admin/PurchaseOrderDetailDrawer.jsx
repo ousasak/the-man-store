@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import api from "../../lib/api";
+import { useTranslation } from "../../lib/i18n.jsx";
 import { useAdminPermissions } from "../../hooks/useAdminPermissions.js";
 import { canUpdatePurchaseOrderReceiveStatus } from "../../lib/adminPermissions.js";
 import { closeSwal, errorAlert, loadingAlert, toastSuccess } from "../../lib/swal";
 import { getAdminValidationMessage } from "../../lib/adminValidation.js";
+import { AdminCloseButton } from "./AdminCloseButton.jsx";
 import {
   formatPoMoney,
   lineMoney,
@@ -60,6 +62,7 @@ export default function PurchaseOrderDetailDrawer({
   onUpdated,
   allowStatusActions = true,
 }) {
+  const { t } = useTranslation();
   const { user } = useAdminPermissions();
   const canUpdateStatus = canUpdatePurchaseOrderReceiveStatus(user);
   const [busy, setBusy] = useState(false);
@@ -85,18 +88,25 @@ export default function PurchaseOrderDetailDrawer({
   const totalCost = order.total_cost ?? items.reduce((s, row) => s + (Number(row.line_total_cost) || 0), 0);
   const stockReceived = order.stock_received;
   const status = order.status || "draft";
-  const statusLabel = PO_STATUS_LABELS[status] || status;
+  const statusLabel =
+    status === "received"
+      ? t("inventory.statusReceived", "Received")
+      : status === "pending"
+        ? t("inventory.statusPending", "Pending")
+        : status === "draft"
+          ? t("inventory.statusDraft", "Draft")
+          : PO_STATUS_LABELS[status] || status;
   const receiveListingLabel =
     order.receive_listing_status === "active"
-      ? "Active — sell immediately"
+      ? t("inventory.receiveListingActive", "Active — sell immediately")
       : order.receive_listing_status === "on_hold"
-        ? "On Hold — not for sale yet"
-        : "Default (On Hold when received)";
+        ? t("inventory.receiveListingOnHold", "On Hold — not for sale yet")
+        : t("inventory.receiveListingDefault", "Default (On Hold when received)");
 
   const updateStatus = async (nextStatus) => {
     if (busy || !order.id) return;
     setBusy(true);
-    loadingAlert(nextStatus === "received" ? "Receiving stock…" : "Updating…");
+    loadingAlert(nextStatus === "received" ? t("inventory.receivingStock", "Receiving stock…") : t("common.messages.updating", "Updating…"));
     try {
       const { data } = await api.patch(`/admin/purchase-orders/${order.id}/status`, {
         status: nextStatus,
@@ -108,18 +118,18 @@ export default function PurchaseOrderDetailDrawer({
         const units = updated?.stock_received?.total_units;
         await toastSuccess(
           units != null && units > 0
-            ? `Received ${units} unit(s) into inventory.`
-            : "Purchase order marked as received.",
+            ? t("inventory.receivedUnitsSuccess", "Received {count} unit(s) into inventory.", { count: units })
+            : t("inventory.poMarkedReceived", "Purchase order marked as received."),
         );
         if (updated?.stock_received?.warnings?.length) {
           errorAlert(updated.stock_received.warnings.join("\n"));
         }
       } else {
-        await toastSuccess("Purchase order marked as pending.");
+        await toastSuccess(t("inventory.poMarkedPending", "Purchase order marked as pending."));
       }
     } catch (e) {
       closeSwal();
-      errorAlert(getAdminValidationMessage(e, "Could not update purchase order status."));
+      errorAlert(getAdminValidationMessage(e, t("inventory.couldNotUpdatePoStatus", "Could not update purchase order status.")));
     } finally {
       setBusy(false);
     }
@@ -138,13 +148,13 @@ export default function PurchaseOrderDetailDrawer({
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Purchase order
+              {t("inventory.purchaseOrdersTitle", "Purchase order")}
             </p>
             <h2
               id="po-detail-drawer-title"
               className="mt-0.5 truncate font-mono text-lg font-semibold text-slate-900 dark:text-slate-100"
             >
-              {order.po_number || "Purchase order"}
+              {order.po_number || t("inventory.purchaseOrdersTitle", "Purchase order")}
             </h2>
             <span
               className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${poStatusBadgeClass(status)}`}
@@ -152,55 +162,48 @@ export default function PurchaseOrderDetailDrawer({
               {statusLabel}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" aria-hidden />
-          </button>
+          <AdminCloseButton onClose={onClose} size="sm" variant="default" />
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 space-y-7">
           <section className="space-y-4">
-            <SectionTitle>Order details</SectionTitle>
+            <SectionTitle>{t("inventory.poDetails", "Order details")}</SectionTitle>
             <div className="grid grid-cols-2 gap-4">
-              <DetailRow label="PO number" value={order.po_number} mono />
-              <DetailRow label="Supplier" value={supplier.name} />
-              <DetailRow label="Contact person" value={supplier.contact_person} />
-              <DetailRow label="Phone" required value={supplier.phone} />
-              <DetailRow label="Email" required value={supplier.email} />
-              <DetailRow label="Country" value={supplier.country} />
-              <DetailRow label="Address" value={supplier.address} multiline className="col-span-2" />
-              <DetailRow label="Order date" value={formatDate(order.order_date)} />
-              <DetailRow label="Expected date" value={formatDate(order.expected_delivery)} />
-              <DetailRow label="Created" value={formatDateTime(order.created_at)} />
-              <DetailRow label="Received" value={formatDateTime(order.received_at)} />
-              <DetailRow label="Sell status on receive" value={receiveListingLabel} className="col-span-2" />
-              <DetailRow label="Notes" value={order.notes} className="col-span-2" />
+              <DetailRow label={t("inventory.poNumber", "PO number")} value={order.po_number} mono />
+              <DetailRow label={t("inventory.supplier", "Supplier")} value={supplier.name} />
+              <DetailRow label={t("inventory.contactPerson", "Contact person")} value={supplier.contact_person} />
+              <DetailRow label={t("inventory.phone", "Phone")} required value={supplier.phone} />
+              <DetailRow label={t("inventory.email", "Email")} required value={supplier.email} />
+              <DetailRow label={t("common.country", "Country")} value={supplier.country} />
+              <DetailRow label={t("inventory.address", "Address")} value={supplier.address} multiline className="col-span-2" />
+              <DetailRow label={t("inventory.orderDate", "Order date")} value={formatDate(order.order_date)} />
+              <DetailRow label={t("inventory.expectedDate", "Expected date")} value={formatDate(order.expected_delivery)} />
+              <DetailRow label={t("common.created", "Created")} value={formatDateTime(order.created_at)} />
+              <DetailRow label={t("inventory.received", "Received")} value={formatDateTime(order.received_at)} />
+              <DetailRow label={t("inventory.listingStatus", "Sell status on receive")} value={receiveListingLabel} className="col-span-2" />
+              <DetailRow label={t("common.notes", "Notes")} value={order.notes} className="col-span-2" />
             </div>
           </section>
 
           <section className="space-y-3">
-            <SectionTitle>Line items</SectionTitle>
+            <SectionTitle>{t("inventory.lineItems", "Line items")}</SectionTitle>
             <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[520px] text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-950/60 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="px-3 py-2.5 w-10">#</th>
-                      <th className="px-3 py-2.5">Product</th>
-                      <th className="px-3 py-2.5">Qty</th>
-                      <th className="px-3 py-2.5">Unit price</th>
-                      <th className="px-3 py-2.5">Line total</th>
+                      <th className="px-3 py-2.5">{t("common.products", "Product")}</th>
+                      <th className="px-3 py-2.5">{t("common.quantity", "Qty")}</th>
+                      <th className="px-3 py-2.5">{t("inventory.unitPrice", "Unit price")}</th>
+                      <th className="px-3 py-2.5">{t("common.total", "Line total")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                     {items.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
-                          No line items
+                          {t("common.messages.noData", "No line items")}
                         </td>
                       </tr>
                     ) : (
@@ -234,7 +237,7 @@ export default function PurchaseOrderDetailDrawer({
               </div>
               <div className="flex justify-end border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/40 px-4 py-3 text-sm">
                 <span className="text-slate-600 dark:text-slate-300">
-                  Grand total: <strong className="text-slate-900 dark:text-slate-100">{formatPoMoney(totalCost)}</strong>
+                  {t("common.total", "Grand total")}: <strong className="text-slate-900 dark:text-slate-100">{formatPoMoney(totalCost)}</strong>
                 </span>
               </div>
             </div>
@@ -242,14 +245,17 @@ export default function PurchaseOrderDetailDrawer({
 
           {stockReceived?.received_lines > 0 ? (
             <section className="space-y-2">
-              <SectionTitle>Stock received</SectionTitle>
+              <SectionTitle>{t("inventory.stockReceivedTitle", "Stock received")}</SectionTitle>
               <p className="text-sm text-slate-700 dark:text-slate-200">
-                {stockReceived.total_units} unit(s) received across {stockReceived.received_lines} line(s).
+                {t("inventory.unitsReceivedAcrossLines", "{total} unit(s) received across {lines} line(s).", {
+                  total: stockReceived.total_units,
+                  lines: stockReceived.received_lines,
+                })}
               </p>
             </section>
           ) : allowStatusActions && (status === "draft" || status === "pending") ? (
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Warehouse stock has not been updated yet. Mark as received when goods arrive.
+              {t("inventory.warehouseStockNotUpdatedYet", "Warehouse stock has not been updated yet. Mark as received when goods arrive.")}
             </p>
           ) : null}
         </div>
@@ -262,7 +268,7 @@ export default function PurchaseOrderDetailDrawer({
               onClick={() => updateStatus("pending")}
               className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
             >
-              Mark as pending
+              {t("inventory.statusPending", "Mark as pending")}
             </button>
           ) : null}
           {allowStatusActions && canUpdateStatus && order.can_mark_received ? (
@@ -272,7 +278,7 @@ export default function PurchaseOrderDetailDrawer({
               onClick={() => updateStatus("received")}
               className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
             >
-              Mark as received
+              {t("inventory.receiveStock", "Mark as received")}
             </button>
           ) : null}
           <button
@@ -280,7 +286,7 @@ export default function PurchaseOrderDetailDrawer({
             onClick={onClose}
             className="ml-auto rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Close
+            {t("common.actions.close", "Close")}
           </button>
         </div>
       </aside>

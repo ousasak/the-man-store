@@ -10,6 +10,7 @@ import BrandCreateForm from "./BrandCreateForm.jsx";
 import { QUICK_CREATE_OPTION } from "./FieldWithQuickCreate.jsx";
 import AdminSearchSelect from "./AdminSearchSelect.jsx";
 import { mapAdminSelectOptions } from "../../lib/adminSelectHelpers.js";
+import { useLanguage } from "../../lib/i18n";
 
 const EMPTY = {
   name: "",
@@ -61,6 +62,7 @@ export default function ProductQuickCreateForm({
   showToast = true,
   defaultSupplierId = null,
 }) {
+  const { t } = useLanguage();
   const { primaryColor, mode } = useTheme();
   const accentColor = mode === "dark" ? "#FFFFFF" : primaryColor;
   const accentIsWhite = (accentColor || "").toUpperCase() === "#FFFFFF";
@@ -198,7 +200,7 @@ export default function ProductQuickCreateForm({
       <form onSubmit={create} className="space-y-4 pt-1">
         <div>
           <FieldLabel htmlFor="po-qc-product-name" required>
-            Product name
+            {t("catalog.productName", "Product name")}
           </FieldLabel>
           <input
             id="po-qc-product-name"
@@ -212,41 +214,41 @@ export default function ProductQuickCreateForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <FieldLabel htmlFor="po-qc-product-category" required>
-              Category
+              {t("catalog.category", "Category")}
             </FieldLabel>
             <AdminSearchSelect
               inputId="po-qc-product-category"
               inputClassName={supplierInputClass}
               value={form.category_id}
               onChange={onCategoryChange}
-              pinnedOptions={quickCreatePinned("+ Create new category…")}
+              pinnedOptions={quickCreatePinned(t("createNewCategoryOption", "+ Create new category…"))}
               options={categoryOptions}
-              emptyLabel="— Select category —"
-              placeholder="Search category…"
-              ariaLabel="Category"
+              emptyLabel={`— ${t("selectCategory", "Select category")} —`}
+              placeholder={t("searchCategoryPlaceholder", "Search category…")}
+              ariaLabel={t("catalog.category", "Category")}
             />
           </div>
           <div>
-            <FieldLabel htmlFor="po-qc-product-brand">Brand</FieldLabel>
+            <FieldLabel htmlFor="po-qc-product-brand">{t("catalog.brand", "Brand")}</FieldLabel>
             <AdminSearchSelect
               inputId="po-qc-product-brand"
               inputClassName={supplierInputClass}
               value={form.brand_id}
               onChange={onBrandChange}
-              pinnedOptions={quickCreatePinned("+ Create new brand…")}
+              pinnedOptions={quickCreatePinned(t("createNewBrandOption", "+ Create new brand…"))}
               options={brandOptions}
-              emptyLabel="— Optional —"
-              placeholder="Search brand…"
-              ariaLabel="Brand"
+              emptyLabel={`— ${t("optional", "Optional")} —`}
+              placeholder={t("searchBrandPlaceholder", "Search brand…")}
+              ariaLabel={t("catalog.brand", "Brand")}
             />
           </div>
         </div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-          Line on this purchase order
+          {t("lineOnThisPurchaseOrder", "Line on this purchase order")}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           <div>
-            <FieldLabel htmlFor="po-qc-product-size">Size</FieldLabel>
+            <FieldLabel htmlFor="po-qc-product-size">{t("size", "Size")}</FieldLabel>
             <input
               id="po-qc-product-size"
               className={supplierInputClass}
@@ -256,7 +258,7 @@ export default function ProductQuickCreateForm({
             />
           </div>
           <div>
-            <FieldLabel htmlFor="po-qc-product-color">Color</FieldLabel>
+            <FieldLabel htmlFor="po-qc-product-color">{t("color", "Color")}</FieldLabel>
             <input
               id="po-qc-product-color"
               className={supplierInputClass}
@@ -266,7 +268,7 @@ export default function ProductQuickCreateForm({
             />
           </div>
           <div>
-            <FieldLabel htmlFor="po-qc-product-qty">Qty</FieldLabel>
+            <FieldLabel htmlFor="po-qc-product-qty">{t("qty", "Qty")}</FieldLabel>
             <input
               id="po-qc-product-qty"
               type="number"
@@ -278,7 +280,7 @@ export default function ProductQuickCreateForm({
             />
           </div>
           <div>
-            <FieldLabel htmlFor="po-qc-product-cost">Cost/unit ($)</FieldLabel>
+            <FieldLabel htmlFor="po-qc-product-cost">{t("costPrice", "Cost/unit ($)")}</FieldLabel>
             <input
               id="po-qc-product-cost"
               type="number"
@@ -292,7 +294,7 @@ export default function ProductQuickCreateForm({
           </div>
           <div>
             <FieldLabel htmlFor="po-qc-product-price" required>
-              Sell price ($)
+              {t("sellingPrice", "Sell price ($)")}
             </FieldLabel>
             <input
               id="po-qc-product-price"
@@ -321,7 +323,7 @@ export default function ProductQuickCreateForm({
               disabled={isCreating}
               className="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 hover:bg-slate-50 transition font-semibold text-sm disabled:opacity-60"
             >
-              Cancel
+              {t("cancel", "Cancel")}
             </button>
           ) : null}
           <button
@@ -336,7 +338,7 @@ export default function ProductQuickCreateForm({
               borderColor: accentIsWhite ? "#cbd5e1" : accentColor,
             }}
           >
-            {isCreating ? "Creating…" : "Create product"}
+            {isCreating ? t("creating", "Creating…") : t("catalog.addProduct", "Create product")}
           </button>
         </div>
       </form>
@@ -345,7 +347,7 @@ export default function ProductQuickCreateForm({
         <AdminModal
           open
           onClose={() => setNestedQuickCreate(null)}
-          title="Add New Category"
+          title={t("addNewCategory", "Add New Category")}
           titleId="po-qc-category-title"
           maxWidthClass="max-w-3xl"
           zIndexClass="z-[70]"
@@ -361,7 +363,7 @@ export default function ProductQuickCreateForm({
         <AdminModal
           open
           onClose={() => setNestedQuickCreate(null)}
-          title="Add Brand"
+          title={t("addBrand", "Add Brand")}
           titleId="po-qc-brand-title"
           maxWidthClass="max-w-3xl"
           zIndexClass="z-[70]"

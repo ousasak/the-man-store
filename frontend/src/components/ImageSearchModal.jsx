@@ -3,8 +3,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import api from '../lib/api.js';
 import { IMAGE_SEARCH_REQUEST_TIMEOUT_MS, postImageSearch } from '../lib/imageSearch.js';
+import { useLanguage } from '../lib/i18n.jsx';
 
 export default function ImageSearchModal({ isOpen, onClose }) {
+  const { t } = useLanguage();
   // State machine: 'upload' | 'camera' | 'loading' | 'results'
   const [step, setStep] = useState('upload');
   const [products, setProducts] = useState([]);
@@ -312,8 +314,8 @@ export default function ImageSearchModal({ isOpen, onClose }) {
           <div className="p-8">
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Image Search</h1>
-              <p className="text-gray-600">Upload an image or paste a URL to find similar items</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("imageSearch", "Image Search")}</h1>
+              <p className="text-gray-600">{t("imageSearchSubtitle", "Upload an image or paste a URL to find similar items")}</p>
             </div>
 
             {/* Large Drag & Drop Zone */}
@@ -334,8 +336,8 @@ export default function ImageSearchModal({ isOpen, onClose }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               
-              <p className="text-lg font-semibold text-gray-700 mb-1">Drag & drop an image here</p>
-              <p className="text-sm text-gray-500">or click to select from your device</p>
+              <p className="text-lg font-semibold text-gray-700 mb-1">{t("dragDropImageHere", "Drag & drop an image here")}</p>
+              <p className="text-sm text-gray-500">{t("clickToSelectFromDevice", "or click to select from your device")}</p>
               <input 
                 type="file" 
                 hidden 
@@ -348,20 +350,20 @@ export default function ImageSearchModal({ isOpen, onClose }) {
             {/* OR Separator */}
             <div className="flex items-center gap-4 my-6">
               <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-sm font-medium text-gray-500">OR</span>
+              <span className="text-sm font-medium text-gray-500">{t("or", "OR")}</span>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
 
             {/* URL Search Input */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search by URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t("searchByUrl", "Search by URL")}</label>
               <div className="relative flex items-center">
                 <svg className="absolute left-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
                   type="text"
-                  placeholder="Paste image URL..."
+                  placeholder={t("pasteImageUrlPlaceholder", "Paste image URL...")}
                   value={urlInput}
                   onChange={e => setUrlInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') handleUrlSearch(); }}
@@ -371,7 +373,7 @@ export default function ImageSearchModal({ isOpen, onClose }) {
                   onClick={handleUrlSearch}
                   className="absolute right-1 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm sm:text-base font-medium transition"
                 >
-                  Search
+                  {t("search", "Search")}
                 </button>
               </div>
             </div>
@@ -385,7 +387,7 @@ export default function ImageSearchModal({ isOpen, onClose }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Take a Photo
+              {t("takePhoto", "Take a Photo")}
             </button>
 
             {/* Error Message */}
@@ -426,7 +428,7 @@ export default function ImageSearchModal({ isOpen, onClose }) {
                 }}
                 className="px-6 sm:px-8 py-3 sm:py-3.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-base font-semibold transition"
               >
-                Cancel
+                {t("cancel", "Cancel")}
               </button>
               <button 
                 onClick={capturePhoto}
@@ -450,8 +452,8 @@ export default function ImageSearchModal({ isOpen, onClose }) {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6" />
-              <p className="text-xl font-bold text-gray-900">Scanning image...</p>
-              <p className="text-gray-600 text-sm mt-2">Using AI to find similar products</p>
+              <p className="text-xl font-bold text-gray-900">{t("scanningImage", "Scanning image...")}</p>
+              <p className="text-gray-600 text-sm mt-2">{t("usingAiToFindSimilar", "Using AI to find similar products")}</p>
             </div>
           </div>
         )}
@@ -461,13 +463,13 @@ export default function ImageSearchModal({ isOpen, onClose }) {
           <div className="p-8 h-screen overflow-y-auto">
             {/* Results Header */}
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Search Results</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t("searchResults", "Search Results")}</h2>
               {detectedText && (
-                <p className="text-sm text-gray-600">Detected: <span className="font-medium text-gray-900">"{detectedText}"</span></p>
+                <p className="text-sm text-gray-600">{t("detected", "Detected:")} <span className="font-medium text-gray-900">"{detectedText}"</span></p>
               )}
               {matchReason === 'fallback_recent' && (
                 <p className="text-sm text-amber-700 bg-amber-50 px-3 py-2 rounded-lg mt-2">
-                  ℹ️ No exact match found. Showing latest items instead.
+                  ℹ️ {t("noExactMatchShowingLatest", "No exact match found. Showing latest items instead.")}
                 </p>
               )}
             </div>
@@ -503,7 +505,7 @@ export default function ImageSearchModal({ isOpen, onClose }) {
                   <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
-                  <p className="text-gray-500 font-medium">No similar products found</p>
+                  <p className="text-gray-500 font-medium">{t("noSimilarProductsFound", "No similar products found")}</p>
                 </div>
               )}
             </div>
@@ -514,7 +516,7 @@ export default function ImageSearchModal({ isOpen, onClose }) {
                 onClick={() => setStep('upload')}
                 className="flex-1 py-3 sm:py-3.5 border border-gray-300 text-gray-700 rounded-lg text-base font-semibold hover:bg-gray-50 transition"
               >
-                Search Again
+                {t("searchAgain", "Search Again")}
               </button>
             </div>
           </div>

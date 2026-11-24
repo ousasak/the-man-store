@@ -5,6 +5,7 @@ import AdminModal from "./AdminModal.jsx";
 import { AdminSectionLoader } from "./AdminLoading";
 import { permissionActionLabel, permissionKey } from "../../lib/adminPermissions.js";
 import { toastSuccess, errorAlert } from "../../lib/swal";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 function PermissionToggle({ checked, disabled, onChange, label }) {
   return (
@@ -32,6 +33,7 @@ function PermissionToggle({ checked, disabled, onChange, label }) {
 }
 
 export default function AdminPermissionsPanel({ open, adminUser, onClose, onSaved }) {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [matrix, setMatrix] = useState(null);
@@ -137,7 +139,7 @@ export default function AdminPermissionsPanel({ open, adminUser, onClose, onSave
     <AdminModal
       open={open}
       onClose={onClose}
-      title="Resource Permissions"
+      title={t("resourcePermissions") || "Resource Permissions"}
       titleIcon={<ShieldCheck className="h-5 w-5" aria-hidden />}
       maxWidthClass="max-w-5xl"
       variant="sheet"
@@ -147,7 +149,7 @@ export default function AdminPermissionsPanel({ open, adminUser, onClose, onSave
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{adminUser?.name}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400">{adminUser?.email}</p>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Toggle what this admin can access. Superadmin-only areas (administrator accounts, payment gateway, security audit, homepage manager) are not assignable here.
+            {t("permissionsHint") || "Toggle what this admin can access. Superadmin-only areas (administrator accounts, payment gateway, security audit, homepage manager) are not assignable here."}
           </p>
         </div>
 
@@ -159,7 +161,7 @@ export default function AdminPermissionsPanel({ open, adminUser, onClose, onSave
               <thead className="sticky top-0 z-10 bg-white dark:bg-slate-900">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Resource
+                    {t("resource") || "Resource"}
                   </th>
                   {actions.map((action) => (
                     <th
@@ -170,7 +172,7 @@ export default function AdminPermissionsPanel({ open, adminUser, onClose, onSave
                     </th>
                   ))}
                   <th className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    All
+                    {t("all") || "All"}
                   </th>
                 </tr>
               </thead>
@@ -240,7 +242,7 @@ export default function AdminPermissionsPanel({ open, adminUser, onClose, onSave
             onClick={onClose}
             className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Cancel
+            {t("common.actions.cancel") || "Cancel"}
           </button>
           <button
             type="button"
@@ -248,7 +250,7 @@ export default function AdminPermissionsPanel({ open, adminUser, onClose, onSave
             onClick={handleReset}
             className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Reset defaults
+            {t("resetDefaults") || "Reset defaults"}
           </button>
           <button
             type="button"
@@ -256,7 +258,7 @@ export default function AdminPermissionsPanel({ open, adminUser, onClose, onSave
             onClick={handleSave}
             className="rounded-lg bg-[color:var(--admin-primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save permissions"}
+            {saving ? (t("common.messages.saving") || "Saving…") : (t("savePermissions") || "Save permissions")}
           </button>
         </div>
       </div>

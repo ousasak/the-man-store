@@ -27,8 +27,49 @@ export const PRICE_RULES = [
   { value: "follow_standard", label: "Follow Standard Price" },
 ];
 
-export function lotTierLabel(value) {
-  return LOT_TIERS.find((t) => t.value === value)?.label || value || "—";
+export function getLotTierFilterOptions(t) {
+  if (!t) return LOT_TIER_FILTER_OPTIONS;
+  return [
+    { id: "all", label: t("inventory.allTiers", "All tiers") },
+    { id: "older", label: t("inventory.lotTierOlderStock", "Older stock") },
+    { id: "newer", label: t("inventory.lotTierNewerStock", "Newer stock") },
+  ];
+}
+
+export function getLotListingStatusFilterOptions(t) {
+  if (!t) return LOT_LISTING_STATUS_FILTER_OPTIONS;
+  return [
+    { id: "all", label: t("inventory.allStatuses", "All statuses") },
+    { id: "active", label: t("inventory.listingStatusActive", "Active") },
+    { id: "clearance", label: t("inventory.listingStatusClearance", "Clearance") },
+    { id: "on_hold", label: t("inventory.listingStatusOnHold", "On Hold") },
+    { id: "discontinued", label: t("inventory.listingStatusDiscontinued", "Discontinued") },
+  ];
+}
+
+export function getPriceRuleOptions(t) {
+  if (!t) return PRICE_RULES;
+  return [
+    { value: "fixed", label: t("inventory.priceRuleFixed", "Fixed Price") },
+    { value: "percent_of_standard", label: t("inventory.priceRulePercentOfStandard", "% of Standard Price") },
+    { value: "follow_standard", label: t("inventory.priceRuleFollowStandard", "Follow Standard Price") },
+  ];
+}
+
+export function getListingStatusOptions(t) {
+  if (!t) return LISTING_STATUSES;
+  return [
+    { value: "active", label: t("inventory.listingStatusActive", "Active") },
+    { value: "clearance", label: t("inventory.listingStatusClearance", "Clearance") },
+    { value: "on_hold", label: t("inventory.listingStatusOnHold", "On Hold") },
+    { value: "discontinued", label: t("inventory.listingStatusDiscontinued", "Discontinued") },
+  ];
+}
+
+export function lotTierLabel(value, t = null) {
+  if (value === "older") return t ? t("inventory.lotTierOlderStock", "Older Stock") : "Older Stock";
+  if (value === "newer") return t ? t("inventory.lotTierNewerStock", "Newer Stock") : "Newer Stock";
+  return LOT_TIERS.find((item) => item.value === value)?.label || value || "—";
 }
 
 export function lotTierTone(value) {
@@ -40,8 +81,12 @@ export function lotTierTone(value) {
   }
 }
 
-export function listingStatusLabel(value) {
-  return LISTING_STATUSES.find((s) => s.value === value)?.label || value || "—";
+export function listingStatusLabel(value, t = null) {
+  if (value === "active") return t ? t("inventory.listingStatusActive", "Active") : "Active";
+  if (value === "clearance") return t ? t("inventory.listingStatusClearance", "Clearance") : "Clearance";
+  if (value === "on_hold") return t ? t("inventory.listingStatusOnHold", "On Hold") : "On Hold";
+  if (value === "discontinued") return t ? t("inventory.listingStatusDiscontinued", "Discontinued") : "Discontinued";
+  return LISTING_STATUSES.find((item) => item.value === value)?.label || value || "—";
 }
 
 export function listingStatusTone(value) {
@@ -100,41 +145,41 @@ export function formatLotPriceEventAt(value) {
   return d.toLocaleString();
 }
 
-export function formatLotPriceEventSummary(event) {
+export function formatLotPriceEventSummary(event, t = null) {
   if (!event) return "";
   const parts = [event.action_label || event.action];
   if (event.discount_percent_off != null && Number(event.discount_percent_off) > 0) {
-    parts.push(`${event.discount_percent_off}% off`);
+    parts.push(`${event.discount_percent_off}% ${t ? t("common.off", "off") : "off"}`);
   }
   if (event.unit_price_after != null) {
     parts.push(`→ $${Number(event.unit_price_after).toFixed(2)}`);
   } else if (event.unit_price_before != null && event.unit_price_after == null) {
-    parts.push(`was $${Number(event.unit_price_before).toFixed(2)}`);
+    parts.push(t ? t("inventory.wasPrice", "was ${price}", { price: Number(event.unit_price_before).toFixed(2) }) : `was $${Number(event.unit_price_before).toFixed(2)}`);
   }
   return parts.join(" · ");
 }
 
-export function formatLotDetailFieldValue(field, value) {
+export function formatLotDetailFieldValue(field, value, t = null) {
   if (value == null || value === "") return "—";
-  if (field === "listing_status") return listingStatusLabel(value);
-  if (field === "lot_tier") return lotTierLabel(value);
-  if (field === "is_sellable") return value ? "Yes" : "No";
+  if (field === "listing_status") return listingStatusLabel(value, t);
+  if (field === "lot_tier") return lotTierLabel(value, t);
+  if (field === "is_sellable") return value ? (t ? t("common.yes", "Yes") : "Yes") : (t ? t("common.no", "No") : "No");
   if (field === "unit_cost") return `$${Number(value).toFixed(2)}`;
   return String(value);
 }
 
-export function formatLotDetailChangeLine(change) {
+export function formatLotDetailChangeLine(change, t = null) {
   if (!change) return "";
-  const label = change.label || change.field || "Field";
-  const before = formatLotDetailFieldValue(change.field, change.before);
-  const after = formatLotDetailFieldValue(change.field, change.after);
+  const label = change.label || change.field || (t ? t("common.field", "Field") : "Field");
+  const before = formatLotDetailFieldValue(change.field, change.before, t);
+  const after = formatLotDetailFieldValue(change.field, change.after, t);
   if (change.before == null || change.before === "") {
     return `${label}: ${after}`;
   }
   return `${label}: ${before} → ${after}`;
 }
 
-export function formatLotDetailEventSummary(event) {
+export function formatLotDetailEventSummary(event, t = null) {
   if (!event) return "";
   const parts = [event.action_label || event.action];
   if (event.metadata?.po_number) {
@@ -142,9 +187,9 @@ export function formatLotDetailEventSummary(event) {
   }
   const changes = Array.isArray(event.changes) ? event.changes : [];
   if (changes.length > 0) {
-    parts.push(formatLotDetailChangeLine(changes[0]));
+    parts.push(formatLotDetailChangeLine(changes[0], t));
     if (changes.length > 1) {
-      parts.push(`+${changes.length - 1} more`);
+      parts.push(t ? t("inventory.moreChangesCount", "+{count} more", { count: changes.length - 1 }) : `+${changes.length - 1} more`);
     }
   }
   return parts.join(" · ");

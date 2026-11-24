@@ -85,6 +85,9 @@ api.interceptors.request.use((config) => {
     config.headers["ngrok-skip-browser-warning"] = "true";
   }
 
+  const lang = (typeof localStorage !== "undefined" && localStorage.getItem("language")) || "en";
+  config.headers["Accept-Language"] = lang;
+
   const token = localStorage.getItem(TOKEN_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

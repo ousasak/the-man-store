@@ -211,12 +211,32 @@ export const STOCK_INVENTORY_SORT_OPTIONS = [
   { id: "sku", label: "SKU" },
 ];
 
+export function getStockInventorySortOptions(t) {
+  if (!t) return STOCK_INVENTORY_SORT_OPTIONS;
+  return [
+    { id: "name", label: t("common.table.name", "Name") },
+    { id: "date_in", label: t("inventory.date", "Date") },
+    { id: "stock", label: t("inventory.stockQty", "Stock") },
+    { id: "sku", label: t("products.sku", "SKU") },
+  ];
+}
+
 export const STOCK_INVENTORY_STOCK_FILTER_OPTIONS = [
   { id: "all", label: "All stock levels" },
   { id: "in", label: "In stock" },
   { id: "low", label: "Low stock" },
   { id: "out", label: "Out of stock" },
 ];
+
+export function getStockInventoryStockFilterOptions(t) {
+  if (!t) return STOCK_INVENTORY_STOCK_FILTER_OPTIONS;
+  return [
+    { id: "all", label: t("inventory.allStockLevels", "All stock levels") },
+    { id: "in", label: t("inventory.inStock", "In stock") },
+    { id: "low", label: t("inventory.lowStock", "Low stock") },
+    { id: "out", label: t("inventory.outOfStock", "Out of stock") },
+  ];
+}
 
 /** SKU-level Stock & Inventory list (`/admin/stock-inventory`). */
 export const SKU_STOCK_LIST_SORT_OPTIONS = [
@@ -228,6 +248,19 @@ export const SKU_STOCK_LIST_SORT_OPTIONS = [
   { id: "wac_cost", label: "WAC cost" },
   { id: "status", label: "Status" },
 ];
+
+export function getSkuStockListSortOptions(t) {
+  if (!t) return SKU_STOCK_LIST_SORT_OPTIONS;
+  return [
+    { id: "sku", label: t("products.sku", "SKU") },
+    { id: "product", label: t("common.products", "Product") },
+    { id: "activity_date", label: t("inventory.date", "Date") },
+    { id: "in_stock", label: t("inventory.inStock", "In stock") },
+    { id: "stock_value", label: t("inventory.stockValue", "Stock value") },
+    { id: "wac_cost", label: t("inventory.wacCost", "WAC cost") },
+    { id: "status", label: t("common.status", "Status") },
+  ];
+}
 
 export function skuStockListBucket(row) {
   const s = String(row?.status ?? "").toLowerCase();

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import AdminSearchSelect from "./AdminSearchSelect.jsx";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 export default function CategoryPicker({
   categories = [],
@@ -8,9 +9,11 @@ export default function CategoryPicker({
   labelCls,
   inputCls,
   disabled = false,
-  emptyMessage = "No catalog categories yet. Add categories under Admin → Categories.",
-  placeholder = "Search category…",
+  emptyMessage,
+  placeholder,
 }) {
+  const { t } = useLanguage();
+
   const options = useMemo(
     () =>
       (categories || []).map((c) => ({
@@ -22,12 +25,15 @@ export default function CategoryPicker({
     [categories],
   );
 
+  const resolvedEmptyMessage = emptyMessage || t("categories.picker.emptyMessage", "No catalog categories yet. Add categories under Admin → Categories.");
+  const resolvedPlaceholder = placeholder || t("categories.picker.placeholder", "Search category…");
+
   if (categories.length === 0) {
     return (
       <div>
-        <label className={labelCls}>Category</label>
+        <label className={labelCls}>{t("categories.picker.label", "Category")}</label>
         <p className="mt-2 rounded-xl border border-dashed border-slate-200 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          {emptyMessage}
+          {resolvedEmptyMessage}
         </p>
       </div>
     );
@@ -36,7 +42,7 @@ export default function CategoryPicker({
   return (
     <div>
       <label className={labelCls} htmlFor="admin-category-picker">
-        Category
+        {t("categories.picker.label", "Category")}
       </label>
       <AdminSearchSelect
         inputId="admin-category-picker"
@@ -44,13 +50,15 @@ export default function CategoryPicker({
         onChange={onChange}
         options={options}
         disabled={disabled}
-        placeholder={placeholder}
-        emptyLabel="— Select category —"
-        ariaLabel="Category"
+        placeholder={resolvedPlaceholder}
+        emptyLabel={t("categories.picker.emptyLabel", "— Select category —")}
+        ariaLabel={t("categories.picker.label", "Category")}
         inputClassName={inputCls}
         menuMinWidth={256}
       />
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Type to search · {options.length} available</p>
+      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        {t("categories.picker.helpText", `Type to search · ${options.length} available`, { count: options.length })}
+      </p>
     </div>
   );
 }

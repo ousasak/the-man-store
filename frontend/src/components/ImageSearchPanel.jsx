@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../lib/i18n.jsx";
 
 function normalizeSimilarity(item) {
   const direct = item?.similarity ?? item?.similarity_score;
@@ -34,6 +35,7 @@ function normalizeResults(payload) {
 }
 
 export default function ImageSearchPanel() {
+  const { t } = useLanguage();
   const [previewUrl, setPreviewUrl] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -150,8 +152,8 @@ export default function ImageSearchPanel() {
   return (
     <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm">
-        <h2 className="text-2xl font-bold text-zinc-900">Image Search</h2>
-        <p className="mt-1 text-sm text-zinc-600">Upload an image or capture one to find visually similar products.</p>
+        <h2 className="text-2xl font-bold text-zinc-900">{t("imageSearch", "Image Search")}</h2>
+        <p className="mt-1 text-sm text-zinc-600">{t("imageSearchPanelSubtitle", "Upload an image or capture one to find visually similar products.")}</p>
 
         <div className="mt-5 flex flex-wrap gap-3">
           <button
@@ -159,7 +161,7 @@ export default function ImageSearchPanel() {
             onClick={() => fileInputRef.current?.click()}
             className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800"
           >
-            Upload Image
+            {t("uploadImage", "Upload Image")}
           </button>
 
           <button
@@ -167,7 +169,7 @@ export default function ImageSearchPanel() {
             onClick={openCamera}
             className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 hover:bg-zinc-50"
           >
-            Capture from Camera
+            {t("captureFromCamera", "Capture from Camera")}
           </button>
         </div>
 
@@ -181,7 +183,7 @@ export default function ImageSearchPanel() {
 
         {previewUrl && (
           <div className="mt-5">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">Selected Image</p>
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">{t("selectedImage", "Selected Image")}</p>
             <img src={previewUrl} alt="Preview" className="h-44 w-44 rounded-xl border border-zinc-200 object-cover" />
           </div>
         )}
@@ -197,21 +199,21 @@ export default function ImageSearchPanel() {
                 onClick={captureFromCamera}
                 className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
               >
-                Capture & Search
+                {t("captureAndSearch", "Capture & Search")}
               </button>
               <button
                 type="button"
                 onClick={stopCamera}
                 className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50"
               >
-                Cancel
+                {t("cancel", "Cancel")}
               </button>
             </div>
           </div>
         )}
 
         {loading && (
-          <div className="mt-5 rounded-xl bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">Searching similar products...</div>
+          <div className="mt-5 rounded-xl bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">{t("searchingSimilarProducts", "Searching similar products...")}</div>
         )}
 
         {error && (
@@ -221,13 +223,13 @@ export default function ImageSearchPanel() {
 
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-zinc-900">Results</h3>
-          <span className="text-sm text-zinc-500">{results.length} item(s)</span>
+          <h3 className="text-lg font-bold text-zinc-900">{t("results", "Results")}</h3>
+          <span className="text-sm text-zinc-500">{results.length} {t("itemsCount", "item(s)")}</span>
         </div>
 
         {results.length === 0 ? (
           <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500">
-            No results yet. Upload or capture an image to begin.
+            {t("noResultsYetUploadImage", "No results yet. Upload or capture an image to begin.")}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -239,7 +241,7 @@ export default function ImageSearchPanel() {
                 <div className="p-3">
                   <p className="line-clamp-2 text-sm font-semibold text-zinc-900">{item.name}</p>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-xs text-zinc-500">Similarity</span>
+                    <span className="text-xs text-zinc-500">{t("similarity", "Similarity")}</span>
                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
                       {item.similarity != null ? `${item.similarity}%` : "N/A"}
                     </span>

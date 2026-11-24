@@ -15,6 +15,7 @@ import { resolveImageUrl } from "../../lib/images";
 import { errorAlert, toastSuccess } from "../../lib/swal";
 import { useTheme } from "../../state/theme.jsx";
 import { useLanguage } from "../../lib/i18n.jsx";
+import { GlobalAdminToast } from "../../lib/adminMessages.jsx";
 import { AdminContentSkeleton } from "@/components/admin/AdminLoading";
 import {
   canAccessAdminPath,
@@ -1077,6 +1078,8 @@ export default function AdminLayout() {
           </Suspense>
         </div>
       </main>
+
+      <GlobalAdminToast />
 
       {!sidebarOpen && activeRailGroup && (
         <RailGroupFlyout

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom";
 import { MoreVertical, Plus, Tag } from "lucide-react";
 import api from "../../lib/api";
+import { useTranslation } from "../../lib/i18n.jsx";
 import { toastSuccess } from "../../lib/swal";
 import { formatPoMoney } from "../../lib/purchaseOrderHelpers.js";
 import {
@@ -29,59 +30,63 @@ import {
   PRICE_RULES,
   shortLotNumber,
   isLotOnHold,
+  getListingStatusOptions,
+  getPriceRuleOptions,
 } from "../../lib/inventoryLotHelpers.js";
 import { SellQueueBadge, SellsNextBadge, SoldOutBadge } from "./LotSellOrderBadge.jsx";
 import LotSellPriceCell from "./LotSellPriceCell.jsx";
 
-function LotStatusPill({ status }) {
+function LotStatusPill({ status, t }) {
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${listingStatusTone(status)}`}>
-      {listingStatusLabel(status)}
+      {listingStatusLabel(status, t)}
     </span>
   );
 }
 
-function LotTierPill({ tier }) {
+function LotTierPill({ tier, t }) {
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${lotTierTone(tier)}`}>
-      {lotTierLabel(tier)}
+      {lotTierLabel(tier, t)}
     </span>
   );
 }
 
-function lotActionItems(lot, canEdit) {
+function lotActionItems(lot, canEdit, t = null) {
   const items = [];
   if (canEdit && !lot.is_sold_out) {
-    items.push({ id: "edit-prices", label: "Edit prices" });
+    items.push({ id: "edit-prices", label: t ? t("inventory.editPrices", "Edit prices") : "Edit prices" });
   }
   if (canEdit) {
     if (lotDiscountOff(lot) != null) {
-      items.push({ id: "edit-discount", label: "Edit discount" });
-      items.push({ id: "remove-discount", label: "Remove discount", tone: "danger" });
+      items.push({ id: "edit-discount", label: t ? t("inventory.editDiscount", "Edit discount") : "Edit discount" });
+      items.push({ id: "remove-discount", label: t ? t("inventory.removeDiscount", "Remove discount") : "Remove discount", tone: "danger" });
     } else {
-      items.push({ id: "lot-discount", label: "Lot discount" });
+      items.push({ id: "lot-discount", label: t ? t("inventory.lotDiscount", "Lot discount") : "Lot discount" });
     }
     if (lot.listing_status === "clearance") {
-      items.push({ id: "edit-clearance", label: "Edit clearance" });
-      items.push({ id: "revert-clearance", label: "Revert to active" });
+      items.push({ id: "edit-clearance", label: t ? t("inventory.editClearance", "Edit clearance") : "Edit clearance" });
+      items.push({ id: "revert-clearance", label: t ? t("inventory.revertClearance", "Revert to active") : "Revert to active" });
     } else {
-      items.push({ id: "mark-clearance", label: "Mark as clearance" });
+      items.push({ id: "mark-clearance", label: t ? t("inventory.markClearance", "Mark as clearance") : "Mark as clearance" });
     }
     items.push({
       id: isLotOnHold(lot) ? "release-hold" : "set-hold",
-      label: isLotOnHold(lot) ? "Release hold" : "Set on hold",
+      label: isLotOnHold(lot)
+        ? (t ? t("inventory.releaseHold", "Release hold") : "Release hold")
+        : (t ? t("inventory.setOnHold", "Set on hold") : "Set on hold"),
     });
   }
-  items.push({ id: "history", label: "History", separatorBefore: items.length > 0 });
+  items.push({ id: "history", label: t ? t("inventory.history", "History") : "History", separatorBefore: items.length > 0 });
   return items;
 }
 
-function LotRowActionsMenu({ lot, canEdit, onAction }) {
+function LotRowActionsMenu({ lot, canEdit, onAction, t }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
   const [menuStyle, setMenuStyle] = useState(null);
-  const items = useMemo(() => lotActionItems(lot, canEdit), [lot, canEdit]);
+  const items = useMemo(() => lotActionItems(lot, canEdit, t), [lot, canEdit, t]);
 
   const updateMenuPosition = useCallback(() => {
     const btn = buttonRef.current;
@@ -180,7 +185,7 @@ function LotRowActionsMenu({ lot, canEdit, onAction }) {
         type="button"
         onClick={toggleOpen}
         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-        aria-label={`Actions for lot ${lot.lot_number}`}
+        aria-label={t ? t("inventory.actionsForLot", `Actions for lot ${lot.lot_number}`, { lot: lot.lot_number }) : `Actions for lot ${lot.lot_number}`}
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -204,6 +209,7 @@ export default function InventoryLotsPanel({
   onToDateChange = null,
   showFilters = false,
 }) {
+  const { t } = useTranslation();
   const [lots, setLots] = useState([]);
   const [summary, setSummary] = useState(null);
   const [sellOldFirst, setSellOldFirst] = useState(true);
@@ -248,7 +254,7 @@ export default function InventoryLotsPanel({
       setSummary(data?.meta?.summary ?? null);
       setSellOldFirst(data?.meta?.sell_old_first !== false);
     } catch (e) {
-      setErr(e?.response?.data?.message || "Could not load inventory lots.");
+      setErr(e?.response?.data?.message || t("inventory.couldNotLoadInventoryLots", "Could not load inventory lots."));
       setLots([]);
       setSummary(null);
     } finally {
@@ -322,12 +328,12 @@ export default function InventoryLotsPanel({
         is_sellable: Boolean(form.is_sellable),
         notes: form.notes || null,
       });
-      toastSuccess("Inventory lot created.");
+      toastSuccess(t("inventory.lotCreatedSuccess", "Inventory lot created."));
       resetForm();
       await load();
       onChanged?.();
     } catch (e2) {
-      setErr(e2?.response?.data?.message || "Could not create inventory lot.");
+      setErr(e2?.response?.data?.message || t("inventory.couldNotCreateLot", "Could not create inventory lot."));
     } finally {
       setSaving(false);
     }
@@ -346,7 +352,7 @@ export default function InventoryLotsPanel({
     const cost = Number(editUnitCost);
     const price = Number(editUnitPrice);
     if (!Number.isFinite(cost) || cost < 0 || !Number.isFinite(price) || price < 0) {
-      setErr("Enter valid unit cost and unit price.");
+      setErr(t("inventory.enterValidCostAndPrice", "Enter valid unit cost and unit price."));
       return;
     }
     setSaving(true);
@@ -357,12 +363,12 @@ export default function InventoryLotsPanel({
         unit_price: Math.round(price * 100) / 100,
         price_rule: "fixed",
       });
-      toastSuccess("Lot prices updated.");
+      toastSuccess(t("inventory.lotPricesUpdated", "Lot prices updated."));
       setEditPriceLot(null);
       await load();
       onChanged?.();
     } catch (e2) {
-      setErr(e2?.response?.data?.message || "Could not update lot prices.");
+      setErr(e2?.response?.data?.message || t("inventory.couldNotUpdatePrices", "Could not update lot prices."));
     } finally {
       setSaving(false);
     }
@@ -373,11 +379,11 @@ export default function InventoryLotsPanel({
     try {
       const onHold = isLotOnHold(lot);
       await api.post(`/admin/inventory-lots/${lot.id}/${onHold ? "release-hold" : "on-hold"}`);
-      toastSuccess(onHold ? "Lot released from hold." : "Lot set on hold.");
+      toastSuccess(onHold ? t("inventory.lotReleasedHold", "Lot released from hold.") : t("inventory.lotSetOnHold", "Lot set on hold."));
       await load();
       onChanged?.();
     } catch (e) {
-      setErr(e?.response?.data?.message || "Could not update inventory lot.");
+      setErr(e?.response?.data?.message || t("inventory.couldNotUpdateLot", "Could not update inventory lot."));
     }
   };
 
@@ -397,13 +403,13 @@ export default function InventoryLotsPanel({
         discount_percent: Number(discountPercent) || 0,
       });
       toastSuccess(
-        lotDiscountOff(discountLot) != null ? "Lot discount updated." : "Lot discount applied.",
+        lotDiscountOff(discountLot) != null ? t("inventory.lotDiscountUpdated", "Lot discount updated.") : t("inventory.lotDiscountApplied", "Lot discount applied."),
       );
       closeDiscountModal();
       await load();
       onChanged?.();
     } catch (e2) {
-      setErr(e2?.response?.data?.message || "Could not apply lot discount.");
+      setErr(e2?.response?.data?.message || t("inventory.couldNotApplyDiscount", "Could not apply lot discount."));
     } finally {
       setSaving(false);
     }
@@ -413,11 +419,11 @@ export default function InventoryLotsPanel({
     if (!canEdit) return;
     try {
       await api.delete(`/admin/inventory-lots/${lot.id}/lot-discount`);
-      toastSuccess("Lot discount removed.");
+      toastSuccess(t("inventory.lotDiscountRemoved", "Lot discount removed."));
       await load();
       onChanged?.();
     } catch (e) {
-      setErr(e?.response?.data?.message || "Could not remove lot discount.");
+      setErr(e?.response?.data?.message || t("inventory.couldNotRemoveDiscount", "Could not remove lot discount."));
     }
   };
 
@@ -425,11 +431,11 @@ export default function InventoryLotsPanel({
     if (!canEdit) return;
     try {
       await api.post(`/admin/inventory-lots/${lot.id}/revert-clearance`);
-      toastSuccess("Lot reverted to active.");
+      toastSuccess(t("inventory.lotRevertedActive", "Lot reverted to active."));
       await load();
       onChanged?.();
     } catch (e) {
-      setErr(e?.response?.data?.message || "Could not revert clearance.");
+      setErr(e?.response?.data?.message || t("inventory.couldNotRevertClearance", "Could not revert clearance."));
     }
   };
 
@@ -498,12 +504,12 @@ export default function InventoryLotsPanel({
       await api.post(`/admin/inventory-lots/${clearanceLot.id}/mark-clearance`, {
         unit_price: clearancePrice === "" ? null : Number(clearancePrice),
       });
-      toastSuccess(clearanceIsEdit ? "Clearance price updated." : "Inventory lot marked as clearance.");
+      toastSuccess(clearanceIsEdit ? t("inventory.clearancePriceUpdated", "Clearance price updated.") : t("inventory.lotMarkedClearance", "Inventory lot marked as clearance."));
       closeClearanceModal();
       await load();
       onChanged?.();
     } catch (e2) {
-      setErr(e2?.response?.data?.message || "Could not mark clearance.");
+      setErr(e2?.response?.data?.message || t("inventory.couldNotMarkClearance", "Could not mark clearance."));
     } finally {
       setSaving(false);
     }
@@ -534,11 +540,10 @@ export default function InventoryLotsPanel({
           {embedded ? (
             summary ? (
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Older {summary.older || 0} · Newer {summary.newer || 0} · Active {summary.active || 0} · Clearance{" "}
-                {summary.clearance || 0}
+                {t("inventory.olderCount", "Older {count}", { count: summary.older || 0 })} · {t("inventory.newerCount", "Newer {count}", { count: summary.newer || 0 })} · {t("inventory.activeCount", "Active {count}", { count: summary.active || 0 })} · {t("inventory.clearanceCount", "Clearance {count}", { count: summary.clearance || 0 })}
               </p>
             ) : (
-              <span className="text-xs text-slate-500 dark:text-slate-400">Lot breakdown for this SKU</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">{t("inventory.lotBreakdownSku", "Lot breakdown for this SKU")}</span>
             )
           ) : (
             <div className="flex items-center gap-2.5">
@@ -547,12 +552,11 @@ export default function InventoryLotsPanel({
               </div>
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-slate-800 dark:text-slate-100">
-                  Inventory Lots
+                  {t("inventory.inventoryLotsTitle", "Inventory Lots")}
                 </h3>
                 {summary ? (
                   <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    Older {summary.older || 0} · Newer {summary.newer || 0} · Active {summary.active || 0} · Clearance{" "}
-                    {summary.clearance || 0}
+                    {t("inventory.olderCount", "Older {count}", { count: summary.older || 0 })} · {t("inventory.newerCount", "Newer {count}", { count: summary.newer || 0 })} · {t("inventory.activeCount", "Active {count}", { count: summary.active || 0 })} · {t("inventory.clearanceCount", "Clearance {count}", { count: summary.clearance || 0 })}
                   </p>
                 ) : null}
               </div>
@@ -565,7 +569,7 @@ export default function InventoryLotsPanel({
               className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
             >
               <Plus className="h-4 w-4" aria-hidden />
-              Add Inventory Lot
+              {t("inventory.addInventoryLot", "Add Inventory Lot")}
             </button>
           ) : null}
         </div>
@@ -590,7 +594,7 @@ export default function InventoryLotsPanel({
               singleRow
               search={search}
               onSearchChange={onSearchChange}
-              searchPlaceholder="Search lot, season, barcode, status…"
+              searchPlaceholder={t("inventory.searchLotsPanelPlaceholder", "Search lot, season, barcode, status…")}
               fromDate={fromDate}
               onFromDateChange={onFromDateChange}
               toDate={toDate}
@@ -616,81 +620,81 @@ export default function InventoryLotsPanel({
         {showForm && canEdit ? (
           <form onSubmit={submitLot} className="mb-5 grid gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40 md:grid-cols-2">
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Season
+              {t("inventory.season", "Season")}
               <input className={ADMIN_LIST_FIELD_CLASS} value={form.season} onChange={(e) => setForm((f) => ({ ...f, season: e.target.value }))} />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Collection Code
+              {t("inventory.collectionCode", "Collection Code")}
               <input className={ADMIN_LIST_FIELD_CLASS} value={form.collection_code} onChange={(e) => setForm((f) => ({ ...f, collection_code: e.target.value }))} />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Listing Status
+              {t("inventory.listingStatus", "Listing Status")}
               <AdminSearchSelect
                 value={form.listing_status}
                 onChange={(listing_status) => setForm((f) => ({ ...f, listing_status }))}
-                options={mapIdLabelOptions(LISTING_STATUSES)}
+                options={mapIdLabelOptions(getListingStatusOptions(t))}
                 inputClassName={ADMIN_LIST_FIELD_CLASS}
-                ariaLabel="Listing status"
-                placeholder="Search status…"
+                ariaLabel={t("inventory.listingStatus", "Listing Status")}
+                placeholder={t("inventory.searchStatus", "Search status…")}
                 allowEmpty={false}
               />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Qty On Hand
+              {t("inventory.onHand", "Qty On Hand")}
               <input type="number" min="0" className={ADMIN_LIST_FIELD_CLASS} value={form.quantity_on_hand} onChange={(e) => setForm((f) => ({ ...f, quantity_on_hand: e.target.value }))} />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Unit Cost
+              {t("inventory.unitCost", "Unit Cost")}
               <input type="number" min="0" step="0.01" className={ADMIN_LIST_FIELD_CLASS} value={form.unit_cost} onChange={(e) => setForm((f) => ({ ...f, unit_cost: e.target.value }))} />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Unit Price
+              {t("inventory.unitPrice", "Unit Price")}
               <input type="number" min="0" step="0.01" className={ADMIN_LIST_FIELD_CLASS} value={form.unit_price} onChange={(e) => setForm((f) => ({ ...f, unit_price: e.target.value }))} />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Price Rule
+              {t("inventory.priceRule", "Price Rule")}
               <AdminSearchSelect
                 value={form.price_rule}
                 onChange={(price_rule) => setForm((f) => ({ ...f, price_rule }))}
-                options={mapIdLabelOptions(PRICE_RULES)}
+                options={mapIdLabelOptions(getPriceRuleOptions(t))}
                 inputClassName={ADMIN_LIST_FIELD_CLASS}
-                ariaLabel="Price rule"
-                placeholder="Search rule…"
+                ariaLabel={t("inventory.priceRule", "Price Rule")}
+                placeholder={t("inventory.searchRule", "Search rule…")}
                 allowEmpty={false}
               />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-              Barcode (optional)
+              {t("inventory.barcodeOptional", "Barcode (optional)")}
               <input className={ADMIN_LIST_FIELD_CLASS} value={form.barcode} onChange={(e) => setForm((f) => ({ ...f, barcode: e.target.value }))} />
             </label>
             <div className="md:col-span-2 flex flex-wrap gap-2">
               <button type="submit" disabled={saving} className="inline-flex h-9 items-center rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900">
-                {saving ? "Saving…" : "Save Inventory Lot"}
+                {saving ? t("common.messages.saving", "Saving…") : t("inventory.saveInventoryLot", "Save Inventory Lot")}
               </button>
               <button type="button" onClick={resetForm} className="inline-flex h-9 items-center rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:text-slate-300">
-                Cancel
+                {t("common.actions.cancel", "Cancel")}
               </button>
             </div>
           </form>
         ) : null}
 
         {loading ? (
-          <p className="py-12 text-center text-sm text-slate-500">Loading inventory lots…</p>
+          <p className="py-12 text-center text-sm text-slate-500">{t("inventory.loadingLots", "Loading inventory lots…")}</p>
         ) : (
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-950/[0.03] dark:border-slate-800 dark:bg-slate-900 dark:ring-white/[0.04]">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[920px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-100/95 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:border-slate-600 dark:bg-slate-800/95 dark:text-slate-400">
-                  <th className="px-4 py-3 text-left">Sell order</th>
-                  <th className="px-4 py-3 text-left">Lot Number</th>
-                  <th className="px-4 py-3 text-left">Season</th>
-                  <th className="px-4 py-3 text-left">Lot Tier</th>
-                  <th className="px-4 py-3 text-left">Listing Status</th>
-                  <th className="px-4 py-3 text-right">Qty On Hand</th>
-                  <th className="px-4 py-3 text-right">Unit Cost</th>
-                  <th className="px-4 py-3 text-right">Unit Price</th>
-                  <th className="px-4 py-3 text-left">Barcode</th>
+                  <th className="px-4 py-3 text-left">{t("inventory.sellOrder", "Sell order")}</th>
+                  <th className="px-4 py-3 text-left">{t("inventory.lotNumber", "Lot Number")}</th>
+                  <th className="px-4 py-3 text-left">{t("inventory.season", "Season")}</th>
+                  <th className="px-4 py-3 text-left">{t("inventory.lotTier", "Lot Tier")}</th>
+                  <th className="px-4 py-3 text-left">{t("inventory.listingStatus", "Listing Status")}</th>
+                  <th className="px-4 py-3 text-right">{t("inventory.onHand", "Qty On Hand")}</th>
+                  <th className="px-4 py-3 text-right">{t("inventory.unitCost", "Unit Cost")}</th>
+                  <th className="px-4 py-3 text-right">{t("inventory.unitPrice", "Unit Price")}</th>
+                  <th className="px-4 py-3 text-left">{t("products.barcode", "Barcode")}</th>
                   <th className="px-4 py-3 text-center w-12" />
                 </tr>
               </thead>
@@ -699,10 +703,10 @@ export default function InventoryLotsPanel({
                   <tr>
                     <td colSpan={10} className="bg-white px-4 py-10 text-center text-slate-500 dark:bg-slate-950/20">
                       {lots.length === 0
-                        ? "No inventory lots for this SKU yet. Receive stock from a Purchase Order or add a lot manually."
+                        ? t("inventory.noLotsForSkuYet", "No inventory lots for this SKU yet. Receive stock from a Purchase Order or add a lot manually.")
                         : lotsFiltersActive
-                          ? "No lots match your search or date range."
-                          : "No inventory lots for this SKU yet. Receive stock from a Purchase Order or add a lot manually."}
+                          ? t("inventory.noLotsMatchSearchOrDate", "No lots match your search or date range.")
+                          : t("inventory.noLotsForSkuYet", "No inventory lots for this SKU yet. Receive stock from a Purchase Order or add a lot manually.")}
                     </td>
                   </tr>
                 ) : (
@@ -730,9 +734,9 @@ export default function InventoryLotsPanel({
                       </td>
                       <td className="px-4 py-3 text-slate-700 dark:text-slate-200">{lot.season || "—"}</td>
                       <td className="px-4 py-3">
-                        <LotTierPill tier={lot.lot_tier} />
+                        <LotTierPill tier={lot.lot_tier} t={t} />
                       </td>
-                      <td className="px-4 py-3"><LotStatusPill status={lot.listing_status} /></td>
+                      <td className="px-4 py-3"><LotStatusPill status={lot.listing_status} t={t} /></td>
                       <td className="px-4 py-3 text-right tabular-nums font-semibold">{lot.quantity_on_hand}</td>
                       <td className="px-4 py-3 text-right tabular-nums">{formatPoMoney(lot.unit_cost)}</td>
                       <td className="px-4 py-3">
@@ -742,10 +746,10 @@ export default function InventoryLotsPanel({
                       <td className="px-4 py-3 text-center">
                         {isLotOnHold(lot) ? (
                           <p className="mb-1.5 text-[10px] font-medium leading-snug text-amber-700 dark:text-amber-300">
-                            On hold
+                            {t("inventory.onHold", "On hold")}
                           </p>
                         ) : null}
-                        <LotRowActionsMenu lot={lot} canEdit={canEdit} onAction={handleLotAction} />
+                        <LotRowActionsMenu lot={lot} canEdit={canEdit} onAction={handleLotAction} t={t} />
                       </td>
                     </tr>
                   ))
@@ -772,13 +776,13 @@ export default function InventoryLotsPanel({
       <AdminModal
         open={Boolean(discountLot)}
         onClose={closeDiscountModal}
-        title={lotDiscountOff(discountLot) != null ? "Edit lot discount" : "Lot discount"}
+        title={lotDiscountOff(discountLot) != null ? t("inventory.editDiscount", "Edit lot discount") : t("inventory.lotDiscount", "Lot discount")}
         maxWidthClass="max-w-md"
       >
         <form onSubmit={submitLotDiscount} className="space-y-4 p-1">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Lot {discountLot ? shortLotNumber(discountLot.lot_number) : ""}
-            {discountLot?.sells_next ? " · sells next on website & POS" : ""}
+            {t("inventory.lotNumberHint", "Lot {number}", { number: discountLot ? shortLotNumber(discountLot.lot_number) : "" })}
+            {discountLot?.sells_next ? t("inventory.sellsNextWebsitePos", " · sells next on website & POS") : ""}
           </p>
           {err && discountLot ? (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200">
@@ -786,7 +790,7 @@ export default function InventoryLotsPanel({
             </div>
           ) : null}
           <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-            Discount off lot price (%)
+            {t("inventory.discountPercentLabel", "Discount off lot price (%)")}
             <input
               type="number"
               min="0"
@@ -801,8 +805,11 @@ export default function InventoryLotsPanel({
           </label>
           {discountPreview ? (
             <p className="text-xs text-slate-600 dark:text-slate-300">
-              Lot price {formatPoMoney(discountPreview.baseline)} → {formatPoMoney(discountPreview.sale)} (
-              {discountPreview.off}% off)
+              {t("inventory.discountPreviewText", "Lot price {baseline} → {sale} ({off}% off)", {
+                baseline: formatPoMoney(discountPreview.baseline),
+                sale: formatPoMoney(discountPreview.sale),
+                off: discountPreview.off,
+              })}
             </p>
           ) : null}
           <div className="flex justify-end gap-2 pt-2">
@@ -811,14 +818,14 @@ export default function InventoryLotsPanel({
               onClick={closeDiscountModal}
               className="inline-flex h-9 items-center rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:text-slate-300"
             >
-              Cancel
+              {t("common.actions.cancel", "Cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="inline-flex h-9 items-center rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
             >
-              {saving ? "Saving…" : lotDiscountOff(discountLot) != null ? "Save" : "Apply"}
+              {saving ? t("common.messages.saving", "Saving…") : lotDiscountOff(discountLot) != null ? t("common.actions.save", "Save") : t("common.actions.apply", "Apply")}
             </button>
           </div>
         </form>
@@ -827,13 +834,13 @@ export default function InventoryLotsPanel({
       <AdminModal
         open={Boolean(clearanceLot)}
         onClose={closeClearanceModal}
-        title={clearanceIsEdit ? "Edit clearance price" : "Mark as clearance"}
+        title={clearanceIsEdit ? t("inventory.editClearancePrice", "Edit clearance price") : t("inventory.markClearance", "Mark as clearance")}
         maxWidthClass="max-w-md"
       >
         <form onSubmit={submitClearance} className="space-y-4 p-1">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Lot {clearanceLot ? shortLotNumber(clearanceLot.lot_number) : ""}
-            {clearanceIsEdit ? " · currently clearance" : " · will be listed as clearance"}
+            {t("inventory.lotNumberHint", "Lot {number}", { number: clearanceLot ? shortLotNumber(clearanceLot.lot_number) : "" })}
+            {clearanceIsEdit ? t("inventory.currentlyClearance", " · currently clearance") : t("inventory.willBeListedClearance", " · will be listed as clearance")}
           </p>
           {err && clearanceLot ? (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200">
@@ -841,7 +848,7 @@ export default function InventoryLotsPanel({
             </div>
           ) : null}
           <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-            Clearance unit price
+            {t("inventory.clearanceUnitPrice", "Clearance unit price")}
             <input
               type="number"
               min="0"
@@ -858,14 +865,14 @@ export default function InventoryLotsPanel({
               onClick={closeClearanceModal}
               className="inline-flex h-9 items-center rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:text-slate-300"
             >
-              Cancel
+              {t("common.actions.cancel", "Cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="inline-flex h-9 items-center rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
             >
-              {saving ? "Saving…" : clearanceIsEdit ? "Save" : "Confirm"}
+              {saving ? t("common.messages.saving", "Saving…") : clearanceIsEdit ? t("common.actions.save", "Save") : t("common.actions.confirm", "Confirm")}
             </button>
           </div>
         </form>
@@ -877,13 +884,13 @@ export default function InventoryLotsPanel({
           setEditPriceLot(null);
           setErr("");
         }}
-        title="Edit lot prices"
+        title={t("inventory.editLotPrices", "Edit lot prices")}
         maxWidthClass="max-w-md"
       >
         <form onSubmit={saveEditPrices} className="space-y-4 p-1">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Lot {editPriceLot ? shortLotNumber(editPriceLot.lot_number) : ""}
-            {editPriceLot?.sells_next ? " · sells next on website & POS" : ""}
+            {t("inventory.lotNumberHint", "Lot {number}", { number: editPriceLot ? shortLotNumber(editPriceLot.lot_number) : "" })}
+            {editPriceLot?.sells_next ? t("inventory.sellsNextWebsitePos", " · sells next on website & POS") : ""}
           </p>
           {err && editPriceLot ? (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200">
@@ -891,7 +898,7 @@ export default function InventoryLotsPanel({
             </div>
           ) : null}
           <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-            Unit Cost
+            {t("inventory.unitCost", "Unit Cost")}
             <input
               type="number"
               min="0"
@@ -903,7 +910,7 @@ export default function InventoryLotsPanel({
             />
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-            Unit Price
+            {t("inventory.unitPrice", "Unit Price")}
             <input
               type="number"
               min="0"
@@ -923,14 +930,14 @@ export default function InventoryLotsPanel({
               }}
               className="inline-flex h-9 items-center rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-600 dark:border-slate-600 dark:text-slate-300"
             >
-              Cancel
+              {t("common.actions.cancel", "Cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="inline-flex h-9 items-center rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? t("common.messages.saving", "Saving…") : t("common.actions.save", "Save")}
             </button>
           </div>
         </form>

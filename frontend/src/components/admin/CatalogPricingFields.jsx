@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { catalogLotPricingHint, formatCatalogLotMoney } from "../../lib/catalogLotPricing.js";
 import { formatPoMoney } from "../../lib/purchaseOrderHelpers.js";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 const READONLY_INPUT_CLASS =
   "w-full min-h-[44px] cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 py-2 pl-7 pr-3 text-sm tabular-nums text-slate-600 shadow-sm dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-300";
@@ -33,6 +34,7 @@ export function CatalogPricingReadOnly({
   product = null,
   showCost = false,
 }) {
+  const { t } = useLanguage();
   const fromLots = product?.pricing_source === "inventory_lot";
   const costDisplay = fromLots
     ? moneyInputDisplay(formatCatalogLotMoney(product, "cost"))
@@ -49,9 +51,9 @@ export function CatalogPricingReadOnly({
     <div className="space-y-2">
       <div className={`grid grid-cols-1 gap-5 ${showCost ? "sm:grid-cols-2 sm:gap-6" : ""}`}>
         {showCost ? (
-          <Field id="catalog-cost-readonly" label="Cost/unit (from lot)" displayValue={costDisplay} />
+          <Field id="catalog-cost-readonly" label={t("products.pricing.costPerUnitFromLot", "Cost/unit (from lot)")} displayValue={costDisplay} />
         ) : null}
-        <Field id="catalog-sell-readonly" label="Sell price (from lot)" displayValue={sellDisplay} />
+        <Field id="catalog-sell-readonly" label={t("products.pricing.sellPriceFromLot", "Sell price (from lot)")} displayValue={sellDisplay} />
       </div>
       <p className="text-xs text-slate-500 dark:text-slate-400">
         {lotHint ? (
@@ -59,13 +61,13 @@ export function CatalogPricingReadOnly({
             <span className="font-medium text-slate-600 dark:text-slate-300">{lotHint}. </span>
           </>
         ) : null}
-        Read-only mirror of the next sellable lot. Set or change prices on a{" "}
+        {t("products.pricing.lotPricingMirror", "Read-only mirror of the next sellable lot. Set or change prices on a")}{" "}
         <Link to="/admin/purchase-orders" className="font-semibold text-[color:var(--admin-primary)] hover:underline">
-          Purchase Order
+          {t("products.pricing.purchaseOrder", "Purchase Order")}
         </Link>{" "}
-        or in{" "}
+        {t("products.pricing.orIn", "or in")}{" "}
         <Link to={stockHref} className="font-semibold text-[color:var(--admin-primary)] hover:underline">
-          Stock &amp; Inventory → Inventory Lots
+          {t("products.pricing.inventoryLots", "Stock & Inventory → Inventory Lots")}
         </Link>
         .
       </p>

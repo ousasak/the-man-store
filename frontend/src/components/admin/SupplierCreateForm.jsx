@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../lib/api";
 import { useTheme } from "../../state/theme.jsx";
+import { useLanguage } from "../../lib/i18n.jsx";
 import { closeSwal, errorAlert, loadingAlert, toastSuccess } from "../../lib/swal";
 import { getAdminValidationMessage } from "../../lib/adminValidation.js";
 import SupplierFormFields from "./SupplierFormFields.jsx";
@@ -27,6 +28,7 @@ export default function SupplierCreateForm({
   submitLabel = "Create Supplier",
 }) {
   const { primaryColor, mode } = useTheme();
+  const { t } = useLanguage();
   const accentColor = mode === "dark" ? "#FFFFFF" : primaryColor;
   const accentIsWhite = (accentColor || "").toUpperCase() === "#FFFFFF";
   const [form, setForm] = useState(EMPTY);
@@ -34,7 +36,7 @@ export default function SupplierCreateForm({
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
-  const duplicateCodeMessage = "This Supplier ID is already in use. Please choose a different one.";
+  const duplicateCodeMessage = t("duplicateSupplierCode") || "This Supplier ID is already in use. Please choose a different one.";
 
   const isDuplicateSupplierCode = (code) => {
     const normalized = String(code || "").trim().toUpperCase();
@@ -142,7 +144,7 @@ export default function SupplierCreateForm({
             disabled={isCreating}
             className="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 hover:bg-slate-50 transition font-semibold text-sm disabled:opacity-60"
           >
-            Cancel
+            {t("common.actions.cancel") || "Cancel"}
           </button>
         ) : null}
         <button
@@ -155,7 +157,7 @@ export default function SupplierCreateForm({
             borderColor: accentIsWhite ? "#cbd5e1" : accentColor,
           }}
         >
-          {isCreating ? "Creating…" : submitLabel}
+          {isCreating ? (t("common.messages.saving") || "Creating…") : (submitLabel === "Create Supplier" ? (t("createSupplier") || "Create Supplier") : submitLabel)}
         </button>
       </div>
     </form>

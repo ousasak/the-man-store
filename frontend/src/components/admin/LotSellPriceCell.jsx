@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "../../lib/i18n.jsx";
 import { formatPoMoney } from "../../lib/purchaseOrderHelpers.js";
 import { lotDiscountBasePrice, lotDiscountOff } from "../../lib/inventoryLotHelpers.js";
 
@@ -8,13 +9,14 @@ import { lotDiscountBasePrice, lotDiscountOff } from "../../lib/inventoryLotHelp
  * Detail:  $40 + −20% vs lot $50.00
  */
 export default function LotSellPriceCell({ lot, mode = "catalog", className = "" }) {
+  const { t } = useTranslation();
   const sale = Number(lot?.resolved_unit_price ?? lot?.unit_price ?? 0);
   const percentOff = lotDiscountOff(lot);
   const compare = percentOff != null ? lotDiscountBasePrice(lot) : null;
   const showCompare = percentOff != null && compare != null && compare > sale;
 
   const tooltip = showCompare
-    ? `Lot discount · Was ${formatPoMoney(compare)} · Now ${formatPoMoney(sale)} (−${percentOff}%)`
+    ? `${t("inventory.lotDiscountTooltip", "Lot discount")} · ${t("inventory.wasPrice", "Was {price}", { price: formatPoMoney(compare) })} · ${t("inventory.nowPrice", "Now {price}", { price: formatPoMoney(sale) })} (−${percentOff}%)`
     : undefined;
 
   return (
@@ -23,7 +25,7 @@ export default function LotSellPriceCell({ lot, mode = "catalog", className = ""
       {showCompare ? (
         mode === "detail" ? (
           <p className="mt-0.5 text-[10px] font-semibold leading-tight text-violet-700 dark:text-violet-300">
-            −{percentOff}% vs lot {formatPoMoney(compare)}
+            −{percentOff}% {t("inventory.vsLotPrice", "vs lot {price}", { price: formatPoMoney(compare) })}
           </p>
         ) : (
           <p className="mt-0.5 text-[10px] leading-tight text-slate-500 dark:text-slate-400">

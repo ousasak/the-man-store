@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Bell, X, ExternalLink } from "lucide-react";
 import { resolveImageUrl } from "../../lib/images";
 import { resolveStorefrontPath } from "../../lib/paths";
+import { useLanguage } from "../../lib/i18n.jsx";
+import { CloseButton } from "../common/CloseButton.jsx";
 
 function getNotificationIcon(type) {
   switch (type) {
@@ -81,6 +83,7 @@ function NotificationMediaHero({ mediaUrl, mediaType }) {
 }
 
 function NotificationRowBody({ item, storefrontPath, formatTime }) {
+  const { t } = useLanguage();
   const { mediaUrl, mediaType } = getItemMedia(item);
   const hasMedia = Boolean(mediaUrl && (mediaType === "image" || mediaType === "video"));
 
@@ -94,7 +97,7 @@ function NotificationRowBody({ item, storefrontPath, formatTime }) {
               item.is_read ? "font-medium text-zinc-700" : "font-semibold text-zinc-900"
             }`}
           >
-            {item.title || "Notification"}
+            {item.title || (t("notifications") || "Notification")}
           </p>
           {item.message ? (
             <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-zinc-500">{item.message}</p>
@@ -105,7 +108,7 @@ function NotificationRowBody({ item, storefrontPath, formatTime }) {
             ) : null}
             {storefrontPath ? (
               <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-[#6F8B7F]">
-                View
+                {t("common.actions.view") || "View"}
                 <ExternalLink className="h-3 w-3" aria-hidden />
               </span>
             ) : null}
@@ -124,7 +127,7 @@ function NotificationRowBody({ item, storefrontPath, formatTime }) {
             item.is_read ? "font-medium text-zinc-700" : "font-semibold text-zinc-900"
           }`}
         >
-          {item.title || "Notification"}
+          {item.title || (t("notifications") || "Notification")}
         </p>
         {item.message ? (
           <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-zinc-500">{item.message}</p>
@@ -135,7 +138,7 @@ function NotificationRowBody({ item, storefrontPath, formatTime }) {
           ) : null}
           {storefrontPath ? (
             <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-[#6F8B7F]">
-              View
+              {t("common.actions.view") || "View"}
               <ExternalLink className="h-3 w-3" aria-hidden />
             </span>
           ) : null}
@@ -156,6 +159,7 @@ export default function NotificationDrawer({
   user = null,
   formatTime = () => "",
 }) {
+  const { t } = useLanguage();
   if (!open) return null;
 
   return (
@@ -167,7 +171,7 @@ export default function NotificationDrawer({
       <div
         className="absolute right-0 top-0 flex h-full w-full max-w-[min(100vw,24rem)] flex-col bg-white shadow-2xl animate-in slide-in-from-right duration-300 sm:max-w-lg"
         role="dialog"
-        aria-label="Notifications"
+        aria-label={t("notifications.title") || "Notifications"}
       >
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 px-4">
           <div className="flex items-center gap-2.5">
@@ -175,9 +179,9 @@ export default function NotificationDrawer({
               <Bell className="h-4 w-4" />
             </span>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-900">Notifications</h2>
+              <h2 className="text-sm font-semibold text-zinc-900">{t("notifications.title") || "Notifications"}</h2>
               {unreadCount > 0 ? (
-                <p className="text-[11px] text-zinc-500">{unreadCount} unread</p>
+                <p className="text-[11px] text-zinc-500">{t("notifications.unreadCount", { count: unreadCount }) || `${unreadCount} unread`}</p>
               ) : null}
             </div>
           </div>
@@ -188,17 +192,10 @@ export default function NotificationDrawer({
                 onClick={onMarkAllRead}
                 className="rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6F8B7F] transition-colors hover:bg-[#6F8B7F]/10"
               >
-                Mark all read
+                {t("notifications.markAllRead") || "Mark all read"}
               </button>
             ) : null}
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
-              aria-label="Close notifications"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <CloseButton onClose={onClose} size="sm" variant="default" />
           </div>
         </div>
 
@@ -206,16 +203,16 @@ export default function NotificationDrawer({
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-3 py-16">
               <div className="h-7 w-7 animate-spin rounded-full border-2 border-zinc-200 border-t-[#6F8B7F]" />
-              <p className="text-sm text-zinc-500">Loading…</p>
+              <p className="text-sm text-zinc-500">{t("common.messages.loading") || "Loading…"}</p>
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
               <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-100">
                 <Bell className="h-6 w-6 text-zinc-400" />
               </div>
-              <p className="text-sm font-medium text-zinc-900">No notifications</p>
+              <p className="text-sm font-medium text-zinc-900">{t("notifications.empty") || "No notifications"}</p>
               <p className="mt-1 text-xs text-zinc-500">
-                We&apos;ll notify you when something new arrives.
+                {t("notifications.emptySubtitle") || "We'll notify you when something new arrives."}
               </p>
             </div>
           ) : (

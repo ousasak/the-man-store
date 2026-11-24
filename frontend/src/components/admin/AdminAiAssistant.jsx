@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import api from "../../lib/api";
 import { resolveImageUrl } from "../../lib/images";
 import { useAdminPermissions } from "../../hooks/useAdminPermissions.js";
+import { useTranslation } from "@/lib/i18n.jsx";
 
 const ASSISTANT_TITLE = "The Man Store AI Assistant";
 
@@ -449,21 +450,23 @@ function ChatBubble({ role, content, tables }) {
 
 /** Trigger button — exact structure from spec, tuned for admin light/dark topbar */
 export function AdminAiAssistantButton({ onClick, className = "" }) {
+  const { t } = useTranslation();
   return (
     <button
-      aria-label="Ask AI"
+      aria-label={t("askAi", "Ask AI")}
       type="button"
       tabIndex={0}
       onClick={onClick}
       className={`flex items-center gap-2 rounded-md border border-slate-200 bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:bg-slate-100 dark:border-neutral-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-neutral-800 ${className}`}
     >
       <span className="text-[color:var(--admin-primary)]">{ASK_AI_ICON}</span>
-      Ask AI
+      {t("askAi", "Ask AI")}
     </button>
   );
 }
 
 export default function AdminAiAssistant({ open, onClose }) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([
     { id: "welcome", role: "assistant", content: WELCOME_MESSAGE },
   ]);
@@ -575,7 +578,7 @@ export default function AdminAiAssistant({ open, onClose }) {
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={ASSISTANT_TITLE}>
+    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={t("reports.aiAssistantTitle")}>
       {/* Backdrop */}
       <button
         type="button"
@@ -596,7 +599,7 @@ export default function AdminAiAssistant({ open, onClose }) {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(var(--admin-primary-rgb),0.12)] text-[color:var(--admin-primary)] dark:bg-[rgba(var(--admin-primary-rgb),0.18)]">
               {ASK_AI_ICON}
             </span>
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{ASSISTANT_TITLE}</h2>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("reports.aiAssistantTitle")}</h2>
           </div>
           <button
             type="button"
@@ -663,14 +666,14 @@ export default function AdminAiAssistant({ open, onClose }) {
                   sendMessage();
                 }
               }}
-              placeholder="Ask about revenue, orders, products, stock..."
+              placeholder={t("reports.askAiPlaceholder")}
               disabled={loading}
               className="max-h-28 min-h-[2.25rem] flex-1 resize-none bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              aria-label="Send message"
+              aria-label={t("reports.sendMessage")}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--admin-primary)] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

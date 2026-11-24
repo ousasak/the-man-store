@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\OrderPaidEvent;
-use App\Services\Telegram\TelegramNotificationService;
+use App\Services\TelegramNotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;

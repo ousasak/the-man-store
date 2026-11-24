@@ -5,6 +5,7 @@ import api from "../../lib/api";
 import { resolveImageUrl } from "../../lib/images";
 import { getProductPath } from "../../lib/paths";
 import { useTheme } from "../../state/theme.jsx";
+import { useLanguage } from "../../lib/i18n";
 
 const DEFAULTS = {
   enabled: true,
@@ -13,7 +14,7 @@ const DEFAULTS = {
   social_links: [],
 };
 
-const WELCOME_TEXT =
+const WELCOME_TEXT_EN =
   "Hi! I'm The Man Store support.\n\n" +
   "I can help with:\n" +
   "• Products, sizes & recommendations\n" +
@@ -21,6 +22,15 @@ const WELCOME_TEXT =
   "• Shipping, returns & orders\n" +
   "• Store navigation\n\n" +
   "Ask in Khmer or English.";
+
+const WELCOME_TEXT_KM =
+  "សួស្តី! ខ្ញុំជាជំនួយការរបស់ The Man Store។\n\n" +
+  "ខ្ញុំអាចជួយលោកអ្នកលើ៖\n" +
+  "• ផលិតផល ទំហំ និងការណែនាំ\n" +
+  "• ការបញ្ចុះតម្លៃ និងទំនិញមកដល់ថ្មីៗ\n" +
+  "• ការដឹកជញ្ជូន ការប្តូរទំនិញ និងការបញ្ជាទិញ\n" +
+  "• ការស្វែងរកក្នុងហាង\n\n" +
+  "អាចសាកសួរជាភាសាខ្មែរ ឬអង់គ្លេសបាន។";
 
 const QUICK_SUGGESTIONS = [
   { label: "New arrivals", text: "What's new in the store?" },
@@ -255,6 +265,7 @@ const PLATFORM_META = {
 
 export default function SupportChatWidget() {
   const { storefrontMode } = useTheme();
+  const { t, language } = useLanguage();
   const dark = storefrontMode === "dark";
 
   const getMinBottomOffset = () => {
@@ -268,7 +279,9 @@ export default function SupportChatWidget() {
   const draggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, right: 16, bottom: getMinBottomOffset() });
   const movedRef = useRef(false);
-  const [messages, setMessages] = useState([{ role: "assistant", text: WELCOME_TEXT, products: [] }]);
+  const [messages, setMessages] = useState(() => [
+    { role: "assistant", text: language === "km" ? WELCOME_TEXT_KM : WELCOME_TEXT_EN, products: [] },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const conversationIdRef = useRef(
@@ -483,7 +496,7 @@ export default function SupportChatWidget() {
                 setOpen(false);
               }}
               className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 transition"
-              aria-label="Close chat"
+              aria-label={t("closeChat", "Close chat")}
             >
               <X className="w-4 h-4" />
             </button>
@@ -526,10 +539,23 @@ export default function SupportChatWidget() {
           {!loading && (
             <div className="mt-3">
               <p className={`mb-1.5 text-[10px] font-medium uppercase tracking-wide ${dark ? "text-[#8b949e]" : "text-zinc-400"}`}>
-                Quick ask
+                {t("quickAsk", "Quick ask")}
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {QUICK_SUGGESTIONS.map((s) => (
+                {(language === "km"
+                  ? [
+                      { label: "ទំនិញថ្មី", text: "មានអីវ៉ាន់ថ្មីអ្វីខ្លះ?" },
+                      { label: "បញ្ចុះតម្លៃ", text: "តើមានបញ្ចុះតម្លៃអ្វីខ្លះ?" },
+                      { label: "ការដឹកជញ្ជូន", text: "តើការដឹកជញ្ជូនចំណាយពេលប៉ុន្មាន?" },
+                      { label: "ការប្តូរទំនិញ", text: "តើគោលការណ៍ប្តូរទំនិញយ៉ាងដូចម្តេច?" },
+                    ]
+                  : [
+                      { label: "New arrivals", text: "What's new in the store?" },
+                      { label: "Discounts", text: "Show me items on sale" },
+                      { label: "Shipping", text: "How long does shipping take?" },
+                      { label: "Returns", text: "What is your return policy?" },
+                    ]
+                ).map((s) => (
                   <button
                     key={s.label}
                     type="button"
@@ -555,7 +581,7 @@ export default function SupportChatWidget() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") sendMessage();
               }}
-              placeholder="Ask about products, shipping, sizes…"
+              placeholder={t("askAboutProductsPlaceholder", "Ask about products, shipping, sizes…")}
               className={`flex-1 h-9 bg-transparent px-3 text-sm outline-none ${dark ? "text-[#f0f6fc] placeholder:text-[#8b949e]" : "text-zinc-900 placeholder:text-zinc-400"}`}
             />
             <button
@@ -564,7 +590,7 @@ export default function SupportChatWidget() {
               disabled={loading || !input.trim()}
               className={`h-9 px-4 rounded-full text-sm font-semibold disabled:opacity-50 ${dark ? "bg-[#58a6ff] text-white hover:bg-[#79b8ff]" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}
             >
-              Send
+              {t("send", "Send")}
             </button>
           </div>
 
@@ -606,7 +632,7 @@ export default function SupportChatWidget() {
               ? { backgroundColor: "#ffffff", color: "#000000" }
               : { backgroundColor: "#18181b", color: "#ffffff" }
           }
-          aria-label="Open support chat"
+          aria-label={t("openSupportChat", "Open support chat")}
         >
           <MessageCircle className="w-6 h-6" style={dark ? { color: "#000000" } : undefined} />
           <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-white" />

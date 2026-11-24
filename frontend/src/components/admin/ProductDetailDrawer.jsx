@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { resolveImageUrl } from "../../lib/images";
 import { useAdminPermissions } from "../../hooks/useAdminPermissions.js";
+import { useLanguage } from "../../lib/i18n";
+import { AdminCloseButton } from "./AdminCloseButton.jsx";
 
 const EMPTY = "-";
 
@@ -74,6 +76,7 @@ export default function ProductDetailDrawer({
   open,
   onClose,
 }) {
+  const { t } = useLanguage();
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => {
@@ -115,25 +118,18 @@ export default function ProductDetailDrawer({
       >
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Product detail</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("products.productDetail", "Product detail")}</p>
             <h2 id="product-detail-drawer-title" className="mt-0.5 truncate text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {product.name || "Product"}
+              {product.name || t("products.product", "Product")}
             </h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" aria-hidden />
-          </button>
+          <AdminCloseButton onClose={onClose} size="sm" variant="default" />
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           {photos.length > 0 ? (
             <div className="mb-6">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Product photos</p>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("products.productPhotos", "Product photos")}</p>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {photos.map((url, idx) => (
                   <div
@@ -145,7 +141,7 @@ export default function ProductDetailDrawer({
                     <img src={resolveImageUrl(url)} alt="" className="h-full w-full object-cover" />
                     {idx === 0 ? (
                       <span className="absolute bottom-0 left-0 right-0 py-0.5 text-center text-[9px] font-bold uppercase tracking-wider text-white bg-[color:var(--admin-primary)]">
-                        Cover
+                        {t("products.cover", "Cover")}
                       </span>
                     ) : null}
                   </div>
@@ -155,16 +151,16 @@ export default function ProductDetailDrawer({
           ) : null}
 
           <dl className="grid grid-cols-2 gap-4">
-            <DetailField label="Brand">{brand}</DetailField>
-            <DetailField label="Category">{category}</DetailField>
+            <DetailField label={t("products.table.brand", "Brand")}>{brand}</DetailField>
+            <DetailField label={t("products.table.category", "Category")}>{category}</DetailField>
             {isSuperAdmin ? (
-            <DetailField label="Cost price">
+            <DetailField label={t("products.table.costPrice", "Cost price")}>
               {product?.pricing_source === "inventory_lot"
                 ? formatCatalogLotMoney(product, "cost")
                 : formatMoney(product.cost_price)}
             </DetailField>
             ) : null}
-            <DetailField label="Sell price">
+            <DetailField label={t("products.table.sellPrice", "Sell price")}>
               <span className="font-semibold tabular-nums">
                 {product?.pricing_source === "inventory_lot"
                   ? formatCatalogLotMoney(product, "sell")
@@ -174,7 +170,7 @@ export default function ProductDetailDrawer({
                 <p className="mt-1 text-xs font-normal text-slate-500 dark:text-slate-400">{catalogLotPricingHint(product)}</p>
               ) : null}
             </DetailField>
-            <DetailField label="Status">
+            <DetailField label={t("products.table.status", "Status")}>
               <span
                 className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
                   product.is_active
@@ -182,20 +178,20 @@ export default function ProductDetailDrawer({
                     : "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
                 }`}
               >
-                {product.is_active ? "Active" : "Inactive"}
+                {product.is_active ? t("products.status.active", "Active") : t("products.status.inactive", "Inactive")}
               </span>
             </DetailField>
           </dl>
 
           <div className="mt-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Description</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("products.description", "Description")}</p>
             <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
               {description || EMPTY}
             </p>
           </div>
 
           <div className="mt-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Sizes available</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("products.table.sizes", "Sizes available")}</p>
             {sizes.length > 0 ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {sizes.map((size) => (
@@ -213,7 +209,7 @@ export default function ProductDetailDrawer({
           </div>
 
           <div className="mt-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Colors available</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("products.table.colors", "Colors available")}</p>
             {colors.length > 0 ? (
               <div className="mt-2 space-y-2">
                 {colors.map((color) => (

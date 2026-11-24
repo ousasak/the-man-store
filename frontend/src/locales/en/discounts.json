@@ -1,0 +1,112 @@
+{
+  "manageDiscounts": "Manage Discounts",
+  "pageTitle": "Manage Discounts",
+  "pageSubtitle": "Create and manage product discounts, promotional prices, and campaign periods.",
+  "createDiscount": "Create Discount",
+  "editDiscount": "Edit Discount",
+  "updateDiscount": "Update Discount",
+  "deleteDiscount": "Delete Discount",
+  "deleteDiscountPrompt": "Delete this discount?",
+  "deleteDiscountMessage": "This action cannot be undone.",
+  "allDiscounts": "All Discounts",
+  "searchDiscounts": "Search discounts...",
+  "searchPlaceholder": "Search discounts...",
+  "noDiscountsFound": "No discounts found",
+  "noDiscountsDesc": "Discounts will appear here once created.",
+  "onThisPage": "{count} on this page · {total} total",
+  "totalDiscountsSingle": "{count} discount",
+  "totalDiscountsMultiple": "{count} discounts",
+
+  "table": {
+    "product": "Product",
+    "discount": "Discount",
+    "originalPrice": "Original Price",
+    "discountedPrice": "Discounted Price",
+    "salePrice": "Discounted Price",
+    "quantity": "Quantity",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "actions": "Actions"
+  },
+
+  "columns": {
+    "product": "Product",
+    "discount": "Discount",
+    "originalPrice": "Original Price",
+    "salePrice": "Discounted Price",
+    "quantity": "Quantity",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "actions": "Actions"
+  },
+
+  "types": {
+    "percentage": "Percentage (%)",
+    "fixed": "Fixed Amount ($)",
+    "percentageShort": "Percentage",
+    "fixedShort": "Fixed Amount"
+  },
+
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "unlimited": "Unlimited",
+    "expired": "Expired",
+    "scheduled": "Scheduled"
+  },
+
+  "form": {
+    "product": "Product",
+    "productRequired": "Product *",
+    "selectProduct": "Select Product",
+    "searchProduct": "Search product…",
+    "discountType": "Discount Type",
+    "discountTypeRequired": "Discount Type *",
+    "searchType": "Search type…",
+    "discountValue": "Discount Value",
+    "discountValueUnit": "Discount Value {unit} *",
+    "percentagePlaceholder": "e.g. 20",
+    "fixedPlaceholder": "e.g. 10.99",
+    "originalPrice": "Original Price ($)",
+    "selectProductFirst": "Select a product",
+    "discountedPrice": "Discounted Price ($)",
+    "autoCalculated": "Auto-calculated",
+    "autoCalculatedHint": "Auto: ${salePrice} (from ${originalPrice})",
+    "quantity": "Quantity",
+    "quantityPlaceholder": "e.g. 50",
+    "quantityHelpUnlimited": "Max units at this discounted price. Leave empty for unlimited.",
+    "quantityHelpStock": "Max units at this discounted price (available stock: {stock} units). Leave empty for unlimited.",
+    "availableStock": "available stock",
+    "units": "units",
+    "startDate": "Start Date",
+    "startDateRequired": "Start Date *",
+    "endDate": "End Date",
+    "endDateRequired": "End Date *",
+    "description": "Description",
+    "descriptionPlaceholder": "Discount details, special notes, etc.",
+    "active": "Active",
+    "cancel": "Cancel",
+    "submitCreate": "Create Discount",
+    "submitUpdate": "Update Discount"
+  },
+
+  "messages": {
+    "requiredFields": "Please fill in all required fields",
+    "quantityMinError": "Quantity must be at least 1, or leave empty for unlimited",
+    "quantityStockError": "Discount quantity cannot exceed available stock ({stock} units).",
+    "unauthorizedError": "Unauthorized (401). Please login again.",
+    "loadSaveError": "Failed to load/save data.",
+    "noPermissionView": "You do not have permission to view discounts.",
+    "noPermissionCreate": "You do not have permission to create discounts.",
+    "noPermissionEdit": "You do not have permission to edit discounts.",
+    "noPermissionDelete": "You do not have permission to delete discounts.",
+    "createdSuccess": "Discount created successfully",
+    "updatedSuccess": "Discount updated successfully",
+    "deletedSuccess": "Discount deleted successfully",
+    "bulkUpdatedSuccess": "Discounts updated successfully",
+    "editDiscountTitle": "Edit discount",
+    "deleteDiscountTitle": "Delete discount"
+  }
+}

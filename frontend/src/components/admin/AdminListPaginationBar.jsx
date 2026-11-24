@@ -7,12 +7,15 @@ import AdminTablePagination from "./AdminTablePagination.jsx";
 export default function AdminListPaginationBar({
   page,
   lastPage,
-  total: _total,
+  total,
+  pageSize,
   onPageChange,
+  onPageSizeChange,
   onPrevious,
   onNext,
+  className = "",
 }) {
-  if (lastPage <= 1) return null;
+  if (lastPage <= 1 && (!total || total <= (pageSize || 15))) return null;
 
   const changePage = (target) => {
     if (typeof onPageChange === "function") {
@@ -24,6 +27,14 @@ export default function AdminListPaginationBar({
   };
 
   return (
-    <AdminTablePagination page={page} lastPage={lastPage} onPageChange={changePage} />
+    <AdminTablePagination
+      page={page}
+      lastPage={lastPage}
+      total={total}
+      pageSize={pageSize}
+      onPageChange={changePage}
+      onPageSizeChange={onPageSizeChange}
+      className={className}
+    />
   );
 }

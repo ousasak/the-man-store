@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { SlidersHorizontal, X } from "lucide-react";
 import { STOREFRONT_SORT_OPTIONS } from "../../lib/storefrontProductFilters.js";
 import { useTheme } from "../../state/theme.jsx";
+import { useLanguage } from "../../lib/i18n";
+import { CloseButton } from "../common/CloseButton.jsx";
 
 function isLightPrimaryColor(hex) {
   const clean = String(hex || "").replace("#", "").trim();
@@ -15,6 +17,7 @@ function isLightPrimaryColor(hex) {
 }
 
 export function StorefrontFilterToolbarButton({ activeCount = 0, onClick, className = "" }) {
+  const { t } = useLanguage();
   const { primaryColor } = useTheme();
   const contrastDark = useMemo(() => isLightPrimaryColor(primaryColor), [primaryColor]);
 
@@ -29,7 +32,7 @@ export function StorefrontFilterToolbarButton({ activeCount = 0, onClick, classN
       ].join(" ")}
     >
       <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
-      Filter
+      {t("filter", "Filter")}
       {activeCount > 0 ? (
         <span className="fs-storefront-filter-btn__badge">{activeCount}</span>
       ) : null}
@@ -45,7 +48,7 @@ export default function StorefrontFilterDrawer({
   onToggle,
   onApply,
   onClearAll,
-  applyLabel = "Apply filters",
+  applyLabel,
   sortValue = "recommend",
   onSortChange,
   priceBounds = null,
@@ -54,11 +57,52 @@ export default function StorefrontFilterDrawer({
   onPriceMinChange,
   onPriceMaxChange,
 }) {
+  const { t } = useLanguage();
   const titleId = useId();
   const { primaryColor } = useTheme();
   const accent = primaryColor;
   const contrastDark = useMemo(() => isLightPrimaryColor(accent), [accent]);
   const accentText = contrastDark ? "#0b0b0f" : "#ffffff";
+
+  const resolvedApplyLabel = applyLabel || t("applyFilters", "Apply filters");
+
+  const getSortLabel = (opt) => {
+    if (!opt) return "";
+    switch (opt.value) {
+      case "recommend":
+        return t("recommend", "Recommend");
+      case "new":
+        return t("newItems", "New items");
+      case "price_high":
+        return t("priceHighFirst", "Price (High First)");
+      case "price_low":
+        return t("priceLowFirst", "Price (Low First)");
+      case "discount_high":
+        return t("discountHighFirst", "Discount (High First)");
+      case "discount_low":
+        return t("discountLowFirst", "Discount (Low First)");
+      default:
+        return opt.label;
+    }
+  };
+
+  const getSectionTitle = (sec) => {
+    if (!sec) return "";
+    switch (sec.id) {
+      case "gender":
+        return t("gender", "Gender");
+      case "category":
+        return t("category", "Category");
+      case "brand":
+        return t("brand", "Brand");
+      case "color":
+        return t("color", "Color");
+      case "size":
+        return t("size", "Size");
+      default:
+        return sec.title;
+    }
+  };
 
   const boundsMin = priceBounds?.min ?? 0;
   const boundsMax = priceBounds?.max ?? 100;
@@ -103,22 +147,22 @@ export default function StorefrontFilterDrawer({
       >
         <div className="fs-filter-drawer__header flex items-center justify-between px-5 py-4">
           <h2 id={titleId} className="fs-filter-drawer__title text-lg font-bold">
-            Filter
+            {t("filter", "Filter")}
           </h2>
-          <button
-            type="button"
+          <CloseButton
             onClick={onClose}
-            className="fs-filter-drawer__close rounded-full p-2 transition"
-            aria-label="Close filters"
-          >
-            <X className="h-5 w-5" />
-          </button>
+            size="md"
+            variant="subtle"
+            rounded="full"
+            className="fs-filter-drawer__close"
+            ariaLabel={t("closeFilters", "Close filters")}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="space-y-6">
             <div>
-              <h3 className="fs-filter-drawer__section-title mb-3 text-sm font-bold">Sort by</h3>
+              <h3 className="fs-filter-drawer__section-title mb-3 text-sm font-bold">{t("sortBy", "Sort by")}</h3>
               <ul className="space-y-1">
                 {STOREFRONT_SORT_OPTIONS.map((option) => (
                   <li key={option.value}>
@@ -131,7 +175,7 @@ export default function StorefrontFilterDrawer({
                         checked={sortValue === option.value}
                         onChange={() => onSortChange?.(option.value)}
                       />
-                      <span className="flex-1 font-medium">{option.label}</span>
+                      <span className="flex-1 font-medium">{getSortLabel(option)}</span>
                     </label>
                   </li>
                 ))}
@@ -140,14 +184,14 @@ export default function StorefrontFilterDrawer({
 
             {priceBounds && boundsMax > boundsMin ? (
               <div>
-                <h3 className="fs-filter-drawer__section-title mb-2 text-sm font-bold">Price Range</h3>
+                <h3 className="fs-filter-drawer__section-title mb-2 text-sm font-bold">{t("priceRange", "Price Range")}</h3>
                 <p className="fs-filter-drawer__price-value mb-3 text-sm font-semibold">
                   ${Math.round(minVal)} – ${Math.round(maxVal)}
                 </p>
                 <div className="space-y-3">
                   <div>
                     <label className="fs-filter-drawer__hint mb-1 block text-xs">
-                      Min ${Math.round(boundsMin)}
+                      {t("min", "Min")} ${Math.round(boundsMin)}
                     </label>
                     <input
                       type="range"
@@ -162,7 +206,7 @@ export default function StorefrontFilterDrawer({
                   </div>
                   <div>
                     <label className="fs-filter-drawer__hint mb-1 block text-xs">
-                      Max ${Math.round(boundsMax)}
+                      {t("max", "Max")} ${Math.round(boundsMax)}
                     </label>
                     <input
                       type="range"
@@ -185,9 +229,9 @@ export default function StorefrontFilterDrawer({
 
             {sections.map((section) => (
               <div key={section.id}>
-                <h3 className="fs-filter-drawer__section-title mb-3 text-sm font-bold">{section.title}</h3>
+                <h3 className="fs-filter-drawer__section-title mb-3 text-sm font-bold">{getSectionTitle(section)}</h3>
                 {section.options.length === 0 ? (
-                  <p className="fs-filter-drawer__empty text-xs">No options yet</p>
+                  <p className="fs-filter-drawer__empty text-xs">{t("noOptionsYet", "No options yet")}</p>
                 ) : section.id === "size" ? (
                   <div className="flex flex-wrap gap-2">
                     {section.options.map((option) => {
@@ -244,7 +288,7 @@ export default function StorefrontFilterDrawer({
         <div className="fs-filter-drawer__footer flex items-center justify-between gap-2 px-5 py-4">
           {onClearAll ? (
             <button type="button" onClick={onClearAll} className="fs-filter-drawer__clear text-sm font-semibold transition">
-              Clear all
+              {t("clearAll", "Clear all")}
             </button>
           ) : (
             <span />
@@ -255,7 +299,7 @@ export default function StorefrontFilterDrawer({
             className="fs-filter-drawer__apply rounded-full px-6 py-2.5 text-sm font-bold transition hover:brightness-110"
             style={{ backgroundColor: accent, color: accentText }}
           >
-            {applyLabel}
+            {resolvedApplyLabel}
           </button>
         </div>
       </aside>

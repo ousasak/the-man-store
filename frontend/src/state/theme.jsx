@@ -5,10 +5,10 @@ const THEME_STORAGE_KEY = "themanstore_admin_theme";
 const STOREFRONT_THEME_KEY = "themanstore_storefront_theme";
 
 /** Brand obsidian & gold — buttons, sidebar, menus, focus rings (`--admin-primary`). */
-export const ADMIN_BRAND_PRIMARY = "#0B0F17";
+export const ADMIN_BRAND_PRIMARY = "#C59B27";
 export const ADMIN_GOLD_ACCENT = "#C59B27";
 
-/** Legacy admin colors — migrated to {@link ADMIN_BRAND_PRIMARY} on load. */
+/** Legacy admin colors — migrated to {@link ADMIN_GOLD_ACCENT} on load. */
 const LEGACY_ADMIN_PRIMARY = "#37A169";
 const LEGACY_SAGE_PRIMARY = "#6E8B7E";
 const LEGACY_SPECTRUM_PRIMARY = "#3B82F6";
@@ -20,8 +20,8 @@ export const ADMIN_LIGHT_MUTED_PALETTE_PRESET_ID = "light-muted-palette";
 
 /** Named presets (matches common dashboard “theme picker” patterns). */
 export const ADMIN_APPEARANCE_PRESETS = [
-  { id: "default", label: "Obsidian (The Man Store)", color: ADMIN_BRAND_PRIMARY },
-  { id: "gold", label: "Champagne Gold", color: ADMIN_GOLD_ACCENT },
+  { id: "gold", label: "Champagne Gold (Default)", color: ADMIN_GOLD_ACCENT },
+  { id: "default", label: "Obsidian (The Man Store)", color: "#0B0F17" },
   { id: "slate", label: "Slate Pro", color: "#334155" },
   { id: "emerald", label: "Emerald Pro", color: "#10A37F" },
   { id: "ocean", label: "Ocean Breeze", color: "#6366F1" },
@@ -32,7 +32,7 @@ export const ADMIN_APPEARANCE_PRESETS = [
   {
     id: ADMIN_LIGHT_MUTED_PALETTE_PRESET_ID,
     label: "Light Muted Palette",
-    color: ADMIN_BRAND_PRIMARY,
+    color: ADMIN_GOLD_ACCENT,
     palette: true,
   },
 ];
@@ -48,13 +48,24 @@ export const ADMIN_SPECTRUM_COLORS = [
   "#8FA89A",
 ];
 
+/** Luminous accent cycle for dark mode KPI cards & charts (guarantees high contrast and visible stripes/icons). */
+export const ADMIN_SPECTRUM_COLORS_DARK = [
+  "#38BDF8", // 1: Sky Blue 400 (sales/value/revenue)
+  "#FBBF24", // 2: Amber Gold 400 (inventory/total products)
+  "#34D399", // 3: Emerald 400 (active items)
+  "#F87171", // 4: Rose 400 (out-of-stock / warnings)
+  "#C084FC", // 5: Purple 400
+  "#2DD4BF", // 6: Teal 400
+  "#FB923C", // 7: Coral Orange 400
+];
+
 export const ADMIN_SPECTRUM_SWATCH =
   "linear-gradient(135deg, #0B0F17 0%, #C59B27 28%, #334155 52%, #5B8DEF 72%, #D4A574 88%, #64748B 100%)";
 
 const DEFAULT_THEME = {
   mode: "light",
-  primaryColor: ADMIN_BRAND_PRIMARY,
-  presetId: ADMIN_LIGHT_MUTED_PALETTE_PRESET_ID,
+  primaryColor: ADMIN_GOLD_ACCENT,
+  presetId: "gold",
   scale: "default",
   radius: "md",
   contentLayout: "full",
@@ -83,6 +94,14 @@ function hexToRgbString(hex) {
   return `${red}, ${green}, ${blue}`;
 }
 
+function hexToRgbSpaceString(hex) {
+  const clean = normalizeHexColor(hex).replace("#", "");
+  const red = parseInt(clean.slice(0, 2), 16);
+  const green = parseInt(clean.slice(2, 4), 16);
+  const blue = parseInt(clean.slice(4, 6), 16);
+  return `${red} ${green} ${blue}`;
+}
+
 /** Preset key for a hex color, or "custom" when it does not match a named preset. */
 export function presetIdForPrimaryColor(hex) {
   const n = normalizeHexColor(hex);
@@ -104,22 +123,25 @@ const SCALE_MULT = {
   lg: 1.125,
 };
 
-function applySpectrumPalette(html) {
-  const [base, info, light, warning, mist, infoAlt, pale] = ADMIN_SPECTRUM_COLORS;
-  /* Buttons, menus, links — brand sage; KPI grid cycles muted accents */
-  html.style.setProperty("--admin-primary", ADMIN_BRAND_PRIMARY);
-  html.style.setProperty("--admin-primary-rgb", hexToRgbString(ADMIN_BRAND_PRIMARY));
-  html.style.setProperty("--admin-success", light);
-  html.style.setProperty("--admin-success-rgb", hexToRgbString(light));
-  html.style.setProperty("--admin-danger", "#DC2626");
-  html.style.setProperty("--admin-danger-rgb", hexToRgbString("#DC2626"));
-  html.style.setProperty("--admin-info", info);
-  html.style.setProperty("--admin-info-rgb", hexToRgbString(info));
-  html.style.setProperty("--admin-warning", warning);
-  html.style.setProperty("--admin-warning-rgb", hexToRgbString(warning));
+function applySpectrumPalette(html, mode = "light") {
+  const isDark = mode === "dark";
+  const colors = isDark ? ADMIN_SPECTRUM_COLORS_DARK : ADMIN_SPECTRUM_COLORS;
+  const [base, info, light, warning, mist, infoAlt, pale] = colors;
+  /* Buttons, menus, links — brand gold; KPI grid cycles muted accents */
+  html.style.setProperty("--admin-primary", ADMIN_GOLD_ACCENT);
+  html.style.setProperty("--admin-primary-rgb", hexToRgbString(ADMIN_GOLD_ACCENT));
+  html.style.setProperty("--fs-brand-primary", hexToRgbSpaceString(ADMIN_GOLD_ACCENT));
+  html.style.setProperty("--admin-success", isDark ? "#34D399" : light);
+  html.style.setProperty("--admin-success-rgb", hexToRgbString(isDark ? "#34D399" : light));
+  html.style.setProperty("--admin-danger", isDark ? "#F87171" : "#DC2626");
+  html.style.setProperty("--admin-danger-rgb", hexToRgbString(isDark ? "#F87171" : "#DC2626"));
+  html.style.setProperty("--admin-info", isDark ? "#38BDF8" : info);
+  html.style.setProperty("--admin-info-rgb", hexToRgbString(isDark ? "#38BDF8" : info));
+  html.style.setProperty("--admin-warning", isDark ? "#FBBF24" : warning);
+  html.style.setProperty("--admin-warning-rgb", hexToRgbString(isDark ? "#FBBF24" : warning));
   html.style.setProperty("--admin-accent-purple", pale);
   html.style.setProperty("--admin-accent-teal", base);
-  ADMIN_SPECTRUM_COLORS.forEach((hex, i) => {
+  colors.forEach((hex, i) => {
     html.style.setProperty(`--admin-spectrum-${i + 1}`, hex);
     html.style.setProperty(`--admin-spectrum-${i + 1}-rgb`, hexToRgbString(hex));
   });
@@ -157,8 +179,9 @@ function resolveActivePresetId(primaryColor, presetIdHint) {
   return presetIdForPrimaryColor(primaryColor);
 }
 
-function applyModeAndPrimary(_mode, primaryColor, presetIdHint) {
+function applyModeAndPrimary(mode, primaryColor, presetIdHint) {
   const html = document.documentElement;
+  const isDark = mode === "dark";
   const normalizedColor = normalizeHexColor(primaryColor);
   const activePresetId = resolveActivePresetId(normalizedColor, presetIdHint);
   const preset = ADMIN_APPEARANCE_PRESETS.find((p) => p.id === activePresetId);
@@ -168,13 +191,16 @@ function applyModeAndPrimary(_mode, primaryColor, presetIdHint) {
   html.setAttribute("data-admin-preset", activePresetId);
   html.removeAttribute("data-admin-accent-mode");
 
+  const colors = isDark ? ADMIN_SPECTRUM_COLORS_DARK : ADMIN_SPECTRUM_COLORS;
+
   if (preset?.palette) {
-    applySpectrumPalette(html);
+    applySpectrumPalette(html, mode);
   } else {
     clearSpectrumPalette(html);
     html.style.setProperty("--admin-primary", normalizedColor);
     html.style.setProperty("--admin-primary-rgb", hexToRgbString(normalizedColor));
-    ADMIN_SPECTRUM_COLORS.forEach((hex, i) => {
+    html.style.setProperty("--fs-brand-primary", hexToRgbSpaceString(normalizedColor));
+    colors.forEach((hex, i) => {
       html.style.setProperty(`--admin-spectrum-${i + 1}`, hex);
       html.style.setProperty(`--admin-spectrum-${i + 1}-rgb`, hexToRgbString(hex));
     });
@@ -201,9 +227,9 @@ export function applyAdminAppearanceVars(scale, radius) {
 function normalizeStored(raw) {
   if (!raw || typeof raw !== "object") return { ...DEFAULT_THEME };
   let mode = raw.mode === "light" ? "light" : "dark";
-  let primaryColor = normalizeHexColor(raw.primaryColor);
+  let primaryColor = normalizeHexColor(raw.primaryColor || ADMIN_GOLD_ACCENT);
   const storedPreset = normalizePresetId(
-    typeof raw.presetId === "string" ? raw.presetId : "default",
+    typeof raw.presetId === "string" ? raw.presetId : "gold",
   );
   const colorUpper = primaryColor.toUpperCase();
   if (
@@ -216,16 +242,20 @@ function normalizeStored(raw) {
     colorUpper === "#0B0B0F" ||
     colorUpper === "#1E293B" ||
     colorUpper === "#111827" ||
-    colorUpper === "#2563EB"
+    colorUpper === "#2563EB" ||
+    colorUpper === "#37A169" ||
+    colorUpper === "#10A37F" ||
+    colorUpper === "#10B981"
   ) {
-    primaryColor = ADMIN_BRAND_PRIMARY;
+    primaryColor = ADMIN_GOLD_ACCENT;
   }
   let presetId = ADMIN_APPEARANCE_PRESETS.some((p) => p.id === storedPreset)
     ? storedPreset
     : presetIdForPrimaryColor(primaryColor);
-  /* Legacy “Default” preset → Light Muted Palette + light mode (Dasher-style admin UI). */
-  if (storedPreset === "default" || presetId === "default") {
-    presetId = ADMIN_LIGHT_MUTED_PALETTE_PRESET_ID;
+  /* Legacy “Default” or “emerald” preset → Champagne Gold (Default) */
+  if (storedPreset === "default" || presetId === "default" || storedPreset === "emerald" || storedPreset === ADMIN_LIGHT_MUTED_PALETTE_PRESET_ID) {
+    presetId = "gold";
+    primaryColor = ADMIN_GOLD_ACCENT;
     mode = "light";
   }
   const scale = ["xs", "default", "lg"].includes(raw.scale) ? raw.scale : "default";

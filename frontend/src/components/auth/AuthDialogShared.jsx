@@ -7,6 +7,7 @@ import { resolveBundledLogoUrl } from "../../lib/siteLogo.js";
 import { DialogPopup, DialogTitle, DialogDescription } from "../ui/Dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContents, TabsContent } from "../ui/Tabs";
 import { useAuth } from "../../state/auth";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 /** Shared corner radius — matches --fs-radius-* in styles/index.css */
 export const AUTH_SHELL_CLASS =
@@ -71,6 +72,7 @@ export function AuthDialogShell({
   onTabChange,
   children,
 }) {
+  const { t } = useLanguage();
   return (
     <DialogPopup
       className={`${AUTH_SHELL_CLASS} pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]`}
@@ -89,7 +91,7 @@ export function AuthDialogShell({
           <DialogPrimitive.Close
             onClick={onClose}
             className="absolute right-4 top-4 z-10 rounded-full border border-white/15 bg-white/10 p-1.5 text-white/70 backdrop-blur-sm transition hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
-            aria-label="Close"
+            aria-label={t("common.actions.close") || "Close"}
           >
             <X className="h-4 w-4" />
           </DialogPrimitive.Close>
@@ -112,7 +114,7 @@ export function AuthDialogShell({
               {title}
             </DialogTitle>
           ) : (
-            <DialogTitle className="sr-only">{activeTab === "register" ? "Register" : "Login"}</DialogTitle>
+            <DialogTitle className="sr-only">{activeTab === "register" ? (t("auth.register") || "Register") : (t("auth.login") || "Login")}</DialogTitle>
           )}
           {description ? (
             <DialogDescription className="mt-1.5 text-center text-sm text-white/60">
@@ -120,17 +122,17 @@ export function AuthDialogShell({
             </DialogDescription>
           ) : (
             <DialogDescription className="sr-only">
-              {activeTab === "register" ? "Create a new account" : "Sign in to your account"}
+              {activeTab === "register" ? (t("auth.registerSubtitle") || "Create a new account") : (t("auth.loginSubtitle") || "Sign in to your account")}
             </DialogDescription>
           )}
 
           {/* Tab switcher anchored to bottom of header */}
           <TabsList className="auth-dialog-tabs mt-8 w-full">
             <TabsTrigger value="login" className="auth-dialog-tab">
-              Login
+              {t("auth.login") || "Login"}
             </TabsTrigger>
             <TabsTrigger value="register" className="auth-dialog-tab">
-              Register
+              {t("auth.register") || "Register"}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -211,13 +213,14 @@ export function formatOtpNotice({ message, email, fallback, emailSent }) {
 }
 
 export function AuthDivider() {
+  const { t } = useLanguage();
   return (
     <div className="relative my-5">
       <div className="absolute inset-0 flex items-center" aria-hidden>
         <div className="w-full border-t border-slate-200" />
       </div>
       <div className="relative flex justify-center text-xs uppercase tracking-widest">
-        <span className="bg-white px-3 text-slate-400">or continue with</span>
+        <span className="bg-white px-3 text-slate-400">{t("auth.continueWith") || "or continue with"}</span>
       </div>
     </div>
   );
@@ -304,29 +307,30 @@ export function AuthMethodPicker({
   onContinue,
   methods,
 }) {
+  const { t } = useLanguage();
   const isRegister = mode === "register";
   const items = methods || [
     {
       id: "telegram",
-      title: "Use Telegram on this device",
+      title: t("auth.telegramMethodTitle") || "Use Telegram on this device",
       description: isRegister
-        ? "Continue in Telegram to create or open your customer account"
-        : "Continue in Telegram to open your customer account",
+        ? (t("auth.telegramMethodDescRegister") || "Continue in Telegram to create or open your customer account")
+        : (t("auth.telegramMethodDescLogin") || "Continue in Telegram to open your customer account"),
     },
     {
       id: "email",
-      title: "Email and password",
-      description: isRegister ? "Register with email" : "Use your The Man Store email",
+      title: t("auth.emailMethodTitle") || "Email and password",
+      description: isRegister ? (t("auth.emailMethodDescRegister") || "Register with email") : (t("auth.emailMethodDescLogin") || "Use your The Man Store email"),
     },
     {
       id: "google",
-      title: "Continue with Google",
-      description: isRegister ? "Register with your Google account" : "Sign in with Google",
+      title: t("auth.googleMethodTitle") || "Continue with Google",
+      description: isRegister ? (t("auth.googleMethodDescRegister") || "Register with your Google account") : (t("auth.googleMethodDescLogin") || "Sign in with Google"),
     },
     {
       id: "facebook",
-      title: "Continue with Facebook",
-      description: isRegister ? "Register with Facebook" : "Sign in with Facebook",
+      title: t("auth.facebookMethodTitle") || "Continue with Facebook",
+      description: isRegister ? (t("auth.facebookMethodDescRegister") || "Register with Facebook") : (t("auth.facebookMethodDescLogin") || "Sign in with Facebook"),
     },
   ];
 
@@ -341,12 +345,12 @@ export function AuthMethodPicker({
     <div className="mt-4 flex flex-col gap-5">
       <div className="text-center">
         <h3 className="text-lg font-semibold text-slate-900">
-          {isRegister ? "Register options" : "Login options"}
+          {isRegister ? (t("auth.authOptionsTitleRegister") || "Register options") : (t("auth.authOptionsTitleLogin") || "Login options")}
         </h3>
         <p className="mt-1 text-sm text-slate-500">
           {isRegister
-            ? "Choose how you’d like to create your The Man Store account."
-            : "Choose how you’d like to log in to The Man Store."}
+            ? (t("auth.authOptionsDescRegister") || "Choose how you’d like to create your The Man Store account.")
+            : (t("auth.authOptionsDescLogin") || "Choose how you’d like to log in to The Man Store.")}
         </p>
       </div>
 
@@ -392,7 +396,7 @@ export function AuthMethodPicker({
       </div>
 
       <button type="button" onClick={onContinue} className={AUTH_PRIMARY_BTN}>
-        Continue
+        {t("common.actions.continue") || "Continue"}
       </button>
     </div>
   );

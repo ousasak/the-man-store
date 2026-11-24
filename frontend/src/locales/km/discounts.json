@@ -1,0 +1,112 @@
+{
+  "manageDiscounts": "គ្រប់គ្រងការបញ្ចុះតម្លៃ",
+  "pageTitle": "គ្រប់គ្រងការបញ្ចុះតម្លៃ",
+  "pageSubtitle": "បង្កើត និងគ្រប់គ្រងការបញ្ចុះតម្លៃផលិតផល តម្លៃប្រូម៉ូសិន និងរយៈពេលយុទ្ធនាការ។",
+  "createDiscount": "បង្កើតការបញ្ចុះតម្លៃ",
+  "editDiscount": "កែប្រែការបញ្ចុះតម្លៃ",
+  "updateDiscount": "កែប្រែការបញ្ចុះតម្លៃ",
+  "deleteDiscount": "លុបការបញ្ចុះតម្លៃ",
+  "deleteDiscountPrompt": "តើអ្នកពិតជាចង់លុបការបញ្ចុះតម្លៃនេះមែនទេ?",
+  "deleteDiscountMessage": "សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+  "allDiscounts": "ការបញ្ចុះតម្លៃទាំងអស់",
+  "searchDiscounts": "ស្វែងរកការបញ្ចុះតម្លៃ...",
+  "searchPlaceholder": "ស្វែងរកការបញ្ចុះតម្លៃ...",
+  "noDiscountsFound": "រកមិនឃើញការបញ្ចុះតម្លៃទេ",
+  "noDiscountsDesc": "ការបញ្ចុះតម្លៃនឹងបង្ហាញនៅទីនេះនៅពេលដែលបានបង្កើត។",
+  "onThisPage": "{count} ក្នុងទំព័រនេះ · សរុប {total}",
+  "totalDiscountsSingle": "{count} ការបញ្ចុះតម្លៃ",
+  "totalDiscountsMultiple": "{count} ការបញ្ចុះតម្លៃ",
+
+  "table": {
+    "product": "ផលិតផល",
+    "discount": "បញ្ចុះតម្លៃ",
+    "originalPrice": "តម្លៃដើម",
+    "discountedPrice": "តម្លៃបញ្ចុះ",
+    "salePrice": "តម្លៃបញ្ចុះ",
+    "quantity": "ចំនួន",
+    "startDate": "កាលបរិច្ឆេទចាប់ផ្តើម",
+    "endDate": "កាលបរិច្ឆេទបញ្ចប់",
+    "status": "ស្ថានភាព",
+    "actions": "សកម្មភាព"
+  },
+
+  "columns": {
+    "product": "ផលិតផល",
+    "discount": "បញ្ចុះតម្លៃ",
+    "originalPrice": "តម្លៃដើម",
+    "salePrice": "តម្លៃបញ្ចុះ",
+    "quantity": "ចំនួន",
+    "startDate": "កាលបរិច្ឆេទចាប់ផ្តើម",
+    "endDate": "កាលបរិច្ឆេទបញ្ចប់",
+    "status": "ស្ថានភាព",
+    "actions": "សកម្មភាព"
+  },
+
+  "types": {
+    "percentage": "ភាគរយ (%)",
+    "fixed": "ចំនួនថេរ ($)",
+    "percentageShort": "ភាគរយ",
+    "fixedShort": "ចំនួនថេរ"
+  },
+
+  "status": {
+    "active": "សកម្ម",
+    "inactive": "អសកម្ម",
+    "unlimited": "មិនកំណត់",
+    "expired": "ផុតកំណត់",
+    "scheduled": "បានកំណត់ពេល"
+  },
+
+  "form": {
+    "product": "ផលិតផល",
+    "productRequired": "ផលិតផល *",
+    "selectProduct": "ជ្រើសរើសផលិតផល",
+    "searchProduct": "ស្វែងរកផលិតផល…",
+    "discountType": "ប្រភេទបញ្ចុះតម្លៃ",
+    "discountTypeRequired": "ប្រភេទបញ្ចុះតម្លៃ *",
+    "searchType": "ស្វែងរកប្រភេទ…",
+    "discountValue": "តម្លៃបញ្ចុះ",
+    "discountValueUnit": "តម្លៃបញ្ចុះ {unit} *",
+    "percentagePlaceholder": "ឧ. 20",
+    "fixedPlaceholder": "ឧ. 10.99",
+    "originalPrice": "តម្លៃដើម ($)",
+    "selectProductFirst": "សូមជ្រើសរើសផលិតផល",
+    "discountedPrice": "តម្លៃបញ្ចុះ ($)",
+    "autoCalculated": "គណនាដោយស្វ័យប្រវត្តិ",
+    "autoCalculatedHint": "ស្វ័យប្រវត្តិ: ${salePrice} (ពី ${originalPrice})",
+    "quantity": "ចំនួន",
+    "quantityPlaceholder": "ឧ. 50",
+    "quantityHelpUnlimited": "ចំនួនទំនិញអតិបរមាសម្រាប់តម្លៃបញ្ចុះនេះ។ ទុកទទេប្រសិនបើមិនកំណត់។",
+    "quantityHelpStock": "ចំនួនទំនិញអតិបរមាសម្រាប់តម្លៃបញ្ចុះនេះ (ស្តុកដែលមាន: {stock} គ្រឿង)។ ទុកទទេប្រសិនបើមិនកំណត់។",
+    "availableStock": "ស្តុកដែលមាន",
+    "units": "គ្រឿង",
+    "startDate": "កាលបរិច្ឆេទចាប់ផ្តើម",
+    "startDateRequired": "កាលបរិច្ឆេទចាប់ផ្តើម *",
+    "endDate": "កាលបរិច្ឆេទបញ្ចប់",
+    "endDateRequired": "កាលបរិច្ឆេទបញ្ចប់ *",
+    "description": "ការពិពណ៌នា",
+    "descriptionPlaceholder": "ព័ត៌មានលម្អិតនៃការបញ្ចុះតម្លៃ កំណត់សម្គាល់ពិសេស។ល។",
+    "active": "សកម្ម",
+    "cancel": "បោះបង់",
+    "submitCreate": "បង្កើតការបញ្ចុះតម្លៃ",
+    "submitUpdate": "កែប្រែការបញ្ចុះតម្លៃ"
+  },
+
+  "messages": {
+    "requiredFields": "សូមបំពេញគ្រប់ប្រអប់ដែលតម្រូវ",
+    "quantityMinError": "ចំនួនត្រូវតែយ៉ាងហោចណាស់ 1 ឬទុកទទេសម្រាប់មិនកំណត់",
+    "quantityStockError": "ចំនួនបញ្ចុះតម្លៃមិនអាចលើសពីស្តុកដែលមានទេ ({stock} គ្រឿង)។",
+    "unauthorizedError": "គ្មានការអនុញ្ញាត (401)។ សូមចូលគណនីម្តងទៀត។",
+    "loadSaveError": "ការផ្ទុក ឬរក្សាទុកទិន្នន័យបានបរាជ័យ។",
+    "noPermissionView": "អ្នកមិនមានការអនុញ្ញាតក្នុងការមើលការបញ្ចុះតម្លៃទេ។",
+    "noPermissionCreate": "អ្នកមិនមានការអនុញ្ញាតក្នុងការបង្កើតការបញ្ចុះតម្លៃទេ។",
+    "noPermissionEdit": "អ្នកមិនមានការអនុញ្ញាតក្នុងការកែប្រែការបញ្ចុះតម្លៃទេ។",
+    "noPermissionDelete": "អ្នកមិនមានការអនុញ្ញាតក្នុងការលុបការបញ្ចុះតម្លៃទេ។",
+    "createdSuccess": "បានបង្កើតការបញ្ចុះតម្លៃដោយជោគជ័យ",
+    "updatedSuccess": "បានកែប្រែការបញ្ចុះតម្លៃដោយជោគជ័យ",
+    "deletedSuccess": "បានលុបការបញ្ចុះតម្លៃដោយជោគជ័យ",
+    "bulkUpdatedSuccess": "បានកែប្រែការបញ្ចុះតម្លៃដោយជោគជ័យ",
+    "editDiscountTitle": "កែប្រែការបញ្ចុះតម្លៃ",
+    "deleteDiscountTitle": "លុបការបញ្ចុះតម្លៃ"
+  }
+}

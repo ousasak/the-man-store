@@ -1,0 +1,447 @@
+import React, { useState, useEffect } from "react";
+import apiClient from "@/lib/api";
+import AdminSearchSelect from "@/components/admin/AdminSearchSelect.jsx";
+import { errorAlert, toastSuccess, warningConfirm } from "@/lib/swal";
+import { AdminSectionLoader } from "@/components/admin/AdminLoading";
+import { useTranslation } from "@/lib/i18n.jsx";
+
+const ROLE_FILTER_OPTIONS = [
+  { value: "", label: "All Roles" },
+  { value: "superadmin", label: "Superadmin" },
+  { value: "admin", label: "Admin" },
+  { value: "driver", label: "Driver" },
+  { value: "customer", label: "Customer" },
+];
+
+const STATUS_FILTER_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "suspended", label: "Suspended" },
+];
+
+const FORM_ROLE_OPTIONS = [
+  { value: "admin", label: "Admin" },
+  { value: "driver", label: "Driver" },
+  { value: "customer", label: "Customer" },
+];
+
+export default function UserManagement() {
+  const { t } = useTranslation();
+ const [users, setUsers] = useState([]);
+ const [loading, setLoading] = useState(true);
+ const [searchTerm, setSearchTerm] = useState("");
+ const [roleFilter, setRoleFilter] = useState("");
+ const [statusFilter, setStatusFilter] = useState("");
+ const [editingUser, setEditingUser] = useState(null);
+ const [showModal, setShowModal] = useState(false);
+ const [formData, setFormData] = useState({
+ role: "customer",
+ status: "active",
+ });
+ const [showSessionsModal, setShowSessionsModal] = useState(false);
+ const [sessionsLoading, setSessionsLoading] = useState(false);
+ const [selectedUser, setSelectedUser] = useState(null);
+ const [userSessions, setUserSessions] = useState([]);
+
+ useEffect(() => {
+ fetchUsers();
+ }, [searchTerm, roleFilter, statusFilter]);
+
+ const fetchUsers = async () => {
+ try {
+ setLoading(true);
+ const params = new URLSearchParams();
+ if (searchTerm) params.append("search", searchTerm);
+ if (roleFilter) params.append("role", roleFilter);
+ if (statusFilter) params.append("status", statusFilter);
+
+ const response = await apiClient.get(
+ `/admin/superadmin/users?${params.toString()}`
+ );
+ setUsers(response.data?.data || []);
+ } catch (error) {
+ console.error("Failed to fetch users:", error);
+ } finally {
+ setLoading(false);
+ }
+ };
+
+ const handleEditRole = async (userId) => {
+ const userToEdit = users.find((u) => u.id === userId);
+ setEditingUser(userToEdit);
+ setFormData({
+ role: userToEdit.role,
+ status: userToEdit.status,
+ });
+ setShowModal(true);
+ };
+
+ const handleSaveRole = async () => {
+ try {
+ if (editingUser.role === "superadmin") {
+ await errorAlert({
+ khTitle: "មិនអនុញ្ញាត",
+ enTitle: "Not allowed",
+ khText: "មិនអាចកែតួនាទី Superadmin បានទេ",
+ enText: "Cannot modify superadmin role",
+ });
+ return;
+ }
+
+ await apiClient.patch(`/admin/superadmin/users/${editingUser.id}/role`, {
+ role: formData.role,
+ });
+
+ await toastSuccess({
+ khText: "បានកែប្រែតួនាទីអ្នកប្រើប្រាស់ដោយជោគជ័យ",
+ enText: "User role updated successfully",
+ });
+ setShowModal(false);
+ fetchUsers();
+ } catch (error) {
+ await errorAlert({
+ khTitle: "កែតួនាទីបរាជ័យ",
+ enTitle: "Role update failed",
+ detail: "Failed to update user role: " + error.message,
+ });
+ }
+ };
+
+ const handleSaveStatus = async (userId) => {
+ try {
+ const userToUpdate = users.find((u) => u.id === userId);
+ if (userToUpdate.role === "superadmin") {
+ await errorAlert({
+ khTitle: "មិនអនុញ្ញាត",
+ enTitle: "Not allowed",
+ khText: "មិនអាចកែស្ថានភាព Superadmin បានទេ",
+ enText: "Cannot modify superadmin status",
+ });
+ return;
+ }
+
+ const confirmRes = await warningConfirm({
+ enTitle: "Change account status?",
+ enText: "This toggles whether the user can sign in.",
+ enConfirm: "Update",
+ intent: "primary",
+ });
+ if (!confirmRes.isConfirmed) return;
+
+ const newStatus =
+ userToUpdate.status === "active" ? "inactive" : "active";
+ await apiClient.patch(
+ `/admin/superadmin/users/${userId}/status`,
+ {
+ status: newStatus,
+ }
+ );
+
+ await toastSuccess({
+ khText: "បានកែស្ថានភាពអ្នកប្រើប្រាស់ដោយជោគជ័យ",
+ enText: "User status updated successfully",
+ });
+ fetchUsers();
+ } catch (error) {
+ await errorAlert({
+ khTitle: "កែស្ថានភាពបរាជ័យ",
+ enTitle: "Status update failed",
+ detail: "Failed to update user status: " + error.message,
+ });
+ }
+ };
+
+ const getRoleColor = (role) => {
+ const colors = {
+ superadmin: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+ admin: "bg-[rgba(var(--admin-primary-rgb),0.12)] text-[color:var(--admin-primary)] dark:bg-[rgba(var(--admin-primary-rgb),0.2)] dark:text-[color:var(--admin-primary)]",
+ driver: "bg-[rgba(var(--admin-primary-rgb),0.14)] text-[color:var(--admin-primary)] dark:bg-[rgba(var(--admin-primary-rgb),0.2)] dark:text-[color:var(--admin-primary)]",
+ customer: "bg-slate-100 text-slate-800 dark:bg-slate-700/80 dark:text-slate-200",
+ };
+ return colors[role] || colors.customer;
+ };
+
+ const getStatusColor = (status) => {
+ const colors = {
+ active: "bg-[rgba(var(--admin-primary-rgb),0.12)] text-[color:var(--admin-primary)] dark:bg-[rgba(var(--admin-primary-rgb),0.18)] dark:text-[color:var(--admin-primary)]",
+ inactive:
+ "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+ suspended:
+ "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+ };
+ return colors[status] || colors.active;
+ };
+
+ const openSessionsModal = async (user) => {
+ setSelectedUser(user);
+ setShowSessionsModal(true);
+ setSessionsLoading(true);
+ try {
+ const { data } = await apiClient.get(`/admin/superadmin/users/${user.id}/sessions`);
+ setUserSessions(data?.data || []);
+ } catch (error) {
+ await errorAlert({
+ khTitle: "ផ្ទុកសម័យបរាជ័យ",
+ enTitle: "Failed to load sessions",
+ detail: error?.response?.data?.message || "Failed to load user sessions",
+ });
+ setUserSessions([]);
+ } finally {
+ setSessionsLoading(false);
+ }
+ };
+
+ const revokeUserSession = async (sessionId) => {
+ if (!selectedUser) return;
+ const confirmRes = await warningConfirm({
+ enTitle: "Revoke this session?",
+ enText: "The user will be signed out on that device.",
+ enConfirm: "Revoke",
+ intent: "destructive",
+ });
+ if (!confirmRes.isConfirmed) return;
+ try {
+ await apiClient.delete(`/admin/superadmin/users/${selectedUser.id}/sessions/${sessionId}`);
+ setUserSessions((prev) => prev.filter((s) => s.id !== sessionId));
+ await toastSuccess({
+ khText: "បានបញ្ចប់សម័យដោយជោគជ័យ",
+ enText: "Session revoked successfully",
+ });
+ } catch (error) {
+ await errorAlert({
+ khTitle: "បញ្ចប់សម័យបរាជ័យ",
+ enTitle: "Failed to revoke session",
+ detail: error?.response?.data?.message || "Failed to revoke session",
+ });
+ }
+ };
+
+ return (
+ <div className="space-y-6 w-full min-w-0">
+ {/* Header */}
+ <div className="admin-surface border admin-border rounded-2xl p-6">
+ <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">
+ {t("users.userManagementTitle")}
+ </h2>
+ <p className="text-slate-600 dark:text-slate-400 mb-6">
+ {t("users.userManagementSubtitle")}
+ </p>
+
+ {/* Filters */}
+ <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+ <input
+ type="text"
+ placeholder={t("users.searchUsersPlaceholder")}
+ value={searchTerm}
+ onChange={(e) => setSearchTerm(e.target.value)}
+ className="px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
+ />
+ <AdminSearchSelect
+ value={roleFilter}
+ onChange={setRoleFilter}
+ options={ROLE_FILTER_OPTIONS}
+ inputClassName="px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-white"
+ ariaLabel="Filter by role"
+ placeholder="Search role…"
+ />
+ <AdminSearchSelect
+ value={statusFilter}
+ onChange={setStatusFilter}
+ options={STATUS_FILTER_OPTIONS}
+ inputClassName="px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-white"
+ ariaLabel="Filter by status"
+ placeholder="Search status…"
+ />
+ </div>
+ </div>
+
+ {/* Users Table */}
+ <div className="admin-surface border admin-border rounded-2xl overflow-hidden">
+ {loading ? (
+ <AdminSectionLoader rows={5} />
+ ) : users.length === 0 ? (
+ <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+ {t("users.noUsersFound")}
+ </div>
+ ) : (
+ <div className="overflow-x-auto">
+ <table className="w-full">
+ <thead className="bg-slate-100 dark:bg-slate-700/50">
+ <tr>
+ <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 dark:text-white">
+ {t("users.user")}
+ </th>
+ <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 dark:text-white">
+ {t("users.email")}
+ </th>
+ <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 dark:text-white">
+ {t("users.role")}
+ </th>
+ <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 dark:text-white">
+ {t("users.status")}
+ </th>
+ <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 dark:text-white">
+ {t("users.actions")}
+ </th>
+ </tr>
+ </thead>
+ <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+ {users.map((user) => (
+ <tr
+ key={user.id}
+ className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+ >
+ <td className="px-6 py-4">
+ <div className="flex items-center gap-3">
+ <div className="w-10 h-10 bg-[color:var(--admin-primary)] rounded-full flex items-center justify-center text-white font-bold">
+ {user.name?.charAt(0).toUpperCase() || "U"}
+ </div>
+ <span className="font-medium text-slate-900 dark:text-white">
+ {user.name}
+ </span>
+ </div>
+ </td>
+ <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+ {user.email}
+ </td>
+ <td className="px-6 py-4">
+ <span
+ className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleColor(
+ user.role
+ )}`}
+ >
+ {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+ </span>
+ </td>
+ <td className="px-6 py-4">
+ <span
+ className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+ user.status
+ )}`}
+ >
+ {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+ </span>
+ </td>
+ <td className="px-6 py-4">
+ {user.role === "superadmin" ? (
+ <span className="text-sm text-slate-500 dark:text-slate-400">
+ Protected
+ </span>
+ ) : (
+ <div className="flex gap-2">
+ <button
+ onClick={() => handleEditRole(user.id)}
+ className="px-3 py-1 text-sm bg-[color:var(--admin-primary)] hover:brightness-110 text-white rounded-lg transition-colors"
+ >
+ {t("users.edit")}
+ </button>
+ <button
+ onClick={() => handleSaveStatus(user.id)}
+ className="px-3 py-1 text-sm bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 text-slate-900 dark:text-white rounded-lg transition-colors"
+ >
+ {user.status === "active" ? t("users.deactivate") : t("users.activate")}
+ </button>
+ <button
+ onClick={() => openSessionsModal(user)}
+ className="px-3 py-1 text-sm bg-[color:var(--admin-primary)] hover:brightness-110 text-white rounded-lg transition-colors"
+ >
+ {t("users.sessions")}
+ </button>
+ </div>
+ )}
+ </td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ )}
+ </div>
+
+ {/* Modal */}
+ {showModal && editingUser && (
+ <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+ <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-sm w-full mx-4">
+ <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+ Edit User Role
+ </h3>
+ <p className="text-slate-600 dark:text-slate-400 mb-6">
+ User: <strong>{editingUser.name}</strong>
+ </p>
+
+ <div className="space-y-4 mb-6">
+ <div>
+ <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+ Role
+ </label>
+ <AdminSearchSelect
+ value={formData.role}
+ onChange={(role) => setFormData({ ...formData, role })}
+ options={FORM_ROLE_OPTIONS}
+ inputClassName="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+ ariaLabel="Role"
+ placeholder="Search role…"
+ allowEmpty={false}
+ />
+ </div>
+ </div>
+
+ <div className="flex gap-4">
+ <button
+ onClick={() => setShowModal(false)}
+ className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+ >
+ {t("common.actions.cancel")}
+ </button>
+ <button
+ onClick={handleSaveRole}
+ className="flex-1 px-4 py-2 bg-[color:var(--admin-primary)] hover:brightness-110 text-white rounded-lg transition-colors"
+ >
+ {t("users.saveChanges")}
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
+
+ {showSessionsModal && selectedUser && (
+ <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+ <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-auto">
+ <div className="flex items-center justify-between mb-4">
+ <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Sessions: {selectedUser.name}</h3>
+ <button onClick={() => setShowSessionsModal(false)} className="text-slate-500 hover:text-slate-700">✕</button>
+ </div>
+
+ {sessionsLoading ? (
+ <AdminSectionLoader rows={3} className="p-0" />
+ ) : userSessions.length === 0 ? (
+ <p className="text-slate-500 dark:text-slate-400">No sessions found.</p>
+ ) : (
+ <div className="space-y-3">
+ {userSessions.map((session) => (
+ <div key={session.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+ <div className="flex flex-wrap items-start justify-between gap-2">
+ <div>
+ <p className="font-semibold text-slate-900 dark:text-white">{session.device_name || "Unknown device"}</p>
+ <p className="text-xs text-slate-500 dark:text-slate-400">{session.browser || "Unknown browser"} • {session.os || "Unknown OS"}</p>
+ <p className="text-xs text-slate-500 dark:text-slate-400">IP: {session.ip_address || "-"}</p>
+ <p className="text-xs text-slate-500 dark:text-slate-400">Last used: {session.last_used_at || "-"}</p>
+ </div>
+ <button
+ onClick={() => revokeUserSession(session.id)}
+ className="px-3 py-1 text-xs font-semibold rounded-lg border border-red-300 text-red-700 hover:bg-red-50"
+ >
+ Revoke
+ </button>
+ </div>
+ </div>
+ ))}
+ </div>
+ )}
+ </div>
+ </div>
+ )}
+ </div>
+ );
+}

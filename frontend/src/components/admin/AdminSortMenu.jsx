@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { ArrowUpDown, ChevronRight } from "lucide-react";
+import { useLanguage } from "../../lib/i18n.jsx";
 import {
   GROUP_BY_OPTIONS,
   MORE_SORT_OPTIONS,
@@ -61,8 +62,10 @@ export default function AdminSortMenu({
   onSortDirChange,
   onGroupByChange,
   className = "",
+  size = "default",
 }) {
   const menuId = useId();
+  const { t } = useLanguage();
   const rootRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -70,6 +73,7 @@ export default function AdminSortMenu({
 
   const isMoreSort = MORE_SORT_OPTIONS.some((o) => o.id === sortBy);
   const isCustomSort = sortBy !== "name" || sortDir !== "asc" || (groupBy && groupBy !== "none");
+  const isSm = size === "sm" || className.includes("h-8");
 
   useEffect(() => {
     if (!open) return undefined;
@@ -117,10 +121,12 @@ export default function AdminSortMenu({
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
-        className={`relative inline-flex h-8 items-center gap-1.5 rounded-[5px] border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 ${isCustomSort ? "ring-1 ring-[rgba(var(--admin-primary-rgb),0.25)]" : ""}`}
+        className={`relative inline-flex items-center gap-2 border border-slate-200 bg-white font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 ${
+          isSm ? "h-8 px-3 text-xs rounded-[5px]" : "h-10 px-3.5 text-sm rounded-lg"
+        } ${isCustomSort ? "ring-1 ring-[rgba(var(--admin-primary-rgb),0.25)]" : ""}`}
       >
-        <ArrowUpDown className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" aria-hidden />
-        Sort
+        <ArrowUpDown className={isSm ? "h-3.5 w-3.5 text-slate-500 dark:text-slate-400" : "h-4 w-4 text-slate-500 dark:text-slate-400"} aria-hidden />
+        {t("products.sort.sort", "Sort")}
         {isCustomSort ? (
           <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--admin-primary)]" aria-hidden />
         ) : null}
@@ -136,7 +142,7 @@ export default function AdminSortMenu({
             <MenuItem
               key={opt.id}
               active={sortBy === opt.id}
-              label={opt.label}
+              label={t(`products.sort.${opt.id}`, opt.label)}
               onClick={() => pickSort(opt.id)}
             />
           ))}
@@ -148,17 +154,17 @@ export default function AdminSortMenu({
           >
             <MenuItem
               active={isMoreSort}
-              label="More"
+              label={t("products.sort.more", "More")}
               hasSubmenu
               onClick={() => setMoreOpen((v) => !v)}
             />
             {moreOpen ? (
-              <SubmenuPanel title="Sort by">
+              <SubmenuPanel title={t("products.sort.sortBy", "Sort by")}>
                 {MORE_SORT_OPTIONS.map((opt) => (
                   <MenuItem
                     key={opt.id}
                     active={sortBy === opt.id}
-                    label={opt.label}
+                    label={t(`products.sort.${opt.id}`, opt.label)}
                     onClick={() => pickSort(opt.id)}
                   />
                 ))}
@@ -170,12 +176,12 @@ export default function AdminSortMenu({
 
           <MenuItem
             active={sortDir === "asc"}
-            label="Ascending"
+            label={t("products.sort.sortAsc", "Ascending")}
             onClick={() => onSortDirChange("asc")}
           />
           <MenuItem
             active={sortDir === "desc"}
-            label="Descending"
+            label={t("products.sort.sortDesc", "Descending")}
             onClick={() => onSortDirChange("desc")}
           />
 
@@ -188,17 +194,17 @@ export default function AdminSortMenu({
           >
             <MenuItem
               active={groupBy && groupBy !== "none"}
-              label="Group by"
+              label={t("products.sort.groupBy", "Group by")}
               hasSubmenu
               onClick={() => setGroupOpen((v) => !v)}
             />
             {groupOpen ? (
-              <SubmenuPanel title="Group by">
+              <SubmenuPanel title={t("products.sort.groupBy", "Group by")}>
                 {GROUP_BY_OPTIONS.map((opt) => (
                   <MenuItem
                     key={opt.id}
                     active={groupBy === opt.id}
-                    label={opt.label}
+                    label={t(`products.sort.${opt.id}`, opt.label)}
                     onClick={() => pickGroup(opt.id)}
                   />
                 ))}

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n.jsx";
 import React from 'react';
 import { orderContactInfoCards } from '../../lib/contactPageContent.js';
 import AdminLocaleToggle from './AdminLocaleToggle.jsx';
@@ -6,6 +7,7 @@ const inputClass =
   'h-11 w-full rounded-lg border border-slate-300 dark:border-slate-600 px-3 text-sm focus:border-[var(--admin-primary)] focus:ring-0 outline-none bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 disabled:opacity-60';
 
 function MoveButtons({ canEdit, index, total, onMove }) {
+  const { t } = useTranslation();
   if (!canEdit) return null;
   return (
     <div className="flex shrink-0 flex-col gap-1">
@@ -70,7 +72,7 @@ export default function ContactPageManagerPanel({
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-      <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">Contact Page</h2>
+      <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">{t("settings.contactPageManagerTitle")}</h2>
       <p className="text-slate-500 dark:text-slate-400 mb-6">
         Manage the public Contact Us page: headings, form labels, subject options, and contact info cards. Subject and card order is shared; text is edited per language.
       </p>

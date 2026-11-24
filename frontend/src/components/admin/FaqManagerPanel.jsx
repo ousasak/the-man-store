@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n.jsx";
 import React from 'react';
 import { orderFaqSectionEntries } from '../../lib/faqContent.js';
 
@@ -21,11 +22,12 @@ export default function FaqManagerPanel({
   onRemoveItem,
   onSave,
 }) {
+  const { t } = useTranslation();
   const orderedSections = orderFaqSectionEntries(faqSections, faqSectionOrder);
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-      <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">FAQ Page</h2>
+      <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">{t("settings.faqManagerTitle")}</h2>
       <p className="text-slate-500 dark:text-slate-400 mb-6">
         Create, edit, delete, and reorder FAQ sections and questions. Section order is shared; text is edited per language.
       </p>

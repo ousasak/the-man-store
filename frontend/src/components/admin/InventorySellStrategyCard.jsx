@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../lib/api";
+import { useTranslation } from "../../lib/i18n.jsx";
 
 /**
  * Global website FIFO strategy — older vs newer stock first.
@@ -11,6 +12,7 @@ export default function InventorySellStrategyCard({
   className = "",
   compact = false,
 }) {
+  const { t } = useTranslation();
   const [sellOldFirst, setSellOldFirst] = useState(sellOldFirstProp);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
@@ -47,7 +49,7 @@ export default function InventorySellStrategyCard({
             : "border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300"
         }`}
       >
-        Old first
+        {t("inventory.oldFirst", "Old first")}
       </button>
       <button
         type="button"
@@ -59,12 +61,12 @@ export default function InventorySellStrategyCard({
             : "border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300"
         }`}
       >
-        Newer first
+        {t("inventory.newerFirst", "Newer first")}
       </button>
     </div>
   ) : (
     <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
-      {sellOldFirst ? "Old first" : "Newer first"}
+      {sellOldFirst ? t("inventory.oldFirst", "Old first") : t("inventory.newerFirst", "Newer first")}
     </p>
   );
 
@@ -80,7 +82,7 @@ export default function InventorySellStrategyCard({
             : "border border-slate-300 bg-transparent text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
         }`}
       >
-        Sell old stock first
+        {t("inventory.sellOldStockFirst", "Sell old stock first")}
       </button>
       <button
         type="button"
@@ -92,12 +94,12 @@ export default function InventorySellStrategyCard({
             : "border border-slate-300 bg-transparent text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
         }`}
       >
-        Sell newer stock first
+        {t("inventory.sellNewerStockFirst", "Sell newer stock first")}
       </button>
     </div>
   ) : (
     <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
-      {sellOldFirst ? "Sell old stock first" : "Sell newer stock first"}
+      {sellOldFirst ? t("inventory.sellOldStockFirst", "Sell old stock first") : t("inventory.sellNewerStockFirst", "Sell newer stock first")}
     </p>
   );
 
@@ -106,7 +108,7 @@ export default function InventorySellStrategyCard({
       <div className={className}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Each PO creates a lot with its own price &amp; qty. Website price follows the lot selling next.
+            {t("inventory.sellStrategyCatalogHint", "Each PO creates a lot with its own price & qty. Website price follows the lot selling next.")}
           </p>
           {fullToggleButtons}
         </div>
@@ -119,9 +121,9 @@ export default function InventorySellStrategyCard({
     return (
       <div className={`flex flex-wrap items-center justify-between gap-2 ${className}`.trim()}>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          <span className="font-semibold text-slate-700 dark:text-slate-200">Sell strategy</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-200">{t("inventory.sellStrategy", "Sell strategy")}</span>
           {" · "}
-          Website price = next sellable lot
+          {t("inventory.sellStrategyWebsitePriceHint", "Website price = next sellable lot")}
         </p>
         {toggleButtons}
         {err ? <p className="w-full text-[11px] text-red-600 dark:text-red-400">{err}</p> : null}
@@ -135,10 +137,9 @@ export default function InventorySellStrategyCard({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Website sell strategy</h4>
+          <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("inventory.websiteSellStrategy", "Website sell strategy")}</h4>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Customers see one product. Price follows the lot that would sell next. POS can still scan a specific lot
-            barcode.
+            {t("inventory.websiteSellStrategyDesc", "Customers see one product. Price follows the lot that would sell next. POS can still scan a specific lot barcode.")}
           </p>
         </div>
         {canEdit ? (
@@ -153,7 +154,7 @@ export default function InventorySellStrategyCard({
                   : "border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300"
               }`}
             >
-              Sell old stock first
+              {t("inventory.sellOldStockFirst", "Sell old stock first")}
             </button>
             <button
               type="button"
@@ -165,12 +166,12 @@ export default function InventorySellStrategyCard({
                   : "border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300"
               }`}
             >
-              Sell newer stock first
+              {t("inventory.sellNewerStockFirst", "Sell newer stock first")}
             </button>
           </div>
         ) : (
           <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            {sellOldFirst ? "Sell old stock first" : "Sell newer stock first"}
+            {sellOldFirst ? t("inventory.sellOldStockFirst", "Sell old stock first") : t("inventory.sellNewerStockFirst", "Sell newer stock first")}
           </p>
         )}
       </div>

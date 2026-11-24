@@ -19,12 +19,12 @@ if (!fs.existsSync(backendEnvPath)) {
   if (fs.existsSync(backendEnvExamplePath)) {
     console.log('📋 Creating backend/.env from backend/.env.example...');
     let envContent = fs.readFileSync(backendEnvExamplePath, 'utf8');
-    // Ensure default port is 8002 to match make dev-api
-    envContent = envContent.replace(/^APP_PORT=.*$/m, 'APP_PORT=8002');
-    envContent = envContent.replace(/^SERVER_PORT=.*$/m, 'SERVER_PORT=8002');
-    envContent = envContent.replace(/^APP_URL=.*$/m, 'APP_URL=http://127.0.0.1:8002');
+    // Ensure default port is 8003 to match make dev-api
+    envContent = envContent.replace(/^APP_PORT=.*$/m, 'APP_PORT=8003');
+    envContent = envContent.replace(/^SERVER_PORT=.*$/m, 'SERVER_PORT=8003');
+    envContent = envContent.replace(/^APP_URL=.*$/m, 'APP_URL=http://127.0.0.1:8003');
     fs.writeFileSync(backendEnvPath, envContent, 'utf8');
-    console.log('✅ Created backend/.env (configured for port 8002)');
+    console.log('✅ Created backend/.env (configured for port 8003)');
   } else {
     console.warn('⚠️  backend/.env.example not found. Skipped creating backend/.env');
   }
@@ -36,11 +36,11 @@ if (!fs.existsSync(backendEnvPath)) {
 const frontendEnvPath = path.join(frontendDir, '.env');
 
 if (!fs.existsSync(frontendEnvPath)) {
-  console.log('📋 Creating frontend/.env (proxy target http://127.0.0.1:8002)...');
+  console.log('📋 Creating frontend/.env (proxy target http://127.0.0.1:8003)...');
   const frontendEnvContent = `# Local Development Environment
 VITE_API_BASE_URL=/api
-VITE_PROXY_TARGET=http://127.0.0.1:8002
-VITE_BACKEND_ORIGIN=http://127.0.0.1:8002
+VITE_PROXY_TARGET=http://127.0.0.1:8003
+VITE_BACKEND_ORIGIN=http://127.0.0.1:8003
 VITE_WITH_CREDENTIALS=true
 `;
   fs.writeFileSync(frontendEnvPath, frontendEnvContent, 'utf8');
@@ -130,8 +130,8 @@ console.log('\n==========================================');
 console.log('🎉 Setup process finished!');
 console.log('==========================================');
 console.log('You can now start services:');
-console.log('  👉 make dev            (Runs API port 8002 & Admin POS)');
-console.log('  👉 make dev-api        (Runs Laravel API on port 8002)');
+console.log('  👉 make dev            (Runs API port 8003 & Admin POS)');
+console.log('  👉 make dev-api        (Runs Laravel API on port 8003)');
 console.log('  👉 make dev-admin      (Runs Frontend Admin & POS)');
 console.log('  👉 make dev-storefront (Runs Customer Storefront)');
 console.log('  👉 make db-migrate     (Runs migrations)');

@@ -2,9 +2,9 @@
 
 help:
 	@echo "Available shortcut commands:"
-	@echo "  make dev             - Run API (port 8002) & Web concurrently"
+	@echo "  make dev             - Run API (port 8003) & Web concurrently"
 	@echo "  make dev-all         - Run API, Admin, & Storefront"
-	@echo "  make dev-api         - Run Laravel API (port 8002)"
+	@echo "  make dev-api         - Run Laravel API (port 8003)"
 	@echo "  make dev-admin       - Run Admin Web / POS (port 5173)"
 	@echo "  make dev-storefront  - Run Customer Storefront Web (port 5173)"
 	@echo "  make dev-mobile      - Run Flutter Mobile POS"
@@ -14,7 +14,7 @@ help:
 	@echo "  make mobile          - Shortcut for make dev-mobile"
 	@echo "  make setup           - Setup dependencies & API environment"
 	@echo "  make install         - Install all dependencies (root, frontend, backend)"
-	@echo "  make clean-ports     - Kill any lingering processes on ports 5173 & 8002"
+	@echo "  make clean-ports     - Kill any lingering processes on ports 5173 & 8003"
 	@echo "  make db-migrate      - Run Database Migrations"
 	@echo "  make db-seed         - Seed Database"
 	@echo "  make docker-up       - Start Docker Containers"
@@ -60,9 +60,9 @@ install:
 	cd backend && composer install
 
 clean-ports:
-	@echo "Freeing ports 5173 and 8002..."
-	@lsof -ti:5173,8002 | xargs kill -9 2>/dev/null || true
-	@echo "Ports 5173 and 8002 are now free."
+	@echo "Freeing ports 5173 and 8003..."
+	@lsof -ti:5173,8003 | xargs kill -9 2>/dev/null || true
+	@echo "Ports 5173 and 8003 are now free."
 
 db-migrate:
 	npm run db:migrate

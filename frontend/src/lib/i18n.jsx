@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { modularLocales } from '../locales/index.js';
 
 // Translation dictionaries
 const translations = {
@@ -691,6 +692,601 @@ const translations = {
     collectionsEmptyHint: "Add collections in admin when your store is ready.",
     exploreInspire: "Explore & Inspire",
     exploreInspireHint: "Discover The Man Store looks",
+
+    // Admin Product Form
+    adminEditProduct: "Edit Product",
+    adminAddNewProduct: "Add New Product",
+    adminEditProductSubtitle: "Update product catalog details, media gallery, pricing, and stock variant matrix.",
+    adminAddProductSubtitle: "Create a new product with complete photos, pricing, and Color × Size inventory.",
+    publishedStatus: "Published",
+    draftStatus: "Draft",
+    activeOnStore: "Active on Store",
+    draftHidden: "Draft (Hidden)",
+    saveChangesBtn: "Save Changes",
+    createProductBtn: "Create Product",
+    savingChanges: "Saving...",
+    basicInfoTitle: "Basic Information",
+    basicInfoSubtitle: "Product title, storefront description, and model fit notes.",
+    productNameLabel: "Product Name",
+    productNamePlaceholder: "e.g. Classic Slim-Fit Oxford Shirt",
+    descriptionLabel: "Description",
+    descriptionPlaceholder: "Enter detailed product description, fabric specifications, styling advice...",
+    modelInfoLabel: "Model Information & Fit Notes",
+    modelInfoPlaceholder: "e.g. Model is 185cm / 75kg wearing size Large.",
+    productPhotosTitle: "Product Photos",
+    productPhotosSubtitle: "1 Main Cover Photo + up to 4 Gallery Images (Max 10MB each).",
+    coverPhotoLabel: "Cover Photo",
+    mainDisplayBadge: "Main Display",
+    uploadCoverPhotoText: "Upload Cover Photo",
+    dragDropOrBrowse: "Drag & drop or browse",
+    browseBtn: "Browse",
+    directUrlBtn: "Direct URL",
+    replaceBtn: "Replace",
+    galleryPhotosLabel: "Gallery Photos (Optional)",
+    galleryPhotosSubtitle: "Up to 4 additional angles",
+    slotLabel: "Slot",
+    uploadingPhotoMedia: "Uploading photo to media server...",
+    coverPhotoRequiredErr: "Cover photo required *",
+    pricingFinancialsTitle: "Pricing & Financials",
+    pricingFinancialsSubtitle: "Retail storefront price, supplier cost, live gross margin, and stock barcodes.",
+    costPriceLabel: "Cost Price ($)",
+    costPriceHelp: "Supplier purchase cost per unit.",
+    sellingPriceLabel: "Selling Price ($)",
+    sellingPriceHelp: "Customer storefront retail price.",
+    estimatedGrossMargin: "Estimated Gross Margin",
+    liveGrossProfitPerUnit: "Live gross profit per unit",
+    negativeProfitMargin: "Negative profit margin",
+    lotPricingTitle: "Lot-Based Inventory Pricing",
+    lotPricingDesc: "Selling prices and received costs are tracked per batch/lot in the Inventory system. Inspect receiving history and lot quantities under",
+    stockInventoryLink: "Stock Inventory",
+    andWord: "and",
+    inventoryLotsLink: "Inventory Lots",
+    productIdentifiersTitle: "Product Identification Codes",
+    skuCodeLabel: "SKU Code",
+    autoGenerateBtn: "Auto-generate",
+    productBarcodeLabel: "Product Barcode / UPC (Optional)",
+    variantsMatrixTitle: "Variants & Stock Matrix",
+    variantsMatrixSubtitle: "Multi-color and multi-size stock matrix (Color × Size).",
+    variantsEnabledLabel: "Variants Enabled",
+    singleProductLabel: "Single Product",
+    availableColorsTitle: "Available Colors",
+    availableColorsSubtitle: "Color names & optional swatches",
+    quickColorSuggestions: "Quick Color Suggestions:",
+    colorPlaceholder: "e.g. Navy Blue",
+    addAnotherColorBtn: "Add Another Color",
+    availableSizesTitle: "Available Sizes",
+    availableSizesSubtitle: "Category presets or custom sizes",
+    categoryPresetsLabel: "Category Presets:",
+    addCustomSizeLabel: "Add Custom Size:",
+    customSizePlaceholder: "e.g. 34W x 32L or Free Size",
+    addBtn: "Add",
+    activeSizesLabel: "Active Sizes",
+    matrixTableTitle: "Color × Size Inventory Matrix",
+    totalVariationsLabel: "Total variations:",
+    onHandStockLabel: "On-Hand Stock:",
+    unitsLabel: "units",
+    generateAllBarcodesBtn: "Generate All Barcodes",
+    applyToAllBtn: "Apply to All",
+    colorCol: "Color",
+    sizeCol: "Size",
+    stockQtyCol: "Stock Qty",
+    variantBarcodeCol: "Variant Barcode",
+    formatCol: "Format",
+    actionCol: "Action",
+    singleProductNoVariantsTitle: "Single Product (No Variants)",
+    singleProductNoVariantsDesc: "This item will be sold as a single unit without size or color options. Stock and pricing follow the base SKU and prices above.",
+    statusVisibilityTitle: "Status & Visibility",
+    statusVisibilitySubtitle: "Publishing channel and customer target audience.",
+    publishedOnStorefront: "Published on Storefront",
+    publishedOnStorefrontDesc: "Visible in search, catalog & buyable.",
+    targetCustomerGender: "Target Customer / Gender",
+    genderUnisex: "Unisex / All",
+    genderMen: "Men",
+    genderWomen: "Women",
+    genderKids: "Kids",
+    organizationTitle: "Organization",
+    organizationSubtitle: "Categorize by collection, brand maker, and supplier source.",
+    categoryLabel: "Category",
+    newCategoryBtn: "+ New Category",
+    selectCategoryPlaceholder: "Select category",
+    searchCategoryPlaceholder: "Search category…",
+    brandLabel: "Brand",
+    newBrandBtn: "+ New Brand",
+    selectBrandPlaceholder: "Select brand",
+    searchBrandPlaceholder: "Search brand…",
+    supplierLabel: "Supplier (Optional)",
+    newSupplierBtn: "+ New Supplier",
+    selectSupplierPlaceholder: "Select supplier",
+    searchSupplierPlaceholder: "Search supplier…",
+    supportDeliveryNotesTitle: "Support & Delivery Notes",
+    supportDeliveryNotesSubtitle: "Customer service contact and payment or delivery policies.",
+    supportContactLabel: "Support Contact (Optional)",
+    supportContactPlaceholder: "e.g. +855 12 345 678 or @telegram_handle",
+    paymentDeliveryNotesLabel: "Payment / Delivery Notes",
+    paymentDeliveryNotesPlaceholder: "e.g. Free delivery on orders over $50.",
+    liveSummaryTitle: "Live Summary",
+    liveSummarySubtitle: "Real-time calculation based on inputs.",
+    retailSellPriceLabel: "Retail Sell Price:",
+    grossMarginLabel: "Gross Margin:",
+    totalVariantsLabel: "Total Variants:",
+    estInventoryValueLabel: "Est. Inventory Value:",
+    reviewRequiredNotice: "Review all required fields (*) before saving changes.",
+    directImageUrlTitle: "Direct Image URL",
+    directImageUrlDesc: "Paste a publicly accessible image URL for this photo slot.",
+    applyUrlBtn: "Apply URL",
+    cancelBtn: "Cancel",
+    createNewCategoryTitle: "Create New Category",
+    createNewBrandTitle: "Create New Brand",
+    createNewSupplierTitle: "Create New Supplier",
+    back: "Back",
+    productNameRequiredErr: "Product name is required.",
+    categoryRequiredErr: "Category is required.",
+    brandRequiredErr: "Brand is required.",
+    colorRequiredErr: "At least one color name is required.",
+    sizeRequiredErr: "At least one size must be selected or added.",
+    createNewCategoryOption: "Create new category…",
+    createNewBrandOption: "Create new brand…",
+    createNewSupplierOption: "Create new supplier…",
+
+    // Common missing actions & alerts
+    clear: "Clear",
+    more: "More",
+    new: "New",
+    cash: "Cash",
+    pickup: "Pickup",
+    pay: "Pay",
+    sort: "Sort",
+    edit: "Edit",
+    email: "Email",
+    gender: "Gender",
+    color: "Color",
+    colors: "Colors",
+    supplier: "Supplier",
+    confirmation: "Confirmation",
+    tax: "Tax",
+    taxIncluded: "Tax included",
+    includedInPrice: "Included in price",
+    locating: "Locating…",
+    loginRequired: "Login required",
+    orderAgain: "Order again",
+    orderAgainFailed: "Could not reorder items",
+    orderHasNoItems: "Order has no items to reorder",
+    reorderAsBefore: "Reorder",
+    reorderedSuccess: "Items added to cart",
+    replacementItems: "Replacement Items",
+    resetFilters: "Reset filters",
+    topSuggestions: "Top suggestions",
+    addToCartFailed: "Failed to add to cart",
+    adding: "Adding…",
+    allItemsAddedToCart: "All items added to cart",
+    checkoutGpsFailed: "Unable to retrieve current location",
+    checkoutGpsHint: "Use GPS to auto-fill address",
+    checkoutGpsPinned: "Location pinned",
+    checkoutGpsSuccess: "Address updated from GPS",
+    checkoutGpsUpdate: "Update GPS location",
+    checkoutGpsUse: "Use my current location",
+    codOrderPlaced: "Order placed successfully",
+    codOrderPlacedDesc: "We will contact you shortly to confirm delivery",
+    codPhnomPenhOnly: "Cash on delivery is only available in Phnom Penh",
+    codProvincePrepaidOnly: "Deliveries outside Phnom Penh require advance payment via KHQR",
+    itemsNotAvailable: "Some items are currently unavailable",
+    khqrAutoChecking: "Checking payment status automatically…",
+    payWithKHQR: "Pay with KHQR",
+    paymentMethodCod: "Cash on Delivery (COD)",
+    paymentMethodCodDesc: "Pay cash upon receiving your order",
+    paymentMethodCodNote: "Available in Phnom Penh area only",
+    placeCodOrder: "Place COD Order",
+    previouslyOrdered: "Previously ordered",
+    selectColorFirst: "Please select a color first",
+    someItemsAddedToCart: "Available items added to cart",
+    fromYourOrder: "From your order",
+    noResultsFor: "No results for",
+    recommend: "Recommend",
+    excel: "Excel",
+    pdf: "PDF",
+
+    // Common actions & UI
+    visitSite: "Visit site",
+    askAi: "Ask AI",
+    "common.actions.refresh": "Refresh",
+    "common.actions.view": "View",
+    "common.actions.delete": "Delete",
+    "common.actions.save": "Save",
+    "common.actions.cancel": "Cancel",
+    "common.actions.close": "Close",
+    "common.actions.previous": "Previous",
+    "common.actions.next": "Next",
+
+    // Admin Orders Page
+    "orders.title": "Orders",
+    "orders.subtitle": "Manage and track all customer orders",
+    "orders.allOrders": "All Orders",
+    "orders.filteredOrders": "Filtered orders",
+    "orders.searchPlaceholder": "Search orders...",
+    "orders.today": "Today",
+    "orders.yesterday": "Yesterday",
+    "orders.select": "Select",
+    "orders.orderId": "Order ID",
+    "orders.customer": "Customer",
+    "orders.orderStatus": "Status",
+    "orders.payment": "Payment",
+    "orders.items": "items",
+    "orders.itemsCol": "Items",
+    "orders.total": "Total",
+    "orders.date": "Date",
+    "orders.actionsCol": "Actions",
+    "orders.orderDate": "Order date",
+    "orders.listView": "List view",
+    "orders.gridView": "Grid view",
+    "orders.splitView": "Split view",
+    "orders.printSelected": "Print Selected Invoices",
+    "orders.deleteSelected": "Delete Selected",
+    "orders.awaitingPayment": "Awaiting payment",
+    "orders.processing": "Processing",
+    "orders.shipped": "Shipped",
+    "orders.inTransit": "In transit",
+    "orders.arrived": "Arrived",
+    "orders.goodsReceived": "Goods received",
+    "orders.cancelled": "Cancelled",
+    "orders.paid": "Paid",
+    "orders.unpaid": "Unpaid",
+    "orders.pending": "Pending",
+    "orders.completed": "Completed",
+    "orders.payNowPaid": "Pay now · Paid",
+    "orders.payNowKhqr": "Pay now · KHQR",
+    "orders.paidProcessing": "Paid · Processing",
+    "orders.codCourier": "COD · Courier",
+    "orders.codCollected": "COD · Collected",
+    "orders.order": "order",
+    "orders.orders": "orders",
+    "orders.item": "item",
+    "orders.totalOrders": "total orders",
+    "orders.onThisPage": "on this page",
+    "orders.guest": "Guest",
+    "orders.viewInvoice": "View Invoice",
+    "orders.viewOrders": "View Orders",
+    "orders.noOrders": "No orders found.",
+    "orders.customerInformation": "Customer Information",
+    "orders.shippingAddress": "Shipping Address",
+    "orders.orderSummary": "Order Summary",
+    "orders.orderItems": "Order Items",
+    "orders.qty": "Qty",
+    "orders.paidLabel": "Paid",
+    "orders.totalAmount": "Total Amount",
+    "orders.updateFulfillmentStatus": "Update fulfillment status",
+    "orders.fulfillmentStepsHelp": "Same steps as the courier Telegram job: Processing → Shipped → In transit → Arrived → Goods received.",
+    "orders.searchStatusPlaceholder": "Search status…",
+    "orders.waitingPaymentTooltip": "Waiting for customer payment",
+    "orders.paymentReceivedPrepTooltip": "Payment received; order is being prepared",
+    "orders.paymentReceivedFulfillment": "Payment received · {fulfillment}",
+    "orders.codCollectedTooltip": "Cash on delivery — collected",
+    "orders.codCourierTooltip": "Pay with courier on delivery",
+    "orders.paidOnlineTooltip": "Paid online (KHQR / prepaid)",
+    "orders.payOnlineTooltip": "Pay immediately online (KHQR)",
+    "orders.deleteSelectedOrdersPrompt": "Delete selected orders?",
+    "orders.deleteThisOrderPrompt": "Delete this order?",
+    "orders.deleteSelectedOrdersMessage": "Permanently remove {count} order(s)? This cannot be undone.",
+    "orders.deleteThisOrderMessage": "This action cannot be undone.",
+    "orders.failedToLoadOrders": "Failed to load orders",
+    "orders.failedToLoadOrder": "Failed to load order.",
+    "orders.updateFailed": "Update failed.",
+    "orders.deleteFailed": "Delete failed.",
+    "orders.bulkPrintFailed": "Bulk print failed.",
+    "orders.courierTelegramJobQr": "Courier Telegram job QR",
+    "orders.unlocked": "Unlocked",
+    "orders.lockedConfirmPickup": "Locked — confirm pickup first",
+    "orders.courierTelegramQrDesc": "External courier — no shop account. When they arrive, Admin/Superadmin confirms pickup to unlock. Then they scan this QR for order {orderNumber} (shipped → in transit → arrived → goods received).",
+    "orders.courierNameOptional": "Courier name (optional)",
+    "orders.courierPhoneOptional": "Courier phone (optional)",
+    "orders.loadingQr": "Loading QR…",
+    "orders.deepLink": "Deep link",
+    "orders.unlockedAt": "Unlocked {time}",
+    "orders.confirmPickupUnlockQr": "Confirm pickup & unlock QR",
+    "orders.lockQrAgain": "Lock QR again",
+    "orders.couldNotLoadCourierQr": "Could not load courier Telegram QR",
+    "orders.failedToUnlockCourierJob": "Failed to unlock courier job",
+    "orders.failedToLockCourierJob": "Failed to lock courier job",
+
+    // Admin Products Page
+    "products.title": "Products Management",
+    "products.subtitle": "Manage products, pricing, and stock inventory",
+    "products.productsTitle": "Products",
+    "products.productsSubtitle": "Manage your product catalog",
+    "products.product": "Product",
+    "products.addProduct": "Add Product",
+    "products.createProduct": "Create Product",
+    "products.editProduct": "Edit Product",
+    "products.allProducts": "All Products",
+    "products.filteredProducts": "Filtered products",
+    "products.searchPlaceholder": "Search products, barcode, SKU…",
+    "products.onThisPage": "{count} on this page · {total} total",
+    "products.totalProductsSingle": "{count} product",
+    "products.totalProductsMultiple": "{count} products",
+    "products.selectAll": "Select all",
+    "products.deleteSelected": "Delete ({count})",
+    "products.noProductsYet": "No products yet",
+    "products.createFirstProduct": "Create your first product above",
+    "products.noProducts": "No products",
+    "products.onHandValue": "On-hand value",
+    "products.salesHint": "Sell price × on-hand stock",
+    "products.totalProducts": "Total products",
+    "products.productsHint": "Total catalog items",
+    "products.active": "Active",
+    "products.activeHint": "Published and visible",
+    "products.outOfStock": "Out of stock",
+    "products.stockHint": "0 units available",
+    "products.inStock": "In stock",
+    "products.inactive": "Inactive",
+    "products.sizesAvailable": "Sizes available",
+    "products.colorsAvailable": "Colors available",
+    "products.costPrice": "Cost/unit",
+    "products.sellPrice": "Sell price",
+    "products.totalStock": "Total Stock",
+    "products.select": "Select",
+    "products.productName": "Product Name",
+    "products.brand": "Brand",
+    "products.category": "Category",
+    "products.status": "Status",
+    "products.action": "Action",
+    "products.actions": "Actions",
+    "products.productDetail": "Product detail",
+    "products.productPhotos": "Product photos",
+    "products.cover": "Cover",
+    "products.description": "Description",
+    "products.group": "Group",
+    "products.column": "Column {num}",
+    "products.stats.onHandValue": "On-hand value",
+    "products.stats.salesHint": "Sell price × on-hand stock",
+    "products.stats.totalProducts": "Total products",
+    "products.stats.productsHint": "Total catalog items",
+    "products.stats.active": "Active",
+    "products.stats.activeHint": "Published and visible",
+    "products.stats.outOfStock": "Out of stock",
+    "products.stats.stockHint": "0 units available",
+    "products.stats.allInStock": "All listed items have stock",
+    "products.table.select": "Select",
+    "products.table.productName": "Product Name",
+    "products.table.brand": "Brand",
+    "products.table.category": "Category",
+    "products.table.costPrice": "Cost/unit",
+    "products.table.sellPrice": "Sell price",
+    "products.table.totalStock": "Total Stock",
+    "products.table.sizes": "Sizes available",
+    "products.table.colors": "Colors available",
+    "products.table.status": "Status",
+    "products.table.actions": "Action",
+    "products.status.active": "Active",
+    "products.status.inactive": "Inactive",
+    "products.status.published": "Published",
+    "products.status.draft": "Draft",
+    "products.status.inStock": "In Stock",
+    "products.status.lowStock": "Low Stock",
+    "products.status.outOfStock": "Out of Stock",
+    "products.viewModes.list": "List",
+    "products.viewModes.grid": "Grid",
+    "products.viewModes.split": "Split",
+    "products.viewModes.viewMode": "View mode",
+    "products.sort.sort": "Sort",
+    "products.sort.more": "More",
+    "products.sort.sortBy": "Sort by",
+    "products.sort.sortAsc": "Ascending",
+    "products.sort.sortDesc": "Descending",
+    "products.sort.groupBy": "Group by",
+    "products.filter.addedDate": "Added date",
+    "products.filter.addedDateHint": "Filter by when the product was added to the catalog.",
+    "products.filter.stock": "Stock",
+    "products.filter.gender": "Gender",
+    "products.filter.section": "Section / type",
+    "products.filter.categories": "Categories",
+    "products.filter.stockName": "Stock name",
+    "products.filter.noStockLabel": "No stock label",
+    "products.filter.supplier": "Supplier",
+    "products.filter.noSupplier": "No supplier",
+    "products.gender.men": "Men",
+    "products.gender.women": "Women",
+    "products.gender.boys": "Boys",
+    "products.gender.girls": "Girls",
+    "products.gender.unisex": "Unisex / All",
+    "products.gender.kids": "Kids",
+    "products.card.sizes": "Sizes",
+    "products.card.colors": "Colors",
+    "products.card.cost": "Cost",
+    "products.card.stock": "Stock",
+    "products.actions.editProduct": "Edit product",
+    "products.actions.deleteProduct": "Delete product",
+    "products.actions.viewDetails": "View details",
+    "products.actions.delete": "Delete",
+    "products.actions.edit": "Edit",
+    "products.actions.refresh": "Refresh",
+    "products.actions.cancel": "Cancel",
+    "products.actions.save": "Save",
+    "products.dialogs.deleteTitle": "Delete this product?",
+    "products.dialogs.deleteMessage": "This action cannot be undone. The product will be removed from your catalog.",
+    "products.dialogs.deleteSelectedTitle": "Delete selected products?",
+    "products.dialogs.deleteSelectedMessage": "Permanently remove {count} selected product(s)? This cannot be undone.",
+    "products.imagePicker.title": "Add Image",
+    "products.imagePicker.mainSubtitle": "Main image · drag & drop or paste a URL",
+    "products.imagePicker.gallerySubtitle": "Gallery thumbnail {num} · drag & drop or paste a URL",
+    "products.imagePicker.dropText": "Drop image here or",
+    "products.imagePicker.browseFiles": "browse files",
+    "products.imagePicker.formatHint": "PNG, JPG, WebP up to 10 MB",
+    "products.imagePicker.sizeError": "Image must be 10 MB or smaller.",
+
+    // Admin Categories Page
+    "categories.title": "Categories Management",
+    "categories.subtitle": "Manage your product categories with full CRUD operations",
+    "categories.categoriesTitle": "Categories",
+    "categories.categoriesSubtitle": "Manage your product categories with full CRUD operations",
+    "categories.addCategory": "Add New Category",
+    "categories.createCategory": "Create Category",
+    "categories.editCategory": "Edit Category",
+    "categories.allCategories": "All Categories",
+    "categories.totalCategories": "total categories",
+    "categories.searchPlaceholder": "Search categories...",
+    "categories.deleteSelectedCount": "Delete Selected ({count})",
+    "categories.gender.allGenders": "All Genders",
+    "categories.gender.all": "All",
+    "categories.gender.men": "Men",
+    "categories.gender.women": "Women",
+    "categories.gender.boy": "Boy",
+    "categories.gender.girl": "Girl",
+    "categories.type.selectType": "Select type",
+    "categories.type.clothes": "Clothes",
+    "categories.type.shoes": "Shoes",
+    "categories.type.belt": "Belt",
+    "categories.type.hat": "Hat",
+    "categories.type.bag": "Bag",
+    "categories.type.accessory": "Accessory",
+    "categories.type.other": "Other",
+    "categories.form.createTitle": "Add New Category",
+    "categories.form.editTitle": "Edit Category",
+    "categories.form.name": "Category Name",
+    "categories.form.namePlaceholder": "e.g., Summer Collection",
+    "categories.form.gender": "Gender",
+    "categories.form.genderOptional": "Gender (Optional)",
+    "categories.form.searchGender": "Search gender…",
+    "categories.form.type": "Category Type",
+    "categories.form.typeAria": "Category type",
+    "categories.form.searchType": "Search type…",
+    "categories.form.activeStatus": "Active Status",
+    "categories.form.addCategory": "Add Category",
+    "categories.form.creating": "Creating...",
+    "categories.form.saveChanges": "Save Changes",
+    "categories.form.cancel": "Cancel",
+    "categories.form.yes": "Yes",
+    "categories.form.no": "No",
+    "categories.table.allCategories": "All Categories",
+    "categories.table.totalCategories": "total categories",
+    "categories.table.name": "Category Name",
+    "categories.table.slug": "Slug",
+    "categories.table.gender": "Gender",
+    "categories.table.type": "Type",
+    "categories.table.status": "Status",
+    "categories.table.actions": "Actions",
+    "categories.status.active": "Active",
+    "categories.status.inactive": "Inactive",
+    "categories.status.enabled": "Enabled",
+    "categories.status.disabled": "Disabled",
+    "categories.actions.editCategory": "Edit category",
+    "categories.actions.deleteCategory": "Delete category",
+    "categories.actions.viewDetails": "View Details",
+    "categories.actions.refresh": "Refresh",
+    "categories.dialogs.deleteTitle": "Delete this category?",
+    "categories.dialogs.deleteMessage": "This action cannot be undone. Ensure no products rely on this category.",
+    "categories.dialogs.deleteSelectedTitle": "Delete selected categories?",
+    "categories.dialogs.deleteSelectedMessage": "Permanently remove {count} selected category/categories? This cannot be undone.",
+    "categories.messages.created": "Category created successfully!",
+    "categories.messages.updated": "Category updated successfully!",
+    "categories.messages.deleted": "Category deleted successfully!",
+    "categories.messages.bulkDeleted": "Selected categories deleted successfully!",
+    "categories.messages.noPermissionCreate": "You don't have permission to create categories.",
+    "categories.messages.noPermissionEdit": "You don't have permission to edit categories.",
+    "categories.messages.noPermissionDelete": "You don't have permission to delete categories.",
+    "categories.messages.creating": "Creating category",
+    "categories.messages.pleaseWait": "Please wait",
+    "categories.messages.createFailed": "Create failed",
+    "categories.messages.validationFailed": "Validation failed.",
+    "categories.empty.noCategoriesYet": "No categories yet",
+    "categories.empty.createFirstCategory": "Create your first category above",
+    "categories.picker.emptyMessage": "No catalog categories yet. Add categories under Admin → Categories.",
+    "categories.picker.placeholder": "Search category…",
+    "categories.picker.emptyLabel": "— Select category —",
+    "categories.picker.helpText": "Type to search · {count} available",
+    addNewBrand: "Add New Brand",
+    searchBrandsPlaceholder: "Search brands...",
+    deleteSelectedCount: "Delete Selected ({count})",
+    noBrandsFound: "No brands found.",
+    dragToReorder: "Drag to reorder",
+    noLogo: "No logo",
+    hidden: "Hidden",
+    sortOrder: "Sort order",
+    activeStatus: "Active Status",
+    logoOptional: "Logo (optional)",
+    uploadLocalFile: "Upload local file",
+    useImageUrl: "Use image URL",
+    navCatalogProducts: "Manage products",
+    receiver: "Receiver",
+    setAsDefault: "Set as Default",
+    previous: "Previous",
+    imageSearch: "Image Search",
+    dragDropImageHere: "Drag & drop an image here",
+    clickToSelectFromDevice: "or click to select from your device",
+    pasteImageUrlPlaceholder: "Paste image URL...",
+    scanningImage: "Scanning image...",
+    usingAiToFindSimilar: "Using AI to find similar products",
+    searchResults: "Search Results",
+    detected: "Detected:",
+    noExactMatchShowingLatest: "No exact match found. Showing latest items instead.",
+    noSimilarProductsFound: "No similar products found",
+    searchAgain: "Search Again",
+    imageSearchPanelSubtitle: "Upload an image or capture one to find visually similar products.",
+    uploadImage: "Upload Image",
+    captureFromCamera: "Capture from Camera",
+    selectedImage: "Selected Image",
+    captureAndSearch: "Capture & Search",
+    searchingSimilarProducts: "Searching similar products...",
+    results: "Results",
+    itemsCount: "item(s)",
+    noResultsYetUploadImage: "No results yet. Upload or capture an image to begin.",
+    similarity: "Similarity",
+    resourcePermissions: "Resource Permissions",
+    permissionsHint: "Configure permissions for this role.",
+    resource: "Resource",
+    resetDefaults: "Reset Defaults",
+    savePermissions: "Save Permissions",
+    supplierName: "Supplier Name",
+    supplierId: "Supplier ID",
+    autoGeneratedUnique: "Auto-generated unique code",
+    useSuggestedCode: "Use suggested code",
+    mustBeUniqueSuppliers: "Must be unique across suppliers",
+    supplierStatus: "Supplier Status",
+    searchStatus: "Search status…",
+    basicInfo: "Basic Information",
+    contactPerson: "Contact Person",
+    duplicateSupplierCode: "Supplier code already exists",
+    createSupplier: "Create Supplier",
+    preparingBakongQr: "Preparing Bakong QR...",
+    unableToReachBakong: "Unable to reach Bakong",
+    retry: "Retry",
+    expired: "Expired",
+    generating: "Generating...",
+    saved: "Saved",
+    saveKhqrImage: "Save KHQR image",
+    khqrSavedHint: "Saved. Open ABA / ACLEDA / Wing and scan from Photos.",
+    khqrSaveInstruction: "Save this QR, then scan it from Photos in your bank app.",
+    qrExpired: "QR expired",
+    bill: "Bill",
+    copy: "Copy",
+    khqrStep1Title: "1. Save KHQR & open bank app",
+    khqrStep1Desc: "Save the image, then open ABA / ACLEDA / Wing and scan from Photos.",
+    khqrStep2Title: "2. Confirm amount & pay",
+    khqrStep2Desc: "Approve {currency} {amount} then wait for auto confirmation.",
+    khqrVerifiedEvery: "Bakong MD5 verified every {sec}s",
+    regenerateQr: "Regenerate QR",
+    applyFilters: "Apply filters",
+    newItems: "New items",
+    priceHighFirst: "Price (High First)",
+    priceLowFirst: "Price (Low First)",
+    discountHighFirst: "Discount (High First)",
+    discountLowFirst: "Discount (Low First)",
+    closeFilters: "Close filters",
+    noOptionsYet: "No options yet",
+    clearAll: "Clear all",
+    closeChat: "Close chat",
+    quickAsk: "Quick ask",
+    askAboutProductsPlaceholder: "Ask about products, shipping, sizes…",
+    send: "Send",
+    openSupportChat: "Open support chat",
+    searchVariantBarcode: "Search by variant barcode…",
+    searchProductsBarcode: "Search products, barcode, SKU…",
+    addedDate: "Added date",
+    addedDateHint: "Filter by when the product was added to the catalog.",
+    viewMode: "View mode",
+    stock: "Stock",
+    slugOptional: "Slug (optional)",
+    brandLogoHint: "Upload a square logo for best presentation.",
+    lineOnThisPurchaseOrder: "Line on this purchase order",
+    variantBarcode: "Variant barcode",
   },
   km: {
     // Header
@@ -1320,8 +1916,8 @@ const translations = {
     navBrands: 'ម៉ាក',
     navSuppliers: 'អ្នកផ្គត់ផ្គង់',
     navStockInventory: 'ស្តុក និងទំនិញ',
-    navInventoryLots: 'លឺតស្តុក',
-    navStockReceived: 'ស្តុកទទួលបាន',
+    navInventoryLots: 'បាច់ស្តុកទំនិញ',
+    navStockReceived: 'ការទទួលស្តុកចូល',
     navPayments: 'ការបង់ប្រាក់',
     navSaleHistory: 'ប្រវត្តិការលក់',
     navReports: 'របាយការណ៍',
@@ -1381,7 +1977,764 @@ const translations = {
     collectionsEmptyHint: 'បន្ថែមការប្រមូលផលក្នុងផ្ទាំងគ្រប់គ្រង នៅពេលហាងរបស់អ្នករួចរាល់។',
     exploreInspire: 'Explore & Inspire',
     exploreInspireHint: 'ស្វែងរក និងបំផុសគំនិត',
+
+    // Admin Product Form
+    adminEditProduct: "កែប្រែផលិតផល",
+    adminAddNewProduct: "បន្ថែមផលិតផលថ្មី",
+    adminEditProductSubtitle: "កែប្រែព័ត៌មានលម្អិត រូបភាព ការកំណត់តម្លៃ និងម៉ាទ្រីសស្តុកតាមទំហំ/ពណ៌។",
+    adminAddProductSubtitle: "បង្កើតផលិតផលថ្មីជាមួយរូបភាព ការកំណត់តម្លៃ និងម៉ាទ្រីសស្តុកតាមពណ៌ × ទំហំ។",
+    publishedStatus: "បានផ្សាយ",
+    draftStatus: "ព្រាង",
+    activeOnStore: "សកម្មលើហាង",
+    draftHidden: "ព្រាង (លាក់ទុក)",
+    saveChangesBtn: "រក្សាទុកការកែប្រែ",
+    createProductBtn: "បង្កើតផលិតផល",
+    savingChanges: "កំពុងរក្សាទុក...",
+    basicInfoTitle: "ព័ត៌មានមូលដ្ឋាន",
+    basicInfoSubtitle: "ឈ្មោះផលិតផល ការពិពណ៌នា និងចំណាំទំហំម៉ូដែល។",
+    productNameLabel: "ឈ្មោះផលិតផល",
+    productNamePlaceholder: "ឧ. អាវដៃវែងបុរស Slim-Fit Oxford",
+    descriptionLabel: "ការពិពណ៌នា",
+    descriptionPlaceholder: "បញ្ចូលការពិពណ៌នាលម្អិតអំពីផលិតផល សាច់ក្រណាត់ ការថែទាំ...",
+    modelInfoLabel: "ព័ត៌មានម៉ូដែល និងកំណត់ចំណាំទំហំ",
+    modelInfoPlaceholder: "ឧ. ម៉ូដែលកម្ពស់ 185cm / ទម្ងន់ 75kg ពាក់ទំហំ L",
+    productPhotosTitle: "រូបភាពផលិតផល",
+    productPhotosSubtitle: "រូបក្របមុខចម្បង 1 + រូបភាពបន្ថែមក្នុង Gallery រហូតដល់ 4 សន្លឹក (អតិបរមា 10MB ក្នុងមួយសន្លឹក)។",
+    coverPhotoLabel: "រូបភាពក្របមុខ",
+    mainDisplayBadge: "បង្ហាញចម្បង",
+    uploadCoverPhotoText: "បង្ហោះរូបភាពក្របមុខ",
+    dragDropOrBrowse: "ទាញទម្លាក់ ឬជ្រើសរើសរូបភាព",
+    browseBtn: "ជ្រើសរើសឯកសារ",
+    directUrlBtn: "តំណភ្ជាប់ URL",
+    replaceBtn: "ប្តូររូប",
+    galleryPhotosLabel: "រូបភាពបន្ថែមក្នុង Gallery (ជម្រើស)",
+    galleryPhotosSubtitle: "ជ្រើសរើសមុំបន្ថែមរហូតដល់ 4 រូប",
+    slotLabel: "ប្រអប់ទី",
+    uploadingPhotoMedia: "កំពុងបង្ហោះរូបភាពទៅកាន់ម៉ាស៊ីនមេ...",
+    coverPhotoRequiredErr: "ទាមទាររូបភាពក្របមុខ *",
+    pricingFinancialsTitle: "តម្លៃ និងព័ត៌មានហិរញ្ញវត្ថុ",
+    pricingFinancialsSubtitle: "តម្លៃលក់រាយ តម្លៃដើមទិញចូល ប្រាក់ចំណេញដុល្លារ និងបាកូដស្តុក។",
+    costPriceLabel: "តម្លៃដើមទិញចូល ($)",
+    costPriceHelp: "តម្លៃដើមក្នុងមួយឯកតាពីអ្នកផ្គត់ផ្គង់។",
+    sellingPriceLabel: "តម្លៃលក់លើហាង ($)",
+    sellingPriceHelp: "តម្លៃលក់រាយជូនអតិថិជននៅលើហាង។",
+    estimatedGrossMargin: "ប្រាក់ចំណេញសរុបប៉ាន់ស្មាន",
+    liveGrossProfitPerUnit: "ប្រាក់ចំណេញក្នុងមួយឯកតាលក់ចេញ",
+    negativeProfitMargin: "លក់ក្រោមតម្លៃដើម (ខាត)",
+    lotPricingTitle: "ការកំណត់តម្លៃស្តុកតាមបាច់ (Lot)",
+    lotPricingDesc: "តម្លៃលក់ និងថ្លៃដើមទិញចូលត្រូវបានតាមដានតាមបាច់នីមួយៗក្នុងប្រព័ន្ធស្តុក។ ពិនិត្យប្រវត្តិទទួល និងចំនួនបាច់ទំនិញនៅ",
+    stockInventoryLink: "ស្តុកទំនិញ",
+    andWord: "និង",
+    inventoryLotsLink: "បាច់ស្តុកទំនិញ",
+    productIdentifiersTitle: "កូដសម្គាល់ផលិតផល",
+    skuCodeLabel: "កូដ SKU",
+    autoGenerateBtn: "បង្កើតស្វ័យប្រវត្តិ",
+    productBarcodeLabel: "បាកូដទំនិញ / UPC (ជម្រើស)",
+    variantsMatrixTitle: "វ៉ារ្យ៉ង់ និងម៉ាទ្រីសស្តុក",
+    variantsMatrixSubtitle: "ម៉ាទ្រីសស្តុកតាមពណ៌ និងទំហំ (Color × Size)។",
+    variantsEnabledLabel: "បើកដំណើរការវ៉ារ្យ៉ង់",
+    singleProductLabel: "ផលិតផលទោល",
+    availableColorsTitle: "ពណ៌ដែលមាន",
+    availableColorsSubtitle: "ឈ្មោះពណ៌ និងរូបភាពកូនពណ៌",
+    quickColorSuggestions: "ពណ៌ពេញនិយមណែនាំ៖",
+    colorPlaceholder: "ឧ. ពណ៌ខៀវចាស់ (Navy)",
+    addAnotherColorBtn: "បន្ថែមពណ៌ថ្មី",
+    availableSizesTitle: "ទំហំដែលមាន",
+    availableSizesSubtitle: "ទំហំតាមប្រភេទ ឬទំហំផ្ទាល់ខ្លួន",
+    categoryPresetsLabel: "ទំហំតាមប្រភេទ៖",
+    addCustomSizeLabel: "បន្ថែមទំហំផ្ទាល់ខ្លួន៖",
+    customSizePlaceholder: "ឧ. 34W x 32L ឬ Free Size",
+    addBtn: "បន្ថែម",
+    activeSizesLabel: "ទំហំសកម្ម",
+    matrixTableTitle: "ម៉ាទ្រីសស្តុក ពណ៌ × ទំហំ",
+    totalVariationsLabel: "វ៉ារ្យ៉ង់សរុប៖",
+    onHandStockLabel: "ស្តុកជាក់ស្តែង៖",
+    unitsLabel: "ឯកតា",
+    generateAllBarcodesBtn: "បង្កើតបាកូដទាំងអស់",
+    applyToAllBtn: "អនុវត្តទាំងអស់",
+    colorCol: "ពណ៌",
+    sizeCol: "ទំហំ",
+    stockQtyCol: "ចំនួនស្តុក",
+    variantBarcodeCol: "បាកូដវ៉ារ្យ៉ង់",
+    formatCol: "ទម្រង់",
+    actionCol: "សកម្មភាព",
+    singleProductNoVariantsTitle: "ផលិតផលទោល (គ្មានវ៉ារ្យ៉ង់)",
+    singleProductNoVariantsDesc: "ទំនិញនេះនឹងត្រូវលក់ជាឯកតាទោលដោយគ្មានជម្រើសពណ៌ ឬទំហំឡើយ។ ស្តុក និងតម្លៃគឺផ្អែកលើ SKU និងតម្លៃគោលខាងលើ។",
+    statusVisibilityTitle: "ស្ថានភាព និងការបង្ហាញ",
+    statusVisibilitySubtitle: "បណ្តាញផ្សព្វផ្សាយ និងអតិថិជនគោលដៅ។",
+    publishedOnStorefront: "ផ្សាយលើហាងអនឡាញ",
+    publishedOnStorefrontDesc: "បង្ហាញក្នុងការស្វែងរក កាតាឡុក និងអាចបញ្ជាទិញបាន។",
+    targetCustomerGender: "អតិថិជនគោលដៅ / ភេទ",
+    genderUnisex: "ទាំងអស់ (Unisex)",
+    genderMen: "បុរស",
+    genderWomen: "ស្ត្រី",
+    genderKids: "កុមារ",
+    organizationTitle: "ការចាត់ថ្នាក់ទំនិញ",
+    organizationSubtitle: "ចាត់ថ្នាក់តាមប្រភេទ ម៉ាកផលិតផល និងប្រភពផ្គត់ផ្គង់។",
+    categoryLabel: "ប្រភេទ",
+    newCategoryBtn: "+ ប្រភេទថ្មី",
+    selectCategoryPlaceholder: "ជ្រើសរើសប្រភេទ",
+    searchCategoryPlaceholder: "ស្វែងរកប្រភេទ...",
+    brandLabel: "ម៉ាក",
+    newBrandBtn: "+ ម៉ាកថ្មី",
+    selectBrandPlaceholder: "ជ្រើសរើសម៉ាក",
+    searchBrandPlaceholder: "ស្វែងរកម៉ាក...",
+    supplierLabel: "អ្នកផ្គត់ផ្គង់ (ជម្រើស)",
+    newSupplierBtn: "+ អ្នកផ្គត់ផ្គង់ថ្មី",
+    selectSupplierPlaceholder: "ជ្រើសរើសអ្នកផ្គត់ផ្គង់",
+    searchSupplierPlaceholder: "ស្វែងរកអ្នកផ្គត់ផ្គង់...",
+    supportDeliveryNotesTitle: "សេវាអតិថិជន និងកំណត់ចំណាំការដឹកជញ្ជូន",
+    supportDeliveryNotesSubtitle: "ទំនាក់ទំនងសេវាអតិថិជន និងគោលការណ៍ទូទាត់/ដឹកជញ្ជូន។",
+    supportContactLabel: "ទំនាក់ទំនងជំនួយ (ជម្រើស)",
+    supportContactPlaceholder: "ឧ. +855 12 345 678 ឬ @telegram_handle",
+    paymentDeliveryNotesLabel: "កំណត់ចំណាំការទូទាត់ / ដឹកជញ្ជូន",
+    paymentDeliveryNotesPlaceholder: "ឧ. ដឹកជញ្ជូនឥតគិតថ្លៃសម្រាប់ការបញ្ជាទិញចាប់ពី $50 ឡើងទៅ។",
+    liveSummaryTitle: "សេចក្តីសង្ខេបផ្ទាល់",
+    liveSummarySubtitle: "ការគណនាផ្ទាល់តាមទិន្នន័យដែលបានបញ្ចូល។",
+    retailSellPriceLabel: "តម្លៃលក់រាយ៖",
+    grossMarginLabel: "ប្រាក់ចំណេញសរុប៖",
+    totalVariantsLabel: "វ៉ារ្យ៉ង់សរុប៖",
+    estInventoryValueLabel: "តម្លៃស្តុកប៉ាន់ស្មាន៖",
+    reviewRequiredNotice: "សូមពិនិត្យមើលប្រអប់ដែលទាមទារ (*) ទាំងអស់មុនពេលរក្សាទុក។",
+    directImageUrlTitle: "តំណភ្ជាប់រូបភាពផ្ទាល់",
+    directImageUrlDesc: "បិទភ្ជាប់តំណភ្ជាប់ URL រូបភាពដែលមានសុពលភាពសម្រាប់ប្រអប់រូបថតនេះ។",
+    applyUrlBtn: "យល់ព្រមប្រើ URL",
+    cancelBtn: "បោះបង់",
+    createNewCategoryTitle: "បង្កើតប្រភេទថ្មី",
+    createNewBrandTitle: "បង្កើតម៉ាកថ្មី",
+    createNewSupplierTitle: "បង្កើតអ្នកផ្គត់ផ្គង់ថ្មី",
+    back: "ថយក្រោយ",
+    productNameRequiredErr: "ទាមទារឈ្មោះផលិតផល។",
+    categoryRequiredErr: "ទាមទារការជ្រើសរើសប្រភេទ។",
+    brandRequiredErr: "ទាមទារការជ្រើសរើសម៉ាក។",
+    colorRequiredErr: "ទាមទារយ៉ាងហោចណាស់ឈ្មោះពណ៌មួយ។",
+    sizeRequiredErr: "ទាមទារជ្រើសរើស ឬបន្ថែមទំហំយ៉ាងហោចណាស់មួយ។",
+    createNewCategoryOption: "បង្កើតប្រភេទថ្មី…",
+    createNewBrandOption: "បង្កើតម៉ាកថ្មី…",
+    createNewSupplierOption: "បង្កើតអ្នកផ្គត់ផ្គង់ថ្មី…",
+
+    // Common missing actions & alerts
+    clear: "សម្អាត",
+    more: "បន្ថែម",
+    new: "ថ្មី",
+    cash: "សាច់ប្រាក់",
+    pickup: "មកយកផ្ទាល់",
+    pay: "ទូទាត់",
+    sort: "តម្រៀប",
+    edit: "កែប្រែ",
+    email: "អ៊ីមែល",
+    gender: "ភេទ",
+    color: "ពណ៌",
+    colors: "ពណ៌",
+    supplier: "អ្នកផ្គត់ផ្គង់",
+    confirmation: "ការបញ្ជាក់",
+    tax: "ពន្ធ",
+    taxIncluded: "រួមបញ្ចូលពន្ធ",
+    includedInPrice: "រួមបញ្ចូលក្នុងតម្លៃរួចហើយ",
+    locating: "កំពុងកំណត់ទីតាំង…",
+    loginRequired: "សូមចូលគណនីជាមុនសិន",
+    orderAgain: "បញ្ជាទិញម្តងទៀត",
+    orderAgainFailed: "មិនអាចបញ្ជាទិញម្តងទៀតបានទេ",
+    orderHasNoItems: "ការបញ្ជាទិញគ្មានទំនិញសម្រាប់បញ្ជាទិញម្តងទៀតទេ",
+    reorderAsBefore: "បញ្ជាទិញដូចមុន",
+    reorderedSuccess: "បានបញ្ចូលទំនិញទៅកន្ត្រក",
+    replacementItems: "ទំនិញប្តូរ",
+    resetFilters: "កំណត់តម្រងឡើងវិញ",
+    topSuggestions: "ការណែនាំចម្បង",
+    addToCartFailed: "បរាជ័យក្នុងការបន្ថែមទៅកន្ត្រក",
+    adding: "កំពុងបន្ថែម…",
+    allItemsAddedToCart: "បានបន្ថែមទំនិញទាំងអស់ទៅកន្ត្រក",
+    checkoutGpsFailed: "មិនអាចទាញយកទីតាំងបច្ចុប្បន្នបានទេ",
+    checkoutGpsHint: "ប្រើ GPS ដើម្បីបំពេញអាសយដ្ឋានដោយស្វ័យប្រវត្តិ",
+    checkoutGpsPinned: "បានកំណត់ទីតាំង",
+    checkoutGpsSuccess: "បានធ្វើបច្ចុប្បន្នភាពអាសយដ្ឋានពី GPS",
+    checkoutGpsUpdate: "ធ្វើបច្ចុប្បន្នភាពទីតាំង GPS",
+    checkoutGpsUse: "ប្រើទីតាំងបច្ចុប្បន្នរបស់ខ្ញុំ",
+    codOrderPlaced: "ការបញ្ជាទិញបានជោគជ័យ",
+    codOrderPlacedDesc: "យើងខ្ញុំនឹងទាក់ទងលោកអ្នកក្នុងពេលឆាប់ៗដើម្បីបញ្ជាក់ការដឹកជញ្ជូន",
+    codPhnomPenhOnly: "សេវាទូទាត់ពេលទទួលទំនិញ (COD) គាំទ្រតែក្នុងរាជធានីភ្នំពេញប៉ុណ្ណោះ",
+    codProvincePrepaidOnly: "ការដឹកជញ្ជូនតាមបណ្តាខេត្តតម្រូវឱ្យទូទាត់មុនតាម KHQR",
+    itemsNotAvailable: "ទំនិញមួយចំនួនមិនមានក្នុងស្តុកទេ",
+    khqrAutoChecking: "កំពុងផ្ទៀងផ្ទាត់ការទូទាត់ដោយស្វ័យប្រវត្តិ…",
+    payWithKHQR: "ទូទាត់ជាមួយ KHQR",
+    paymentMethodCod: "ទូទាត់ពេលទទួលទំនិញ (COD)",
+    paymentMethodCodDesc: "បង់ប្រាក់សុទ្ធនៅពេលដែលទំនិញត្រូវបានដឹកដល់ដៃលោកអ្នក",
+    paymentMethodCodNote: "សម្រាប់តែតំបន់រាជធានីភ្នំពេញប៉ុណ្ណោះ",
+    placeCodOrder: "បញ្ជាទិញដោយបង់ប្រាក់ពេលទទួលទំនិញ",
+    previouslyOrdered: "ធ្លាប់បានបញ្ជាទិញពីមុន",
+    selectColorFirst: "សូមជ្រើសរើសពណ៌ជាមុនសិន",
+    someItemsAddedToCart: "បានបន្ថែមទំនិញដែលមានទៅកន្ត្រក",
+    fromYourOrder: "ពីការបញ្ជាទិញរបស់អ្នក",
+    noResultsFor: "រកមិនឃើញលទ្ធផលសម្រាប់",
+    recommend: "ណែនាំ",
+    excel: "Excel",
+    pdf: "PDF",
+
+    // Common actions & UI
+    visitSite: "ចូលមើលគេហទំព័រ",
+    askAi: "សួរ AI",
+    "common.actions.refresh": "ផ្ទុកឡើងវិញ",
+    "common.actions.export": "ទាញចេញ",
+    "common.actions.exportCsv": "ទាញចេញ CSV",
+    "common.actions.exportCsvAll": "ទាញចេញ CSV (ទាំងអស់)",
+    "common.actions.exportCsvCount": "ទាញចេញ CSV ({count})",
+    "common.actions.view": "មើល",
+    "common.actions.delete": "លុប",
+    "common.actions.save": "រក្សាទុក",
+    "common.actions.cancel": "បោះបង់",
+    "common.actions.close": "បិទ",
+    "common.actions.previous": "មុន",
+    "common.actions.next": "បន្ទាប់",
+
+    // Admin Orders Page
+    "orders.title": "ការបញ្ជាទិញ",
+    "orders.subtitle": "គ្រប់គ្រង និងតាមដានរាល់ការបញ្ជាទិញរបស់អតិថិជន",
+    "orders.allOrders": "ការបញ្ជាទិញទាំងអស់",
+    "orders.filteredOrders": "ការបញ្ជាទិញដែលបានចម្រាញ់",
+    "orders.searchPlaceholder": "ស្វែងរកការបញ្ជាទិញ...",
+    "orders.today": "ថ្ងៃនេះ",
+    "orders.yesterday": "ម្សិលមិញ",
+    "orders.select": "ជ្រើសរើស",
+    "orders.orderId": "លេខកូដបញ្ជាទិញ",
+    "orders.customer": "អតិថិជន",
+    "orders.orderStatus": "ស្ថានភាព",
+    "orders.payment": "ការទូទាត់",
+    "orders.items": "មុខ",
+    "orders.itemsCol": "ទំនិញ",
+    "orders.total": "សរុប",
+    "orders.date": "កាលបរិច្ឆេទ",
+    "orders.actionsCol": "សកម្មភាព",
+    "orders.orderDate": "កាលបរិច្ឆេទបញ្ជាទិញ",
+    "orders.listView": "ទិដ្ឋភាពបញ្ជី",
+    "orders.gridView": "ទិដ្ឋភាពក្រឡា",
+    "orders.splitView": "ទិដ្ឋភាពពុះចែក",
+    "orders.printSelected": "បោះពុម្ពវិក្កយបត្រដែលបានជ្រើសរើស",
+    "orders.deleteSelected": "លុបការបញ្ជាទិញដែលបានជ្រើសរើស",
+    "orders.awaitingPayment": "រង់ចាំការទូទាត់",
+    "orders.processing": "កំពុងដំណើរការ",
+    "orders.shipped": "បានផ្ញើចេញ",
+    "orders.inTransit": "កំពុងដឹកជញ្ជូន",
+    "orders.arrived": "បានមកដល់",
+    "orders.goodsReceived": "បានទទួលទំនិញ",
+    "orders.cancelled": "បានបោះបង់",
+    "orders.paid": "បានទូទាត់",
+    "orders.unpaid": "មិនទាន់ទូទាត់",
+    "orders.pending": "រង់ចាំ",
+    "orders.completed": "បានបញ្ចប់",
+    "orders.payNowPaid": "ទូទាត់ភ្លាមៗ · បានទូទាត់",
+    "orders.payNowKhqr": "ទូទាត់ភ្លាមៗ · KHQR",
+    "orders.paidProcessing": "បានទូទាត់ · កំពុងដំណើរការ",
+    "orders.codCourier": "COD · អ្នកដឹកជញ្ជូន",
+    "orders.codCollected": "COD · បានទទួលប្រាក់",
+    "orders.order": "ការបញ្ជាទិញ",
+    "orders.orders": "ការបញ្ជាទិញ",
+    "orders.item": "មុខ",
+    "orders.totalOrders": "ការបញ្ជាទិញសរុប",
+    "orders.onThisPage": "ក្នុងទំព័រនេះ",
+    "orders.guest": "ភ្ញៀវ",
+    "orders.viewInvoice": "មើលវិក្កយបត្រ",
+    "orders.viewOrders": "មើលការបញ្ជាទិញ",
+    "orders.noOrders": "មិនមានការបញ្ជាទិញទេ",
+    "orders.customerInformation": "ព័ត៌មានអតិថិជន",
+    "orders.shippingAddress": "អាសយដ្ឋានដឹកជញ្ជូន",
+    "orders.orderSummary": "សេចក្តីសង្ខេបការបញ្ជាទិញ",
+    "orders.orderItems": "ទំនិញដែលបានបញ្ជាទិញ",
+    "orders.qty": "ចំនួន",
+    "orders.paidLabel": "តម្លៃបង់",
+    "orders.totalAmount": "ចំនួនទឹកប្រាក់សរុប",
+    "orders.updateFulfillmentStatus": "កែប្រែស្ថានភាពការបញ្ជាទិញ",
+    "orders.fulfillmentStepsHelp": "ជំហានដូចគ្នានឹងការងារ Telegram របស់អ្នកដឹកជញ្ជូន៖ កំពុងដំណើរការ → បានផ្ញើចេញ → កំពុងដឹកជញ្ជូន → បានមកដល់ → បានទទួលទំនិញ។",
+    "orders.searchStatusPlaceholder": "ស្វែងរកស្ថានភាព…",
+    "orders.waitingPaymentTooltip": "កំពុងរង់ចាំការទូទាត់ពីអតិថិជន",
+    "orders.paymentReceivedPrepTooltip": "បានទទួលការទូទាត់ ការបញ្ជាទិញកំពុងត្រូវបានរៀបចំ",
+    "orders.paymentReceivedFulfillment": "បានទទួលការទូទាត់ · {fulfillment}",
+    "orders.codCollectedTooltip": "ទូទាត់ពេលដឹកជញ្ជូន — បានប្រមូលប្រាក់រួចរាល់",
+    "orders.codCourierTooltip": "ទូទាត់ជាមួយអ្នកដឹកជញ្ជូនពេលមកដល់",
+    "orders.paidOnlineTooltip": "បានទូទាត់តាមអនឡាញ (KHQR / បង់ប្រាក់ជាមុន)",
+    "orders.payOnlineTooltip": "ទូទាត់ភ្លាមៗតាមអនឡាញ (KHQR)",
+    "orders.deleteSelectedOrdersPrompt": "តើអ្នកពិតជាចង់លុបការបញ្ជាទិញដែលបានជ្រើសរើសមែនទេ?",
+    "orders.deleteThisOrderPrompt": "តើអ្នកពិតជាចង់លុបការបញ្ជាទិញនេះមែនទេ?",
+    "orders.deleteSelectedOrdersMessage": "លុបការបញ្ជាទិញចំនួន {count} ជាអចិន្ត្រៃយ៍? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+    "orders.deleteThisOrderMessage": "សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+    "orders.failedToLoadOrders": "មិនអាចទាញយកការបញ្ជាទិញបានទេ",
+    "orders.failedToLoadOrder": "មិនអាចទាញយកការបញ្ជាទិញបានទេ។",
+    "orders.updateFailed": "ការកែប្រែបានបរាជ័យ។",
+    "orders.deleteFailed": "ការលុបបានបរាជ័យ។",
+    "orders.bulkPrintFailed": "ការបោះពុម្ពវិក្កយបត្រជាក្រុមបានបរាជ័យ។",
+    "orders.courierTelegramJobQr": "QR ការងារ Telegram របស់អ្នកដឹកជញ្ជូន",
+    "orders.unlocked": "បានដោះសោ",
+    "orders.lockedConfirmPickup": "បានចាក់សោ — សូមបញ្ជាក់ការទទួលទំនិញជាមុន",
+    "orders.courierTelegramQrDesc": "អ្នកដឹកជញ្ជូនខាងក្រៅ — មិនចាំបាច់មានគណនីហាងទេ។ នៅពេលពួកគេមកដល់ Admin/Superadmin បញ្ជាក់ការទទួលដើម្បីដោះសោ។ បន្ទាប់មកពួកគេស្កេន QR នេះសម្រាប់ការបញ្ជាទិញ {orderNumber} (បានផ្ញើចេញ → កំពុងដឹកជញ្ជូន → បានមកដល់ → បានទទួលទំនិញ)។",
+    "orders.courierNameOptional": "ឈ្មោះអ្នកដឹកជញ្ជូន (មិនបង្ខំ)",
+    "orders.courierPhoneOptional": "លេខទូរស័ព្ទអ្នកដឹកជញ្ជូន (មិនបង្ខំ)",
+    "orders.loadingQr": "កំពុងផ្ទុក QR…",
+    "orders.deepLink": "តំណភ្ជាប់ផ្ទាល់",
+    "orders.unlockedAt": "បានដោះសោនៅម៉ោង {time}",
+    "orders.confirmPickupUnlockQr": "បញ្ជាក់ការទទួលទំនិញ & ដោះសោ QR",
+    "orders.lockQrAgain": "ចាក់សោ QR ម្តងទៀត",
+    "orders.couldNotLoadCourierQr": "មិនអាចផ្ទុក QR ការងារ Telegram របស់អ្នកដឹកជញ្ជូនបានទេ",
+    "orders.failedToUnlockCourierJob": "មិនអាចដោះសោការងារអ្នកដឹកជញ្ជូនបានទេ",
+    "orders.failedToLockCourierJob": "មិនអាចចាក់សោការងារអ្នកដឹកជញ្ជូនបានទេ",
+
+    // Admin Products Page
+    "products.title": "គ្រប់គ្រងទំនិញ",
+    "products.subtitle": "គ្រប់គ្រងទំនិញ តម្លៃ និងស្តុកក្នុងហាង",
+    "products.productsTitle": "ទំនិញ",
+    "products.productsSubtitle": "គ្រប់គ្រងកាតាឡុកទំនិញរបស់អ្នក",
+    "products.product": "ទំនិញ",
+    "products.addProduct": "បន្ថែមទំនិញ",
+    "products.createProduct": "បង្កើតទំនិញ",
+    "products.editProduct": "កែប្រែទំនិញ",
+    "products.allProducts": "ទំនិញទាំងអស់",
+    "products.filteredProducts": "ទំនិញដែលបានចម្រាញ់",
+    "products.searchPlaceholder": "ស្វែងរកទំនិញ បាកូដ កូដ SKU…",
+    "products.onThisPage": "{count} ក្នុងទំព័រនេះ · សរុប {total}",
+    "products.totalProductsSingle": "{count} ទំនិញ",
+    "products.totalProductsMultiple": "{count} ទំនិញ",
+    "products.selectAll": "ជ្រើសរើសទាំងអស់",
+    "products.deleteSelected": "លុប ({count})",
+    "products.noProductsYet": "មិនទាន់មានទំនិញទេ",
+    "products.createFirstProduct": "បង្កើតទំនិញដំបូងរបស់អ្នកខាងលើ",
+    "products.noProducts": "គ្មានទំនិញ",
+    "products.onHandValue": "តម្លៃស្តុកសរុប",
+    "products.salesHint": "តម្លៃលក់ × ស្តុកជាក់ស្តែង",
+    "products.totalProducts": "ទំនិញសរុប",
+    "products.productsHint": "មុខទំនិញសរុបក្នុងកាតាឡុក",
+    "products.active": "សកម្ម",
+    "products.activeHint": "បានផ្សព្វផ្សាយ និងបង្ហាញ",
+    "products.outOfStock": "អស់ពីស្តុក",
+    "products.stockHint": "មាន 0 គ្រឿងក្នុងស្តុក",
+    "products.inStock": "មានក្នុងស្តុក",
+    "products.inactive": "អសកម្ម",
+    "products.sizesAvailable": "ទំហំដែលមាន",
+    "products.colorsAvailable": "ពណ៌ដែលមាន",
+    "products.costPrice": "តម្លៃដើម/ឯកតា",
+    "products.sellPrice": "តម្លៃលក់",
+    "products.totalStock": "ស្តុកសរុប",
+    "products.select": "ជ្រើសរើស",
+    "products.productName": "ឈ្មោះទំនិញ",
+    "products.brand": "ម៉ាក",
+    "products.category": "ប្រភេទ",
+    "products.status": "ស្ថានភាព",
+    "products.action": "សកម្មភាព",
+    "products.actions": "សកម្មភាព",
+    "products.productDetail": "ព័ត៌មានលម្អិតទំនិញ",
+    "products.productPhotos": "រូបថតទំនិញ",
+    "products.cover": "ក្របទំព័រ",
+    "products.description": "ការពិពណ៌នា",
+    "products.group": "ក្រុម",
+    "products.column": "ជួរឈរ {num}",
+    "products.stats.onHandValue": "តម្លៃស្តុកសរុប",
+    "products.stats.salesHint": "តម្លៃលក់ × ស្តុកជាក់ស្តែង",
+    "products.stats.totalProducts": "ទំនិញសរុប",
+    "products.stats.productsHint": "មុខទំនិញសរុបក្នុងកាតាឡុក",
+    "products.stats.active": "សកម្ម",
+    "products.stats.activeHint": "បានផ្សព្វផ្សាយ និងបង្ហាញ",
+    "products.stats.outOfStock": "អស់ពីស្តុក",
+    "products.stats.stockHint": "មាន 0 គ្រឿងក្នុងស្តុក",
+    "products.stats.allInStock": "ទំនិញទាំងអស់មានក្នុងស្តុក",
+    "products.table.select": "ជ្រើសរើស",
+    "products.table.productName": "ឈ្មោះទំនិញ",
+    "products.table.brand": "ម៉ាក",
+    "products.table.category": "ប្រភេទ",
+    "products.table.costPrice": "តម្លៃដើម/ឯកតា",
+    "products.table.sellPrice": "តម្លៃលក់",
+    "products.table.totalStock": "ស្តុកសរុប",
+    "products.table.sizes": "ទំហំដែលមាន",
+    "products.table.colors": "ពណ៌ដែលមាន",
+    "products.table.status": "ស្ថានភាព",
+    "products.table.actions": "សកម្មភាព",
+    "products.status.active": "សកម្ម",
+    "products.status.inactive": "អសកម្ម",
+    "products.status.published": "បានផ្សព្វផ្សាយ",
+    "products.status.draft": "ព្រាង",
+    "products.status.inStock": "មានក្នុងស្តុក",
+    "products.status.lowStock": "ស្តុកទាប",
+    "products.status.outOfStock": "អស់ពីស្តុក",
+    "products.viewModes.list": "បញ្ជី",
+    "products.viewModes.grid": "ក្រឡា",
+    "products.viewModes.split": "ពុះចែក",
+    "products.viewModes.viewMode": "ទម្រង់បង្ហាញ",
+    "products.sort.sort": "តម្រៀប",
+    "products.sort.more": "បន្ថែម",
+    "products.sort.sortBy": "តម្រៀបតាម",
+    "products.sort.sortAsc": "ឡើងលើ",
+    "products.sort.sortDesc": "ចុះក្រោម",
+    "products.sort.groupBy": "ដាក់ជាក្រុមតាម",
+    "products.filter.addedDate": "កាលបរិច្ឆេទបន្ថែម",
+    "products.filter.addedDateHint": "ចម្រាញ់តាមកាលបរិច្ឆេទដែលបានបន្ថែមទៅក្នុងកាតាឡុក។",
+    "products.filter.stock": "ស្តុក",
+    "products.filter.gender": "ភេទ",
+    "products.filter.section": "ផ្នែក / ប្រភេទ",
+    "products.filter.categories": "ប្រភេទទាំងអស់",
+    "products.filter.stockName": "ឈ្មោះស្តុក",
+    "products.filter.noStockLabel": "គ្មានស្លាកស្តុក",
+    "products.filter.supplier": "អ្នកផ្គត់ផ្គង់",
+    "products.filter.noSupplier": "គ្មានអ្នកផ្គត់ផ្គង់",
+    "products.gender.men": "បុរស",
+    "products.gender.women": "នារី",
+    "products.gender.boys": "កុមារា",
+    "products.gender.girls": "កុមារី",
+    "products.gender.unisex": "ទាំងអស់ (Unisex)",
+    "products.gender.kids": "កុមារ",
+    "products.card.sizes": "ទំហំ",
+    "products.card.colors": "ពណ៌",
+    "products.card.cost": "ថ្លៃដើម",
+    "products.card.stock": "ស្តុក",
+    "products.actions.editProduct": "កែប្រែទំនិញ",
+    "products.actions.deleteProduct": "លុបទំនិញ",
+    "products.actions.viewDetails": "មើលព័ត៌មានលម្អិត",
+    "products.actions.delete": "លុប",
+    "products.actions.edit": "កែប្រែ",
+    "products.actions.refresh": "ផ្ទុកឡើងវិញ",
+    "products.actions.cancel": "បោះបង់",
+    "products.actions.save": "រក្សាទុក",
+    "products.dialogs.deleteTitle": "លុបទំនិញនេះមែនទេ?",
+    "products.dialogs.deleteMessage": "សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។ ទំនិញនឹងត្រូវដកចេញពីកាតាឡុករបស់អ្នក។",
+    "products.dialogs.deleteSelectedTitle": "លុបទំនិញដែលបានជ្រើសរើសមែនទេ?",
+    "products.dialogs.deleteSelectedMessage": "លុបទំនិញដែលបានជ្រើសរើសចំនួន {count} ជាអចិន្ត្រៃយ៍? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+    "products.imagePicker.title": "បន្ថែមរូបភាព",
+    "products.imagePicker.mainSubtitle": "រូបភាពចម្បង · អូសទម្លាក់ ឬបិទភ្ជាប់ URL",
+    "products.imagePicker.gallerySubtitle": "រូបភាពតូច {num} · អូសទម្លាក់ ឬបិទភ្ជាប់ URL",
+    "products.imagePicker.dropText": "ទម្លាក់រូបភាពនៅទីនេះ ឬ",
+    "products.imagePicker.browseFiles": "រុករកឯកសារ",
+    "products.imagePicker.formatHint": "PNG, JPG, WebP រហូតដល់ 10 MB",
+    "products.imagePicker.sizeError": "រូបភាពត្រូវតែមានទំហំ 10 MB ឬតូចជាងនេះ។",
+
+    // Admin Categories Page
+    "categories.title": "ការគ្រប់គ្រងប្រភេទទំនិញ",
+    "categories.subtitle": "គ្រប់គ្រងប្រភេទទំនិញរបស់អ្នកជាមួយប្រតិបត្តិការ CRUD ពេញលេញ",
+    "categories.categoriesTitle": "ប្រភេទទំនិញ",
+    "categories.categoriesSubtitle": "គ្រប់គ្រងប្រភេទទំនិញរបស់អ្នកជាមួយប្រតិបត្តិការ CRUD ពេញលេញ",
+    "categories.addCategory": "បន្ថែមប្រភេទថ្មី",
+    "categories.createCategory": "បង្កើតប្រភេទទំនិញ",
+    "categories.editCategory": "កែប្រែប្រភេទទំនិញ",
+    "categories.allCategories": "ប្រភេទទំនិញទាំងអស់",
+    "categories.totalCategories": "ប្រភេទទំនិញសរុប",
+    "categories.searchPlaceholder": "ស្វែងរកប្រភេទទំនិញ...",
+    "categories.deleteSelectedCount": "លុបដែលបានជ្រើសរើស ({count})",
+    "categories.gender.allGenders": "គ្រប់ភេទទាំងអស់",
+    "categories.gender.all": "ទាំងអស់",
+    "categories.gender.men": "បុរស",
+    "categories.gender.women": "នារី",
+    "categories.gender.boy": "កុមារា",
+    "categories.gender.girl": "កុមារី",
+    "categories.type.selectType": "ជ្រើសរើសប្រភេទ",
+    "categories.type.clothes": "សម្លៀកបំពាក់",
+    "categories.type.shoes": "ស្បែកជើង",
+    "categories.type.belt": "ខ្សែក្រវាត់",
+    "categories.type.hat": "មួក",
+    "categories.type.bag": "កាបូប",
+    "categories.type.accessory": "គ្រឿងបន្ថែម",
+    "categories.type.other": "ផ្សេងៗ",
+    "categories.form.createTitle": "បន្ថែមប្រភេទថ្មី",
+    "categories.form.editTitle": "កែប្រែប្រភេទទំនិញ",
+    "categories.form.name": "ឈ្មោះប្រភេទទំនិញ",
+    "categories.form.namePlaceholder": "ឧទាហរណ៍៖ សម្លៀកបំពាក់រដូវក្តៅ",
+    "categories.form.gender": "ភេទ",
+    "categories.form.genderOptional": "ភេទ (មិនបង្ខំ)",
+    "categories.form.searchGender": "ស្វែងរកភេទ…",
+    "categories.form.type": "ប្រភេទ",
+    "categories.form.typeAria": "ប្រភេទ",
+    "categories.form.searchType": "ស្វែងរកប្រភេទ…",
+    "categories.form.activeStatus": "ស្ថានភាពសកម្មភាព",
+    "categories.form.addCategory": "បន្ថែមប្រភេទ",
+    "categories.form.creating": "កំពុងបង្កើត...",
+    "categories.form.saveChanges": "រក្សាទុកការផ្លាស់ប្តូរ",
+    "categories.form.cancel": "បោះបង់",
+    "categories.form.yes": "បាទ/ចាស",
+    "categories.form.no": "ទេ",
+    "categories.table.allCategories": "ប្រភេទទំនិញទាំងអស់",
+    "categories.table.totalCategories": "ប្រភេទទំនិញសរុប",
+    "categories.table.name": "ឈ្មោះប្រភេទទំនិញ",
+    "categories.table.slug": "ស្លាកតំណ",
+    "categories.table.gender": "ភេទ",
+    "categories.table.type": "ប្រភេទ",
+    "categories.table.status": "ស្ថានភាព",
+    "categories.table.actions": "សកម្មភាព",
+    "categories.status.active": "សកម្ម",
+    "categories.status.inactive": "អសកម្ម",
+    "categories.status.enabled": "បានបើក",
+    "categories.status.disabled": "បានបិទ",
+    "categories.actions.editCategory": "កែប្រែប្រភេទទំនិញ",
+    "categories.actions.deleteCategory": "លុបប្រភេទទំនិញ",
+    "categories.actions.viewDetails": "មើលព័ត៌មានលម្អិត",
+    "categories.actions.refresh": "ផ្ទុកឡើងវិញ",
+    "categories.dialogs.deleteTitle": "លុបប្រភេទទំនិញនេះមែនទេ?",
+    "categories.dialogs.deleteMessage": "សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។ សូមប្រាកដថាមិនមានផលិតផលដែលប្រើប្រាស់ប្រភេទទំនិញនេះទេ។",
+    "categories.dialogs.deleteSelectedTitle": "លុបប្រភេទទំនិញដែលបានជ្រើសរើសមែនទេ?",
+    "categories.dialogs.deleteSelectedMessage": "លុបប្រភេទទំនិញដែលបានជ្រើសរើសចំនួន {count} ជាអចិន្ត្រៃយ៍? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+    "categories.messages.created": "បានបង្កើតប្រភេទទំនិញដោយជោគជ័យ!",
+    "categories.messages.updated": "បានកែប្រែប្រភេទទំនិញដោយជោគជ័យ!",
+    "categories.messages.deleted": "បានលុបប្រភេទទំនិញដោយជោគជ័យ!",
+    "categories.messages.bulkDeleted": "បានលុបប្រភេទទំនិញដែលបានជ្រើសរើសដោយជោគជ័យ!",
+    "categories.messages.noPermissionCreate": "អ្នកគ្មានសិទ្ធិបង្កើតប្រភេទទំនិញទេ។",
+    "categories.messages.noPermissionEdit": "អ្នកគ្មានសិទ្ធិកែប្រែប្រភេទទំនិញទេ។",
+    "categories.messages.noPermissionDelete": "អ្នកគ្មានសិទ្ធិលុបប្រភេទទំនិញទេ។",
+    "categories.messages.creating": "កំពុងបង្កើតប្រភេទទំនិញ",
+    "categories.messages.pleaseWait": "សូមរង់ចាំបន្តិច",
+    "categories.messages.createFailed": "បង្កើតប្រភេទទំនិញបរាជ័យ",
+    "categories.messages.validationFailed": "ការផ្ទៀងផ្ទាត់ទិន្នន័យបានបរាជ័យ។",
+    "categories.empty.noCategoriesYet": "មិនទាន់មានប្រភេទទំនិញទេ",
+    "categories.empty.createFirstCategory": "បង្កើតប្រភេទទំនិញដំបូងរបស់អ្នកខាងលើ",
+    "categories.picker.emptyMessage": "មិនទាន់មានប្រភេទទំនិញទេ។ បន្ថែមប្រភេទក្រោម Admin → ប្រភេទទំនិញ។",
+    "categories.picker.placeholder": "ស្វែងរកប្រភេទទំនិញ…",
+    "categories.picker.emptyLabel": "— ជ្រើសរើសប្រភេទទំនិញ —",
+    "categories.picker.helpText": "វាយអក្សរដើម្បីស្វែងរក · មាន {count}",
+    addNewBrand: "បន្ថែមម៉ាកថ្មី",
+    searchBrandsPlaceholder: "ស្វែងរកម៉ាក...",
+    deleteSelectedCount: "លុបដែលបានជ្រើសរើស ({count})",
+    noBrandsFound: "រកមិនឃើញម៉ាកទំនិញទេ",
+    dragToReorder: "អូសដើម្បីតម្រៀបលំដាប់",
+    noLogo: "គ្មានរូបសញ្ញា",
+    hidden: "លាក់",
+    sortOrder: "លំដាប់តម្រៀប",
+    activeStatus: "ស្ថានភាពសកម្ម",
+    logoOptional: "រូបសញ្ញា (ជម្រើស)",
+    uploadLocalFile: "ផ្ទុកឡើងឯកសារក្នុងម៉ាស៊ីន",
+    useImageUrl: "ប្រើ URL រូបភាព",
+    navCatalogProducts: "គ្រប់គ្រងទំនិញ",
+    receiver: "អ្នកទទួល",
+    setAsDefault: "កំណត់ជាលំនាំដើម",
+    previous: "មុន",
+    imageSearch: "ស្វែងរកតាមរូបភាព",
+    dragDropImageHere: "អូស & ទម្លាក់រូបភាពនៅទីនេះ",
+    clickToSelectFromDevice: "ឬចុចដើម្បីជ្រើសរើសពីឧបករណ៍របស់អ្នក",
+    pasteImageUrlPlaceholder: "បិទភ្ជាប់ URL រូបភាព...",
+    scanningImage: "កំពុងស្កេនរូបភាព...",
+    usingAiToFindSimilar: "ប្រើប្រាស់ AI ដើម្បីស្វែងរកទំនិញស្រដៀងគ្នា",
+    searchResults: "លទ្ធផលស្វែងរក",
+    detected: "បានរកឃើញ៖",
+    noExactMatchShowingLatest: "រកមិនឃើញការផ្គូផ្គងពិតប្រាកដទេ។ កំពុងបង្ហាញទំនិញចុងក្រោយជំនួសវិញ។",
+    noSimilarProductsFound: "រកមិនឃើញទំនិញស្រដៀងគ្នាទេ",
+    searchAgain: "ស្វែងរកម្តងទៀត",
+    imageSearchPanelSubtitle: "ផ្ទុកឡើងរូបភាព ឬថតរូបភាពដើម្បីស្វែងរកទំនិញដែលស្រដៀងគ្នា។",
+    uploadImage: "ផ្ទុកឡើងរូបភាព",
+    captureFromCamera: "ថតចេញពីកាមេរ៉ា",
+    selectedImage: "រូបភាពដែលបានជ្រើសរើស",
+    captureAndSearch: "ថត & ស្វែងរក",
+    searchingSimilarProducts: "កំពុងស្វែងរកទំនិញស្រដៀងគ្នា...",
+    results: "លទ្ធផល",
+    itemsCount: "ទំនិញ",
+    noResultsYetUploadImage: "មិនទាន់មានលទ្ធផលទេ។ ផ្ទុកឡើង ឬថតរូបភាពដើម្បីចាប់ផ្តើម។",
+    similarity: "ភាពស្រដៀងគ្នា",
+    resourcePermissions: "សិទ្ធិលើធនធាន",
+    permissionsHint: "កំណត់សិទ្ធិសម្រាប់តួនាទីនេះ",
+    resource: "ធនធាន",
+    resetDefaults: "កំណត់ឡើងវិញលំនាំដើម",
+    savePermissions: "រក្សាទុកសិទ្ធិ",
+    supplierName: "ឈ្មោះអ្នកផ្គត់ផ្គង់",
+    supplierId: "អត្តសញ្ញាណអ្នកផ្គត់ផ្គង់",
+    autoGeneratedUnique: "កូដបង្កើតស្វ័យប្រវត្តិតែមួយគត់",
+    useSuggestedCode: "ប្រើកូដដែលបានណែនាំ",
+    mustBeUniqueSuppliers: "ត្រូវតែមានតែមួយគត់ក្នុងចំណោមអ្នកផ្គត់ផ្គង់",
+    supplierStatus: "ស្ថានភាពអ្នកផ្គត់ផ្គង់",
+    searchStatus: "ស្វែងរកស្ថានភាព…",
+    basicInfo: "ព័ត៌មានមូលដ្ឋាន",
+    contactPerson: "អ្នកទំនាក់ទំនង",
+    duplicateSupplierCode: "កូដអ្នកផ្គត់ផ្គង់មានរួចហើយ",
+    createSupplier: "បង្កើតអ្នកផ្គត់ផ្គង់",
+    preparingBakongQr: "កំពុងរៀបចំ បាគង QR...",
+    unableToReachBakong: "មិនអាចភ្ជាប់ទៅកាន់បាគងបានទេ",
+    retry: "ព្យាយាមម្តងទៀត",
+    expired: "ផុតកំណត់",
+    generating: "កំពុងបង្កើត...",
+    saved: "បានរក្សាទុក",
+    saveKhqrImage: "រក្សាទុករូបភាព KHQR",
+    khqrSavedHint: "បានរក្សាទុក។ បើកកម្មវិធី ABA / ACLEDA / Wing ហើយស្កេនពីរូបថត។",
+    khqrSaveInstruction: "រក្សាទុក QR នេះ ហើយស្កេនពីរូបថតក្នុងកម្មវិធីធនាគាររបស់អ្នក។",
+    qrExpired: "QR ផុតកំណត់",
+    bill: "វិក្កយបត្រ",
+    copy: "ចម្លង",
+    khqrStep1Title: "១. រក្សាទុក KHQR និងបើកកម្មវិធីធនាគារ",
+    khqrStep1Desc: "រក្សាទុករូបភាព បន្ទាប់មកបើក ABA / ACLEDA / Wing ហើយស្កេនពីរូបថត។",
+    khqrStep2Title: "២. បញ្ជាក់ចំនួនទឹកប្រាក់ និងទូទាត់",
+    khqrStep2Desc: "អនុម័ត {currency} {amount} បន្ទាប់មករង់ចាំការបញ្ជាក់ស្វ័យប្រវត្តិ។",
+    khqrVerifiedEvery: "ផ្ទៀងផ្ទាត់បាគង MD5 រៀងរាល់ {sec}វិនាទី",
+    regenerateQr: "បង្កើត QR ឡើងវិញ",
+    applyFilters: "អនុវត្តតម្រង",
+    newItems: "ទំនិញថ្មីៗ",
+    priceHighFirst: "តម្លៃ (ខ្ពស់ទៅទាប)",
+    priceLowFirst: "តម្លៃ (ទាបទៅខ្ពស់)",
+    discountHighFirst: "បញ្ចុះតម្លៃ (ខ្ពស់ទៅទាប)",
+    discountLowFirst: "បញ្ចុះតម្លៃ (ទាបទៅខ្ពស់)",
+    closeFilters: "បិទតម្រង",
+    noOptionsYet: "មិនទាន់មានជម្រើសទេ",
+    clearAll: "សម្អាតទាំងអស់",
+    closeChat: "បិទការសន្ទនា",
+    quickAsk: "សួរបន្ទាន់",
+    askAboutProductsPlaceholder: "សួរអំពីទំនិញ ការដឹកជញ្ជូន ទំហំ…",
+    send: "ផ្ញើ",
+    openSupportChat: "បើកការជជែកគាំទ្រ",
+    searchVariantBarcode: "ស្វែងរកតាមបាកូដជម្រើស…",
+    searchProductsBarcode: "ស្វែងរកទំនិញ បាកូដ កូដ SKU…",
+    addedDate: "កាលបរិច្ឆេទបន្ថែម",
+    addedDateHint: "ចម្រាញ់តាមកាលបរិច្ឆេទដែលទំនិញត្រូវបានបន្ថែមទៅក្នុងកាតាឡុក",
+    viewMode: "ទម្រង់មើល",
+    stock: "ស្តុក",
+    slugOptional: "ស្លាកតំណ (ជម្រើស)",
+    brandLogoHint: "ផ្ទុកឡើងរូបសញ្ញារាងការ៉េសម្រាប់ទិដ្ឋភាពស្អាតបំផុត",
+    lineOnThisPurchaseOrder: "ជួរក្នុងប័ណ្ណបញ្ជាទិញនេះ",
+    variantBarcode: "បាកូដជម្រើស",
   }
+};
+
+// Merge legacy flat dictionary with modular structured dictionaries
+const mergedTranslations = {
+  en: {
+    ...translations.en,
+    ...(modularLocales?.en || {}),
+  },
+  km: {
+    ...translations.km,
+    ...(modularLocales?.km || {}),
+  },
+  kh: {
+    ...translations.km,
+    ...(modularLocales?.km || {}),
+  },
+};
+
+const normalizeLang = (l) => (l === 'kh' ? 'km' : (l || 'en'));
+
+const resolveKey = (dict, key, lang) => {
+  if (!key) return undefined;
+  const normLang = normalizeLang(lang);
+
+  // 1. Direct string match in current dict or translations
+  if (dict && typeof dict[key] === 'string') return dict[key];
+  if (translations?.[normLang] && typeof translations[normLang][key] === 'string') {
+    return translations[normLang][key];
+  }
+
+  const modularDict = normLang ? (modularLocales?.[normLang] || modularLocales?.[lang]) : null;
+
+  // 1b. Fallback to modular common dict if key is not dotted (e.g. "fromDate", "toDate", "filtered", "sort")
+  if (!key.includes('.')) {
+    if (modularDict?.common && typeof modularDict.common[key] === 'string') {
+      return modularDict.common[key];
+    }
+    if (dict?.common && typeof dict.common[key] === 'string') {
+      return dict.common[key];
+    }
+  }
+
+  // 2. If key is namespaced (e.g. "orders.title", "common.actions.refresh")
+  if (key.includes('.')) {
+    const parts = key.split('.');
+
+    // Try modularLocales directly
+    if (modularDict) {
+      let cur = modularDict;
+      let found = true;
+      for (const p of parts) {
+        if (cur && typeof cur === 'object' && p in cur) {
+          cur = cur[p];
+        } else {
+          found = false;
+          break;
+        }
+      }
+      if (found && typeof cur === 'string') return cur;
+    }
+
+    // Try merged dict traversal
+    if (dict) {
+      let cur = dict;
+      let found = true;
+      for (const p of parts) {
+        if (cur && typeof cur === 'object' && p in cur) {
+          cur = cur[p];
+        } else {
+          found = false;
+          break;
+        }
+      }
+      if (found && typeof cur === 'string') return cur;
+    }
+
+    // Module alias shortcuts:
+    // e.g. "actions.refresh" or "notifications.title" or "navigation.pages" -> check modularLocales[normLang].common[parts[0]][parts[1]]
+    if (parts.length === 2 && modularDict?.common?.[parts[0]]?.[parts[1]]) {
+      return modularDict.common[parts[0]][parts[1]];
+    }
+    // e.g. "orders.X" not found in orders -> check modularDict.sales.X
+    if (parts.length === 2 && parts[0] === 'orders' && modularDict?.sales?.[parts[1]]) {
+      return modularDict.sales[parts[1]];
+    }
+    // e.g. "discounts.X" not found in discounts -> check modularDict.sales.X
+    if (parts.length === 2 && parts[0] === 'discounts' && modularDict?.sales?.[parts[1]]) {
+      return modularDict.sales[parts[1]];
+    }
+    // e.g. "sales.X" not found in sales -> check modularDict.discounts.X
+    if (parts.length === 2 && parts[0] === 'sales' && modularDict?.discounts?.[parts[1]]) {
+      return modularDict.discounts[parts[1]];
+    }
+    // e.g. "products.X" not found in products -> check modularDict.catalog.X
+    if (parts.length === 2 && parts[0] === 'products' && modularDict?.catalog?.[parts[1]]) {
+      return modularDict.catalog[parts[1]];
+    }
+    // e.g. "catalog.X" not found in catalog -> check modularDict.products.X
+    if (parts.length === 2 && parts[0] === 'catalog' && modularDict?.products?.[parts[1]]) {
+      return modularDict.products[parts[1]];
+    }
+    // e.g. "categories.X" not found in categories -> check modularDict.catalog.X
+    if (parts.length === 2 && parts[0] === 'categories' && modularDict?.catalog?.[parts[1]]) {
+      return modularDict.catalog[parts[1]];
+    }
+    // e.g. "catalog.X" not found in catalog -> check modularDict.categories.X
+    if (parts.length === 2 && parts[0] === 'catalog' && modularDict?.categories?.[parts[1]]) {
+      return modularDict.categories[parts[1]];
+    }
+    // e.g. "checkout.X" -> check modularDict.pos.X
+    if (parts[0] === 'checkout' && modularDict?.pos) {
+      if (parts.length === 2 && modularDict.pos[parts[1]]) return modularDict.pos[parts[1]];
+      let cur = modularDict.pos;
+      let ok = true;
+      for (let i = 1; i < parts.length; i++) {
+        if (cur && typeof cur === 'object' && parts[i] in cur) {
+          cur = cur[parts[i]];
+        } else {
+          ok = false;
+          break;
+        }
+      }
+      if (ok && typeof cur === 'string') return cur;
+    }
+    // e.g. "common.actions.X" -> check modularDict.common.actions.X or dict.actions.X
+    if (parts.length === 3 && parts[0] === 'common' && parts[1] === 'actions') {
+      if (modularDict?.common?.actions?.[parts[2]]) return modularDict.common.actions[parts[2]];
+      if (dict?.[parts[2]] && typeof dict[parts[2]] === 'string') return dict[parts[2]];
+    }
+
+    // Try last token directly (e.g. "title", "searchPlaceholder", "refresh")
+    const lastToken = parts[parts.length - 1];
+    if (dict && typeof dict[lastToken] === 'string') return dict[lastToken];
+    if (translations?.[normLang] && typeof translations[normLang][lastToken] === 'string') {
+      return translations[normLang][lastToken];
+    }
+  }
+
+  // 3. Direct property in dict if it's an object with .title or .name
+  if (dict && dict[key] && typeof dict[key] === 'object') {
+    if (typeof dict[key].title === 'string') return dict[key].title;
+    if (typeof dict[key].name === 'string') return dict[key].name;
+    if (typeof dict[key][key] === 'string') return dict[key][key];
+  }
+
+  // 4. Check common actions shortcut
+  if (modularDict?.common?.actions?.[key]) {
+    return modularDict.common.actions[key];
+  }
+
+  return undefined;
+};
+
+const interpolate = (template, params) => {
+  if (typeof template !== 'string' || !params) return template;
+  return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, paramKey) => {
+    return params[paramKey] !== undefined ? String(params[paramKey]) : match;
+  });
 };
 
 // Language context
@@ -1390,24 +2743,75 @@ const LanguageContext = createContext();
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
     // Get saved language from localStorage or default to 'en'
-    const saved = localStorage.getItem('language');
-    return saved || 'en';
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('language') : 'en';
+    const normalized = saved === 'kh' ? 'km' : saved;
+    return normalized || 'en';
   });
 
   useEffect(() => {
-    localStorage.setItem('language', language);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('language', language);
+    }
   }, [language]);
 
-  const t = (key) => {
-    return translations[language]?.[key] || translations.en[key] || key;
+  const t = (key, fallbackOrParams, maybeParams) => {
+    if (!key) return '';
+    const fallback = typeof fallbackOrParams === 'string' ? fallbackOrParams : undefined;
+    const params = typeof fallbackOrParams === 'object' && fallbackOrParams !== null ? fallbackOrParams : maybeParams;
+
+    const normLang = normalizeLang(language);
+    const currentDict = mergedTranslations[normLang] || mergedTranslations[language];
+    const enDict = mergedTranslations.en;
+
+    let res = resolveKey(currentDict, key, normLang);
+    // If not found in current language and it's not English, look in English dictionary
+    if ((res === undefined || res === key) && normLang !== 'en') {
+      res = resolveKey(enDict, key, 'en');
+    }
+    // If still unresolved or resolved to raw key itself, use fallback string
+    if (res === undefined || res === key) {
+      res = fallback !== undefined ? fallback : key;
+    }
+    return interpolate(res, params);
   };
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'km' : 'en');
+    setLanguage(prev => (prev === 'en' ? 'km' : 'en'));
+  };
+
+  const formatCurrency = (amount, currency = 'USD') => {
+    const num = Number(amount) || 0;
+    if (currency === 'USD') {
+      return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `${num.toLocaleString(language === 'km' ? 'km-KH' : 'en-US')} ${currency}`;
+  };
+
+  const formatDate = (date, options) => {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return String(date);
+    const locale = language === 'km' ? 'km-KH' : 'en-US';
+    return d.toLocaleDateString(locale, options || { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const formatNumber = (num) => {
+    const val = Number(num) || 0;
+    return val.toLocaleString(language === 'km' ? 'km-KH' : 'en-US');
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, toggleLanguage }}>
+    <LanguageContext.Provider
+      value={{
+        language,
+        setLanguage,
+        t,
+        toggleLanguage,
+        formatCurrency,
+        formatDate,
+        formatNumber,
+      }}
+    >
       {children}
     </LanguageContext.Provider>
   );
@@ -1421,8 +2825,35 @@ export function useLanguage() {
   return context;
 }
 
+export const useTranslation = useLanguage;
+export const useI18n = useLanguage;
+
 // Helper function to get current language
 export function getLanguage() {
-  return localStorage.getItem('language') || 'en';
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('language') || 'en';
+  }
+  return 'en';
+}
+
+export function formatCurrency(amount, currency = 'USD', lang = 'en') {
+  const num = Number(amount) || 0;
+  if (currency === 'USD') {
+    return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  return `${num.toLocaleString(lang === 'km' ? 'km-KH' : 'en-US')} ${currency}`;
+}
+
+export function formatDate(date, options, lang = 'en') {
+  if (!date) return '';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return String(date);
+  const locale = lang === 'km' ? 'km-KH' : 'en-US';
+  return d.toLocaleDateString(locale, options || { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+export function formatNumber(num, lang = 'en') {
+  const val = Number(num) || 0;
+  return val.toLocaleString(lang === 'km' ? 'km-KH' : 'en-US');
 }
 

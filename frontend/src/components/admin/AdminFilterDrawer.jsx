@@ -1,7 +1,9 @@
 import React, { useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { pushAdminModalChrome, popAdminModalChrome } from "../../lib/adminDarkChrome.js";
+import { useLanguage } from "../../lib/i18n.jsx";
 import AdminYearMonthFilter from "./AdminYearMonthFilter.jsx";
+import { AdminCloseButton } from "./AdminCloseButton.jsx";
 
 /**
  * @typedef {{ id: string, title: string, options: Array<{ value: string, label: string, count?: number }> }} FilterSection
@@ -12,16 +14,17 @@ export function AdminFilterToolbarButton({
     onClick,
     className = "",
 }) {
+    const { t } = useLanguage();
     return (
         <button
             type="button"
             onClick={onClick}
-            className={`relative inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 ${className}`}
+            className={`relative inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 ${className}`}
         >
             <svg className="h-4 w-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M10 12h4M12 16h0" />
             </svg>
-            Filter
+            {t("common.actions.filter") || "Filter"}
             {activeCount > 0 ? (
                 <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[color:var(--admin-primary)] px-1.5 py-0.5 text-[10px] font-bold text-white">
                     {activeCount}
@@ -39,11 +42,13 @@ export default function AdminFilterDrawer({
     onToggle,
     onApply,
     onClearAll,
-    applyLabel = "Filter",
+    applyLabel = null,
     afterSections = null,
     yearMonth = null,
 }) {
+    const { t } = useLanguage();
     const titleId = useId();
+    const resolvedApply = applyLabel || t("common.actions.filter") || "Filter";
 
     useEffect(() => {
         if (!open) return undefined;
@@ -76,23 +81,14 @@ export default function AdminFilterDrawer({
             >
                 <div className="flex items-center justify-between border-b border-slate-200/90 px-5 py-4 dark:border-slate-700/90">
                     <h2 id={titleId} className="text-lg font-bold text-slate-900 dark:text-slate-50">
-                        Filters
+                        {t("common.actions.filter") || "Filters"}
                     </h2>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                        aria-label="Close filters"
-                    >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <AdminCloseButton onClose={onClose} size="md" variant="default" ariaLabel={t("common.actions.close", "Close filters")} />
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-5 py-4">
                     {sections.length === 0 && !afterSections && !yearMonth ? (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">No filters for this page.</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{t("noFilters") || "No filters for this page."}</p>
                     ) : (
                         <div className="space-y-6">
                             {yearMonth ? (
@@ -110,7 +106,7 @@ export default function AdminFilterDrawer({
                                         {section.title}
                                     </h3>
                                     {section.options.length === 0 ? (
-                                        <p className="text-xs text-slate-400 dark:text-slate-500">No options yet</p>
+                                        <p className="text-xs text-slate-400 dark:text-slate-500">{t("noOptions") || "No options yet"}</p>
                                     ) : (
                                         <ul className="space-y-2">
                                             {section.options.map((option) => {
@@ -150,7 +146,7 @@ export default function AdminFilterDrawer({
                             onClick={onClearAll}
                             className="text-sm font-semibold text-slate-500 transition hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                         >
-                            Clear all
+                            {t("common.actions.clear") || "Clear all"}
                         </button>
                     ) : (
                         <span />
@@ -160,7 +156,7 @@ export default function AdminFilterDrawer({
                         onClick={onApply}
                         className="rounded-lg bg-[color:var(--admin-primary)] px-6 py-2.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(var(--admin-primary-rgb),0.35)] transition hover:brightness-110"
                     >
-                        {applyLabel}
+                        {resolvedApply}
                     </button>
                 </div>
             </aside>

@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\Api\Admin\HomepageSettingsController;
-use App\Http\Controllers\Api\Storefront\BannerController;
-use App\Http\Controllers\Api\Storefront\BrandController;
-use App\Http\Controllers\Api\Storefront\CategoryController;
-use App\Http\Controllers\Api\Storefront\CollectionController;
-use App\Http\Controllers\Api\Storefront\ProductController;
+use App\Http\Controllers\Api\V1\Admin\Settings\HomepageSettingsController;
+use App\Http\Controllers\Api\V1\Storefront\Catalog\BannerController;
+use App\Http\Controllers\Api\V1\Storefront\Catalog\BrandController;
+use App\Http\Controllers\Api\V1\Storefront\Catalog\CategoryController;
+use App\Http\Controllers\Api\V1\Storefront\Catalog\CollectionController;
+use App\Http\Controllers\Api\V1\Storefront\Catalog\ProductController;
 use Illuminate\Http\Request;
 
 class HomepageBootstrapService

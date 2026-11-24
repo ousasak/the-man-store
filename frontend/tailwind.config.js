@@ -31,7 +31,9 @@ export default {
 			},
 			
   		boxShadow: {
-  			soft: '0 10px 30px rgba(0,0,0,.08)'
+  			soft: '0 10px 30px rgba(0,0,0,.08)',
+  			'2xs': '0 1px 2px 0 rgba(0, 0, 0, 0.04)',
+  			xs: '0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
   		},
   		borderRadius: {
   			xl2: '1.25rem',
@@ -81,12 +83,12 @@ export default {
   				'5': 'hsl(var(--chart-5))'
   			},
 			brand: {
-					primary: "#FF8A00",
+					primary: "#C59B27",
 					background: "#F9F9F9",
 					card: "#FFFFFF",
-					hoverWarm: "#FFF5EE",
+					hoverWarm: "#FFFDF5",
 				},
-        "brand-primary": "#f39c12",
+        "brand-primary": "#C59B27",
         "brand-bg": "#f8f9fa",
   		}
   	}

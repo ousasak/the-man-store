@@ -2,6 +2,7 @@ import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } f
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Plus } from "lucide-react";
 import { resolveImageUrl } from "../../lib/images.js";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 const MENU_MAX_HEIGHT = 220;
 const MENU_GAP = 6;
@@ -65,10 +66,12 @@ export default function AdminSearchSelect({
   allowCustomValue = false,
   inputStyle,
 }) {
+  const { t } = useLanguage();
   const listId = useId();
   const rootRef = useRef(null);
   const listRef = useRef(null);
   const inputRef = useRef(null);
+  const justFocusedRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -193,10 +196,15 @@ export default function AdminSearchSelect({
     setActiveIndex(0);
   }, [query, open]);
 
-  const pick = (nextValue) => {
-    onChange?.(nextValue == null ? "" : String(nextValue));
+  const closeList = () => {
     setOpen(false);
     setQuery("");
+    inputRef.current?.blur();
+  };
+
+  const pick = (nextValue) => {
+    onChange?.(nextValue == null ? "" : String(nextValue));
+    closeList();
   };
 
   const openList = () => {
@@ -206,6 +214,32 @@ export default function AdminSearchSelect({
     setOpen(true);
     setQuery("");
     requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const handleFocus = () => {
+    if (disabled) return;
+    justFocusedRef.current = true;
+    if (!open) {
+      openList();
+    }
+    window.setTimeout(() => {
+      justFocusedRef.current = false;
+    }, 200);
+  };
+
+  const handleClick = () => {
+    if (disabled) return;
+    if (justFocusedRef.current) {
+      justFocusedRef.current = false;
+      return;
+    }
+    if (open) {
+      if (!query.trim()) {
+        closeList();
+      }
+    } else {
+      openList();
+    }
   };
 
   const commitQueryOnBlur = () => {
@@ -235,8 +269,7 @@ export default function AdminSearchSelect({
 
     if (e.key === "Escape") {
       e.preventDefault();
-      setOpen(false);
-      setQuery("");
+      closeList();
       return;
     }
     if (e.key === "ArrowDown") {
@@ -312,7 +345,7 @@ export default function AdminSearchSelect({
         {/* Regular Items: 100% Sidebar sublink format, completely clean with ZERO overlapping lines */}
         {regularItems.length === 0 && pinnedActions.length === 0 ? (
           <div className="px-3 py-4 text-center text-xs text-slate-400 dark:text-slate-500">
-            No matches
+            {t("common.messages.noResults", "No matches")}
           </div>
         ) : (
           <ul className="space-y-1">
@@ -396,7 +429,8 @@ export default function AdminSearchSelect({
             setOpen(true);
             if (!e.target.value.trim() && allowEmpty) onChange?.("");
           }}
-          onFocus={openList}
+          onClick={handleClick}
+          onFocus={handleFocus}
           onBlur={() => {
             window.setTimeout(() => {
               commitQueryOnBlur();
@@ -404,8 +438,8 @@ export default function AdminSearchSelect({
             }, 120);
           }}
           onKeyDown={onKeyDown}
-          placeholder={placeholder || emptyLabel}
-          className={`${inputClassName || defaultInputClasses} ${showSwatch ? "pl-9" : ""} pr-7`}
+          placeholder={open ? (selected?.label || placeholder || emptyLabel) : (placeholder || emptyLabel)}
+          className={`${inputClassName || defaultInputClasses} ${showSwatch ? "pl-9" : ""} pr-7 ${open ? "cursor-text" : "cursor-pointer"}`}
           style={inputStyle}
           autoComplete="off"
         />
@@ -414,7 +448,14 @@ export default function AdminSearchSelect({
           tabIndex={-1}
           disabled={disabled}
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => (open ? setOpen(false) : openList())}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (open) {
+              closeList();
+            } else {
+              openList();
+            }
+          }}
           className="absolute right-1 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
           aria-label="Toggle options"
         >

@@ -6,6 +6,7 @@ import { recordMatchesYearMonth } from "../../lib/adminYearMonthFilter.js";
 import { useAdminFilterDrawer } from "../../lib/useAdminFilterDrawer.js";
 import { useAdminYearMonthFilter } from "../../lib/useAdminYearMonthFilter.js";
 import { useHomepageSettings } from "../../state/homepageSettings.jsx";
+import { useLanguage } from "../../lib/i18n.jsx";
 import AdminFilterDrawer, { AdminFilterToolbarButton } from "./AdminFilterDrawer.jsx";
 import AdminSortMenu from "./AdminSortMenu.jsx";
 import {
@@ -14,6 +15,8 @@ import {
   TableColumnVisibilityMenu,
 } from "./TableColumnVisibilityMenu.jsx";
 import { AdminDashboardLoader, AdminSectionLoader } from "@/components/admin/AdminLoading";
+import AdminEmptyState from "@/components/admin/AdminEmptyState.jsx";
+import AdminRefreshButton from "@/components/admin/AdminRefreshButton.jsx";
 import {
   formatStockBarcodePickerLabel,
 } from "../../lib/stockLabelReceipts";
@@ -72,6 +75,7 @@ export default function ProductCatalogPanel({
   emptyState = null,
 }) {
   const { settings: homepageSettings } = useHomepageSettings();
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState("list");
   const [selectedIds, setSelectedIds] = useState([]);
@@ -447,7 +451,7 @@ export default function ProductCatalogPanel({
                 type="button"
                 onClick={() => onEdit(p)}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[5px] border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-[color:var(--admin-elevated)] dark:text-slate-200 dark:hover:bg-white/10"
-                title="Edit"
+                title={t("products.actions.edit", "Edit")}
                 aria-label={`Edit ${p.name || "product"}`}
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -462,7 +466,7 @@ export default function ProductCatalogPanel({
                 className="inline-flex transition-colors"
                 style={delStyle}
                 aria-label={`Delete ${p.name || "product"}`}
-                title="Delete"
+                title={t("products.actions.delete", "Delete")}
               >
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -482,10 +486,10 @@ export default function ProductCatalogPanel({
           <div className="flex min-w-0 flex-1 flex-wrap items-end gap-3">
             <div className="shrink-0">
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                {listFilters.activeCount === 0 ? title : "Filtered products"}
+                {listFilters.activeCount === 0 ? title : (t("filteredProducts") || "Filtered products")}
               </p>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                {filteredRows.length} product{filteredRows.length !== 1 ? "s" : ""}
+                {filteredRows.length} {t("navProducts") || "products"}
                 {includeUnitsInSummary ? (
                   <>
                     {" · "}
@@ -500,7 +504,7 @@ export default function ProductCatalogPanel({
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={variantBarcodesOnly ? "Search products, variant barcode, SKU…" : "Search products, barcode, SKU…"}
+              placeholder={variantBarcodesOnly ? (t("searchVariantBarcode") || "Search products, variant barcode, SKU…") : (t("searchProductsBarcode") || "Search products, barcode, SKU…")}
               className="h-8 min-w-[10rem] flex-1 rounded-[5px] border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:ring-1 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-slate-600 sm:max-w-[14rem] sm:flex-initial sm:min-w-0 sm:w-44"
             />
 
@@ -514,6 +518,7 @@ export default function ProductCatalogPanel({
             />
 
             <AdminSortMenu
+              size="sm"
               sortBy={productSort.sortBy}
               sortDir={productSort.sortDir}
               groupBy={productSort.groupBy}
@@ -540,14 +545,14 @@ export default function ProductCatalogPanel({
                 value: yearMonthFilter.draft,
                 onChange: yearMonthFilter.setDraft,
                 startYear: 2020,
-                title: "Added date",
-                hint: "Filter by when the product was added to the catalog.",
+                title: t("addedDate") || "Added date",
+                hint: t("addedDateHint") || "Filter by when the product was added to the catalog.",
               }}
             />
 
             <div
               role="group"
-              aria-label="View mode"
+              aria-label={t("viewMode") || "View mode"}
               className="inline-flex items-center rounded-[5px] border border-slate-200 bg-white p-0.5 dark:border-slate-700 dark:bg-slate-900"
             >
               {[
@@ -578,24 +583,17 @@ export default function ProductCatalogPanel({
                 onChange={toggleSelectAll}
                 className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-600"
               />
-              Select all
+              {t("products.selectAll", "Select all")}
             </label>
 
             {onRefresh ? (
-              <button
-                type="button"
+              <AdminRefreshButton
                 onClick={onRefresh}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[5px] border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-                title="Refresh"
-              >
-                {loading ? (
-                  <AdminDashboardLoader size={18} />
-                ) : (
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                )}
-              </button>
+                loading={loading}
+                iconOnly
+                size="sm"
+                className="!h-8 !w-8"
+              />
             ) : null}
 
             <TableColumnVisibilityMenu
@@ -612,15 +610,11 @@ export default function ProductCatalogPanel({
           <AdminSectionLoader rows={6} />
         ) : filteredRows.length === 0 ? (
           emptyState || (
-            <div className="p-12 text-center">
-              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-                <svg className="h-10 w-10 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <p className="text-lg text-slate-500 dark:text-slate-200">No products found</p>
-              <p className="mt-1 text-sm text-slate-400 dark:text-slate-400">Adjust search or filters to find products.</p>
-            </div>
+            <AdminEmptyState
+              type="products"
+              isSearch={Boolean(search?.trim())}
+              searchQuery={search}
+            />
           )
         ) : viewMode === "list" ? (
           <div className="overflow-x-auto rounded-b-xl">
@@ -739,7 +733,7 @@ export default function ProductCatalogPanel({
                                   : "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-[color:var(--admin-elevated)] dark:text-slate-300"
                               }`}
                             >
-                              {p.is_active ? "Active" : "Inactive"}
+                              {p.is_active ? (t("common.status.active") || "Active") : (t("common.status.inactive") || "Inactive")}
                             </span>
                           ) : null}
                           {isColVisible("actions") ? (
@@ -749,8 +743,8 @@ export default function ProductCatalogPanel({
                                   type="button"
                                   onClick={() => onEdit(p)}
                                   className="rounded-[5px] p-2 text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                  title="Edit"
-                                  aria-label="Edit product"
+                                  title={t("common.actions.edit") || "Edit"}
+                                  aria-label={t("common.actions.edit") || "Edit product"}
                                 >
                                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -763,8 +757,8 @@ export default function ProductCatalogPanel({
                                   onClick={() => onDelete(p)}
                                   className="transition-colors"
                                   style={delStyle}
-                                  aria-label="Delete product"
-                                  title="Delete"
+                                  aria-label={t("common.actions.delete") || "Delete product"}
+                                  title={t("common.actions.delete") || "Delete"}
                                 >
                                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -820,7 +814,7 @@ export default function ProductCatalogPanel({
                               : "border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-600 dark:bg-[color:var(--admin-elevated)] dark:text-slate-200"
                           }`}
                           >
-                            {p.is_active ? "Active" : "Inactive"}
+                            {p.is_active ? (t("common.status.active") || "Active") : (t("common.status.inactive") || "Inactive")}
                           </span>
                         ) : null}
                       </div>
@@ -845,12 +839,12 @@ export default function ProductCatalogPanel({
                   ) : null}
                   {isColVisible("stockName") ? (
                     <p className={`mt-0.5 truncate ${gridMetaTextClass(stockNameForProduct(p, categories))}`}>
-                      Stock: {stockNameForProduct(p, categories)}
+                      {t("stock") || "Stock"}: {stockNameForProduct(p, categories)}
                     </p>
                   ) : null}
                   {isColVisible("supplierId") ? (
                     <p className={`mt-0.5 ${gridMetaTextClass(supplierIdForProduct(p, suppliers), { mono: true })}`}>
-                      Supplier: {supplierIdForProduct(p, suppliers)}
+                      {t("supplier") || "Supplier"}: {supplierIdForProduct(p, suppliers)}
                     </p>
                   ) : null}
                   {(isColVisible("price") || isColVisible("stock") || isColVisible("actions")) ? (
@@ -861,7 +855,7 @@ export default function ProductCatalogPanel({
                             <p className="text-base font-bold text-slate-900 dark:text-slate-100">${p.price}</p>
                           ) : null}
                           {isColVisible("stock") ? (
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500">{p.stock} in stock</p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500">{p.stock} {t("inStock") || "in stock"}</p>
                           ) : null}
                         </div>
                       ) : <div />}
@@ -872,8 +866,8 @@ export default function ProductCatalogPanel({
                               type="button"
                               onClick={() => onEdit(p)}
                               className="flex h-7 w-7 items-center justify-center rounded-[5px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                              title="Edit"
-                              aria-label="Edit product"
+                              title={t("common.actions.edit") || "Edit"}
+                              aria-label={t("common.actions.edit") || "Edit product"}
                             >
                               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -885,8 +879,8 @@ export default function ProductCatalogPanel({
                               type="button"
                               onClick={() => onDelete(p)}
                               className="flex h-7 w-7 items-center justify-center rounded-[5px] border border-transparent text-[#dc2626] transition-colors hover:border-[#fecaca] hover:bg-[#fef2f2] dark:text-[#f87171] dark:hover:border-[#7f1d1d]/50 dark:hover:bg-[#450a0a]/35"
-                              title="Delete"
-                              aria-label="Delete product"
+                              title={t("common.actions.delete") || "Delete"}
+                              aria-label={t("common.actions.delete") || "Delete product"}
                             >
                               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

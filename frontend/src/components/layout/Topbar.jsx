@@ -1,11 +1,17 @@
 import React from "react";
 import { useHomepageSettings } from "../../state/homepageSettings.jsx";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 export default function Topbar() {
   const { settings } = useHomepageSettings();
+  const { t } = useLanguage();
   const headerSettings = settings?.header || {};
   const icon = headerSettings.free_delivery_icon || "🚚";
-  const message = headerSettings.free_delivery_text || "Free delivery on order above $40 spent";
+  const defaultMsg = "Free delivery on order above $40 spent";
+  const rawMsg = headerSettings.free_delivery_text;
+  const message = (!rawMsg || rawMsg === defaultMsg)
+    ? (t("freeDelivery") || defaultMsg)
+    : rawMsg;
 
   return (
     <div className="border-b border-zinc-200 bg-white">

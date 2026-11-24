@@ -3,6 +3,7 @@ import { Lock, Mail } from "lucide-react";
 import { useAuth } from "../../state/auth";
 import { useHomepageSettings } from "../../state/homepageSettings.jsx";
 import { resolveBackendOrigin } from "../../lib/backendOrigin";
+import { useLanguage } from "../../lib/i18n.jsx";
 import { Dialog } from "../ui/Dialog";
 import {
   AuthDialogShell,
@@ -20,6 +21,7 @@ import {
 } from "../auth/AuthDialogShared";
 
 export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
+  const { t } = useLanguage();
   const { settings } = useHomepageSettings();
   const [form, setForm] = useState({ email: "", password: "" });
   const [otpForm, setOtpForm] = useState({
@@ -222,14 +224,14 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                 onContinue={handleContinue}
               />
               <AuthFooterLink>
-                New here?{" "}
+                {t("auth.newHere") || "New here?"}{" "}
                 <AuthTextButton
                   onClick={() => {
                     onClose();
                     onSwitchToRegister();
                   }}
                 >
-                  Register
+                  {t("auth.register") || "Register"}
                 </AuthTextButton>
               </AuthFooterLink>
             </>
@@ -250,7 +252,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
           {!otpMode && step === "email" ? (
             <>
               <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-6">
-                <AuthField id="login-email" label="Email" icon={Mail}>
+                <AuthField id="login-email" label={t("auth.email") || "Email"} icon={Mail}>
                   <input
                     id="login-email"
                     name="email"
@@ -258,7 +260,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                     autoComplete="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="you@example.com"
+                    placeholder={t("auth.emailPlaceholder") || "you@example.com"}
                     className={AUTH_INPUT}
                     required
                   />
@@ -266,7 +268,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
 
                 <AuthField
                   id="login-password"
-                  label="Password"
+                  label={t("auth.password") || "Password"}
                   icon={Lock}
                 >
                   <input
@@ -276,7 +278,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                     autoComplete="current-password"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder="Enter your password"
+                    placeholder={t("auth.passwordPlaceholder") || "Enter your password"}
                     className={AUTH_INPUT}
                   />
                 </AuthField>
@@ -288,14 +290,14 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                       window.location.href = "/forgot-password";
                     }}
                   >
-                    Forgot password?
+                    {t("auth.forgotPassword") || "Forgot password?"}
                   </AuthTextButton>
                 </div>
 
                 <AuthError message={error} />
 
                 <button type="submit" disabled={loading} className={AUTH_PRIMARY_BTN}>
-                  {loading ? "Logging in…" : "Login"}
+                  {loading ? (t("auth.loggingIn") || "Logging in…") : (t("auth.login") || "Login")}
                 </button>
               </form>
 
@@ -306,7 +308,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                     setStep("choose");
                   }}
                 >
-                  ← Back to options
+                  {t("auth.backToOptions") || "← Back to options"}
                 </AuthTextButton>
               </AuthFooterLink>
             </>
@@ -315,7 +317,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
           {otpMode ? (
             <form onSubmit={handleVerifyOtp} className="mt-7 flex flex-col gap-6">
               <OtpDeliveryNotice message={otpNotice} emailSent={otpEmailSent} />
-              <AuthField id="login-otp-code" label="Verification code" icon={Lock}>
+              <AuthField id="login-otp-code" label={t("auth.otpCode") || "Verification code"} icon={Lock}>
                 <input
                   id="login-otp-code"
                   name="otp_code"
@@ -324,14 +326,14 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                   autoComplete="one-time-code"
                   value={otpForm.code}
                   onChange={(e) => setOtpForm({ ...otpForm, code: e.target.value })}
-                  placeholder="6-digit code"
+                  placeholder={t("auth.otpPlaceholder") || "6-digit code"}
                   className={AUTH_INPUT}
                   required
                 />
               </AuthField>
               <AuthError message={error} />
               <button type="submit" disabled={loading} className={AUTH_PRIMARY_BTN}>
-                {loading ? "Verifying…" : "Verify and log in"}
+                {loading ? (t("auth.verifying") || "Verifying…") : (t("auth.verifyAndLogin") || "Verify and log in")}
               </button>
               <button
                 type="button"
@@ -339,7 +341,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                 disabled={loading}
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-60"
               >
-                Resend code
+                {t("auth.resendCode") || "Resend code"}
               </button>
               <AuthTextButton
                 onClick={() => {
@@ -349,7 +351,7 @@ export default function LoginDialog({ isOpen, onClose, onSwitchToRegister }) {
                   setStep("email");
                 }}
               >
-                ← Back to login
+                {t("auth.backToLogin") || "← Back to login"}
               </AuthTextButton>
             </form>
           ) : null}

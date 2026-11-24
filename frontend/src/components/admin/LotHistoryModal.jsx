@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { History } from "lucide-react";
 import api from "../../lib/api";
+import { useTranslation } from "../../lib/i18n.jsx";
 import AdminModal from "./AdminModal.jsx";
 import AdminListQueryToolbar from "./AdminListQueryToolbar.jsx";
 import { formatPoMoney } from "../../lib/purchaseOrderHelpers.js";
@@ -11,16 +12,15 @@ import {
   formatLotPriceEventSummary,
 } from "../../lib/inventoryLotHelpers.js";
 
-const FILTERS = [
-  { id: "all", label: "All" },
-  { id: "pricing", label: "Pricing" },
-  { id: "details", label: "Details" },
-];
-
-function FilterTabs({ value, onChange, counts }) {
+function FilterTabs({ value, onChange, counts, t }) {
+  const tabs = [
+    { id: "all", label: t("inventory.all", "All") },
+    { id: "pricing", label: t("inventory.pricing", "Pricing") },
+    { id: "details", label: t("inventory.details", "Details") },
+  ];
   return (
     <div className="flex flex-wrap gap-1.5">
-      {FILTERS.map((tab) => (
+      {tabs.map((tab) => (
         <button
           key={tab.id}
           type="button"
@@ -39,7 +39,7 @@ function FilterTabs({ value, onChange, counts }) {
   );
 }
 
-function KindBadge({ kind }) {
+function KindBadge({ kind, t }) {
   const isPricing = kind === "pricing";
   return (
     <span
@@ -49,12 +49,13 @@ function KindBadge({ kind }) {
           : "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
       }`}
     >
-      {isPricing ? "Pricing" : "Details"}
+      {isPricing ? t("inventory.pricing", "Pricing") : t("inventory.details", "Details")}
     </span>
   );
 }
 
 export default function LotHistoryModal({ open, onClose, lot }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
   const [fromDate, setFromDate] = useState("");
@@ -102,7 +103,7 @@ export default function LotHistoryModal({ open, onClose, lot }) {
       setPriceEvents(Array.isArray(priceRes.data?.data) ? priceRes.data.data : []);
       setDetailEvents(Array.isArray(detailRes.data?.data) ? detailRes.data.data : []);
     } catch (e) {
-      setErr(e?.response?.data?.message || "Could not load lot history.");
+      setErr(e?.response?.data?.message || t("inventory.couldNotLoadLotHistory", "Could not load lot history."));
       setPriceEvents([]);
       setDetailEvents([]);
     } finally {
@@ -151,7 +152,7 @@ export default function LotHistoryModal({ open, onClose, lot }) {
     <AdminModal
       open={open}
       onClose={onClose}
-      title="Lot history"
+      title={t("inventory.lotHistory")}
       titleIcon={
         <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
           <History className="h-4 w-4" aria-hidden />
@@ -164,14 +165,14 @@ export default function LotHistoryModal({ open, onClose, lot }) {
           <p className="font-mono text-xs text-slate-500 dark:text-slate-400">{lot.lot_number}</p>
         ) : null}
 
-        <FilterTabs value={filter} onChange={setFilter} counts={counts} />
+        <FilterTabs value={filter} onChange={setFilter} counts={counts} t={t} />
 
         <AdminListQueryToolbar
           embedded
           singleRow
           search={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Search action, field, or admin…"
+          searchPlaceholder={t("common.search", "Search action, field, or admin…")}
           fromDate={fromDate}
           onFromDateChange={setFromDate}
           toDate={toDate}
@@ -188,17 +189,17 @@ export default function LotHistoryModal({ open, onClose, lot }) {
         ) : null}
 
         {loading ? (
-          <p className="py-8 text-center text-sm text-slate-500">Loading lot history…</p>
+          <p className="py-8 text-center text-sm text-slate-500">{t("inventory.loadingLotHistory")}</p>
         ) : filteredEvents.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-500">No history for this lot.</p>
+          <p className="py-8 text-center text-sm text-slate-500">{t("inventory.noHistoryForLot")}</p>
         ) : (
           <ul className="max-h-[min(24rem,50vh)] space-y-2 overflow-y-auto pr-1">
             {filteredEvents.map(({ kind, event }) => {
               const changes = Array.isArray(event.changes) ? event.changes : [];
               const summary =
                 kind === "pricing"
-                  ? formatLotPriceEventSummary(event)
-                  : formatLotDetailEventSummary(event);
+                  ? formatLotPriceEventSummary(event, t)
+                  : formatLotDetailEventSummary(event, t);
 
               return (
                 <li
@@ -207,7 +208,7 @@ export default function LotHistoryModal({ open, onClose, lot }) {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <KindBadge kind={kind} />
+                      <KindBadge kind={kind} t={t} />
                       <span className="font-semibold text-slate-800 dark:text-slate-100">{summary}</span>
                     </div>
                     <span className="shrink-0 tabular-nums text-slate-500 dark:text-slate-400">
@@ -215,7 +216,7 @@ export default function LotHistoryModal({ open, onClose, lot }) {
                     </span>
                   </div>
                   <p className="mt-1 text-slate-500 dark:text-slate-400">
-                    By {event.admin?.name || event.admin?.email || "System"}
+                    {t("inventory.byAdmin", "By {name}", { name: event.admin?.name || event.admin?.email || t("inventory.system", "System") })}
                     {kind === "pricing" &&
                     event.unit_price_before != null &&
                     event.unit_price_after != null ? (
@@ -227,7 +228,7 @@ export default function LotHistoryModal({ open, onClose, lot }) {
                   {kind === "details" && changes.length > 0 ? (
                     <ul className="mt-2 space-y-0.5 text-slate-600 dark:text-slate-300">
                       {changes.map((change) => (
-                        <li key={`${event.id}-${change.field}`}>{formatLotDetailChangeLine(change)}</li>
+                        <li key={`${event.id}-${change.field}`}>{formatLotDetailChangeLine(change, t)}</li>
                       ))}
                     </ul>
                   ) : null}

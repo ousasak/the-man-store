@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import api from "../../lib/api";
+import { useTranslation } from "../../lib/i18n.jsx";
 import { resolveImageUrl } from "../../lib/images";
 import { useTheme } from "../../state/theme.jsx";
 import { closeSwal, errorAlert, loadingAlert, toastSuccess } from "../../lib/swal";
@@ -7,6 +8,7 @@ import { getAdminValidationMessage } from "../../lib/adminValidation.js";
 import { BARCODE_QR_TYPE } from "../../lib/stockLabelReceipts";
 import CategoryPicker from "./CategoryPicker.jsx";
 import AdminSearchSelect from "./AdminSearchSelect.jsx";
+import AdminDatePicker from "./AdminDatePicker.jsx";
 
 const STOCK_UNIT_OPTIONS = [
   { value: "", label: "Select unit" },
@@ -106,6 +108,7 @@ export default function StockLabelCreateForm({
   onCancel,
   showToast = true,
 }) {
+  const { t, language } = useTranslation();
   const { primaryColor, mode } = useTheme();
   const accentColor = accentIsWhite(primaryColor, mode) ? "#16a34a" : primaryColor;
   const productImageInputRef = useRef(null);
@@ -228,7 +231,7 @@ export default function StockLabelCreateForm({
 
       <div>
         <label className={labelCls} htmlFor="qc-stock-name">
-          Stock name <span className="text-red-500">*</span>
+          {t("inventory.stockName")} <span className="text-red-500">*</span>
         </label>
         <input
           id="qc-stock-name"
@@ -236,10 +239,12 @@ export default function StockLabelCreateForm({
           onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))}
           required
           className={inputCls}
-          placeholder="Enter stock name"
+          placeholder={t("inventory.enterStockName")}
         />
         <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-          Stock labels track inventory only. Set barcodes on products (Variant Barcode for color/size items).
+          {language === "km"
+            ? "ស្លាកស្តុកសម្រាប់តាមដានតែចំនួនស្តុកប៉ុណ្ណោះ។ កំណត់បាកូដលើទំនិញ (បាកូដវ៉ារ្យ៉ង់សម្រាប់ពណ៌/ទំហំ)។"
+            : "Stock labels track inventory only. Set barcodes on products (Variant Barcode for color/size items)."}
         </p>
       </div>
 
@@ -254,11 +259,11 @@ export default function StockLabelCreateForm({
       />
 
       <div>
-        <label className={labelCls}>Product condition</label>
+        <label className={labelCls}>{t("inventory.productCondition")}</label>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {[
-            { value: "new", label: "New", hint: "ទំនិញថ្មី" },
-            { value: "second_hand", label: "Second-hand", hint: "ទំនិញមួយទឹក" },
+            { value: "new", label: t("inventory.conditionNew"), hint: language === "km" ? "ទំនិញថ្មីស្រឡាង" : "Brand new" },
+            { value: "second_hand", label: t("inventory.conditionSecondHand"), hint: language === "km" ? "ទំនិញមួយទឹក/ជជុះ" : "Pre-owned / second-hand" },
           ].map((option) => {
             const selected = productCondition === option.value;
             return (
@@ -293,7 +298,7 @@ export default function StockLabelCreateForm({
       </div>
 
       <div>
-        <label className={labelCls}>Product image</label>
+        <label className={labelCls}>{language === "km" ? "រូបភាពទំនិញ" : "Product image"}</label>
         <button
           type="button"
           disabled={isUploading}
@@ -308,7 +313,7 @@ export default function StockLabelCreateForm({
             />
           ) : (
             <>
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Click to upload a photo</p>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{language === "km" ? "ចុចដើម្បីបង្ហោះរូបភាព" : "Click to upload a photo"}</p>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">PNG, JPG, WEBP — max 5 MB</p>
             </>
           )}
@@ -317,7 +322,7 @@ export default function StockLabelCreateForm({
 
       <div>
         <label className={labelCls} htmlFor="qc-stock-description">
-          Description
+          {t("common.description", "Description")}
         </label>
         <textarea
           id="qc-stock-description"
@@ -325,14 +330,14 @@ export default function StockLabelCreateForm({
           onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
           rows={4}
           className={textareaCls}
-          placeholder="Product description..."
+          placeholder={t("common.description", "Product description...")}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={labelCls} htmlFor="qc-stock-unit">
-            Unit
+            {t("inventory.unit", "Unit")}
           </label>
           <AdminSearchSelect
             inputId="qc-stock-unit"
@@ -341,19 +346,19 @@ export default function StockLabelCreateForm({
             options={STOCK_UNIT_OPTIONS}
             inputClassName={inputCls}
             ariaLabel="Unit"
-            placeholder="Search unit…"
+            placeholder={t("common.search", "Search unit…")}
           />
         </div>
         <div>
           <label className={labelCls} htmlFor="qc-stock-date-in">
-            Date in
+            {t("inventory.date", "Date in")}
           </label>
-          <input
+          <AdminDatePicker
             id="qc-stock-date-in"
-            type="date"
             value={form.date_in || ""}
-            onChange={(e) => setForm((s) => ({ ...s, date_in: e.target.value }))}
+            onChange={(val) => setForm((s) => ({ ...s, date_in: val }))}
             className={inputCls}
+            placeholder={t("inventory.date", "Date in")}
           />
         </div>
       </div>
@@ -372,7 +377,7 @@ export default function StockLabelCreateForm({
             disabled={isCreating}
             className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Cancel
+            {t("common.actions.cancel", "Cancel")}
           </button>
         ) : null}
         <button
@@ -381,7 +386,7 @@ export default function StockLabelCreateForm({
           className="rounded-lg px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
           style={{ backgroundColor: accentColor }}
         >
-          {isCreating ? "Saving…" : "Save item"}
+          {isCreating ? t("common.messages.saving", "Saving…") : t("common.actions.save", "Save item")}
         </button>
       </div>
     </form>

@@ -26,3 +26,11 @@ export const SORT_DIR_OPTIONS = [
   { value: "desc", label: "Desc" },
   { value: "asc", label: "Asc" },
 ];
+
+export function getSortDirOptions(t = null) {
+  if (!t) return SORT_DIR_OPTIONS;
+  return [
+    { value: "desc", label: t("common.sortDesc", "ចុះក្រោម") },
+    { value: "asc", label: t("common.sortAsc", "ឡើងលើ") },
+  ];
+}

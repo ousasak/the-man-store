@@ -4,6 +4,7 @@ import VariantBarcodePreview from "./VariantBarcodePreview.jsx";
 import { resolveImageUrl } from "../../lib/images";
 import { parseVariantMatrix } from "../../lib/variantMatrix.js";
 import { normalizeVariantBarcodeFormat } from "../../lib/variantBarcode.js";
+import { useLanguage } from "../../lib/i18n";
 
 /** All color × size rows for display (includes rows without barcode). */
 function variantRowsForProduct(product) {
@@ -37,6 +38,7 @@ export default function ProductVariantDetailModal({
   isDark = false,
   onEditProduct,
 }) {
+  const { t } = useLanguage();
   if (!product) return null;
 
   const rows = variantRowsForProduct(product);
@@ -71,14 +73,14 @@ export default function ProductVariantDetailModal({
             ) : null}
             {product.category?.name ? (
               <p className="text-slate-600 dark:text-slate-300">
-                Category: <span className="font-medium">{product.category.name}</span>
+                {t("category", "Category")}: <span className="font-medium">{product.category.name}</span>
               </p>
             ) : null}
             <p className="text-slate-600 dark:text-slate-300">
-              Price: <span className="font-semibold text-slate-900 dark:text-slate-100">${product.price}</span>
+              {t("price", "Price")}: <span className="font-semibold text-slate-900 dark:text-slate-100">${product.price}</span>
             </p>
             <p className="text-slate-600 dark:text-slate-300">
-              Stock: <span className="font-semibold tabular-nums">{product.stock ?? 0}</span>
+              {t("stock", "Stock")}: <span className="font-semibold tabular-nums">{product.stock ?? 0}</span>
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {hasVariants
@@ -97,10 +99,10 @@ export default function ProductVariantDetailModal({
             <table className="w-full min-w-[28rem] text-left text-sm">
               <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                 <tr>
-                  <th className="px-4 py-2.5">Color</th>
-                  <th className="px-4 py-2.5">Size</th>
-                  <th className="px-4 py-2.5 text-right">Qty</th>
-                  <th className="px-4 py-2.5">Variant barcode</th>
+                  <th className="px-4 py-2.5">{t("color", "Color")}</th>
+                  <th className="px-4 py-2.5">{t("size", "Size")}</th>
+                  <th className="px-4 py-2.5 text-right">{t("qty", "Qty")}</th>
+                  <th className="px-4 py-2.5">{t("variantBarcode", "Variant barcode")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -137,7 +139,7 @@ export default function ProductVariantDetailModal({
             onClick={onClose}
             className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            Close
+            {t("common.actions.close", "Close")}
           </button>
           {onEditProduct ? (
             <button

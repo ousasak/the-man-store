@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, History, Package, Pencil, Tag } from "lucide-react";
+import { useTranslation } from "../../lib/i18n.jsx";
 import AdminModal from "./AdminModal.jsx";
 import InventoryLotsPanel from "./InventoryLotsPanel.jsx";
 import MovementDetailsButton from "./MovementDetailsButton.jsx";
@@ -13,27 +14,28 @@ import { useAdminPermissions } from "../../hooks/useAdminPermissions.js";
 import AdminListQueryToolbar from "./AdminListQueryToolbar.jsx";
 import AdminTablePagination from "./AdminTablePagination.jsx";
 
-function sellPriceOverview(row) {
+function sellPriceOverview(row, t = null) {
   const source = row?.sell_price_source;
+  const label = t ? t("inventory.unitPrice", "Sell price") : "Sell price";
   if (source === "inventory_lot") {
-    const tier = row?.next_lot_tier ? lotTierLabel(row.next_lot_tier) : "FIFO lot";
+    const tier = row?.next_lot_tier ? lotTierLabel(row.next_lot_tier, t) : (t ? t("inventory.fifoLot", "FIFO lot") : "FIFO lot");
     return {
-      label: "Sell price",
+      label,
       value: formatPoMoney(row.sell_price),
-      hint: `Website & POS · ${tier}`,
+      hint: t ? t("inventory.websitePosTierHint", "Website & POS · {tier}", { tier }) : `Website & POS · ${tier}`,
     };
   }
   if (source === "unsellable_lots") {
     return {
-      label: "Sell price",
+      label,
       value: "—",
-      hint: "All lots on hold",
+      hint: t ? t("inventory.allLotsOnHold", "All lots on hold") : "All lots on hold",
     };
   }
   return {
-    label: "Sell price",
+    label,
     value: formatPoMoney(row?.sell_price),
-    hint: "No sellable lots — catalog default",
+    hint: t ? t("inventory.noSellableLotsCatalogDefault", "No sellable lots — catalog default") : "No sellable lots — catalog default",
   };
 }
 
@@ -83,9 +85,17 @@ function StatField({ label, value, hint = null, mono = false, className = "", ce
 }
 
 function TypeCell({ type }) {
-  const t = String(type).toLowerCase();
-  const isBoth = t.includes("purchase") && t.includes("sale");
-  const isPurchase = t.includes("purchase");
+  const { t } = useTranslation();
+  const s = String(type || "").toLowerCase();
+  const isBoth = s.includes("purchase") && s.includes("sale");
+  const isPurchase = s.includes("purchase");
+  const label = isBoth
+    ? `${t("inventory.purchase", "Purchase")} / ${t("inventory.sale", "Sale")}`
+    : isPurchase
+      ? t("inventory.purchase", "Purchase")
+      : s.includes("sale")
+        ? t("inventory.sale", "Sale")
+        : type;
   return (
     <span className="inline-flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-100">
       {isBoth ? (
@@ -99,20 +109,29 @@ function TypeCell({ type }) {
           aria-hidden
         />
       )}
-      {type}
+      {label}
     </span>
   );
 }
 
-function stockStatusMeta(status) {
+function stockStatusMeta(status, t = null) {
   const s = String(status || "").toLowerCase();
   if (s.includes("out")) {
-    return "border-red-200/90 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-200";
+    return {
+      label: t ? t("inventory.outOfStock", "Out of stock") : (status || "Out of stock"),
+      className: "border-red-200/90 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-200",
+    };
   }
   if (s.includes("low")) {
-    return "border-amber-200/90 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/50 dark:text-amber-200";
+    return {
+      label: t ? t("inventory.lowStock", "Low stock") : (status || "Low stock"),
+      className: "border-amber-200/90 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/50 dark:text-amber-200",
+    };
   }
-  return "border-emerald-200/90 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-200";
+  return {
+    label: t ? t("inventory.inStock", "In stock") : (status || "In stock"),
+    className: "border-emerald-200/90 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-200",
+  };
 }
 
 function movementRowClass(type, index) {
@@ -238,6 +257,8 @@ export default function StockSkuDetailModal({
     if (movementPage > movementListPage.lastPage) setMovementPage(movementListPage.lastPage);
   }, [movementPage, movementListPage.lastPage]);
 
+  const { t } = useTranslation();
+
   if (!row) return null;
 
   const inStock = Math.max(0, Number(row.in_stock) || 0);
@@ -256,14 +277,14 @@ export default function StockSkuDetailModal({
     movementSearch.trim() || movementFromDate || movementToDate,
   );
   const movementCountLabel = movementsLoading
-    ? "Loading…"
-    : `${filteredMovements.length} movement${filteredMovements.length !== 1 ? "s" : ""}`;
+    ? (t("common.messages.loading") || "Loading…")
+    : `${filteredMovements.length} ${t("inventory.movements", "movements")}`;
 
   return (
     <AdminModal
       open={open}
       onClose={onClose}
-      title="SKU Details"
+      title={t("inventory.skuDetails", "SKU Details")}
       titleIcon={<Package className="h-5 w-5" strokeWidth={2} aria-hidden />}
       titleId="stock-sku-detail-title"
       variant="sheet"
@@ -274,53 +295,58 @@ export default function StockSkuDetailModal({
           <AccordionSection
             id="sku-detail-overview"
             icon={Package}
-            title="Overview"
+            title={t("inventory.overview", "Overview")}
             open={openSections.overview}
             onToggle={() => toggleSection("overview")}
           >
             <div className="bg-slate-50/50 px-4 py-5 text-center dark:bg-slate-950/30 sm:px-6">
               <div className="flex flex-col items-center gap-5">
                 <div className="grid w-full max-w-4xl grid-cols-2 justify-items-center gap-x-6 gap-y-4 md:grid-cols-5 md:gap-x-8">
-                  <StatField centered label="SKU" value={row.sku} mono />
-                  <StatField centered label="Product" value={row.product_name} className="min-w-0" />
-                  <StatField centered label="Size" value={row.size} />
-                  <StatField centered label="Color" value={row.color} />
-                  <StatField centered label="Date" value={formatDateIso(row.activity_date)} />
+                  <StatField centered label={t("products.sku", "SKU")} value={row.sku} mono />
+                  <StatField centered label={t("common.products", "Product")} value={row.product_name} className="min-w-0" />
+                  <StatField centered label={t("common.size", "Size")} value={row.size} />
+                  <StatField centered label={t("common.color", "Color")} value={row.color} />
+                  <StatField centered label={t("inventory.date", "Date")} value={formatDateIso(row.activity_date)} />
                 </div>
                 <div className="grid w-full max-w-4xl grid-cols-2 justify-items-center gap-x-6 gap-y-4 sm:grid-cols-3 md:grid-cols-5 md:gap-x-6">
                   <StatField
                     centered
-                    label="In stock"
+                    label={t("inventory.availableQty", "In stock")}
                     value={String(inStock)}
                     hint={
                       heldAside > 0
-                        ? `${heldAside} on hold / not sellable · ${totalOnHand} total in lots`
+                        ? t("inventory.onHoldLotsHint", `${heldAside} on hold / not sellable · ${totalOnHand} total in lots`, { heldAside, totalOnHand })
                         : null
                     }
                   />
                   {isSuperAdmin ? (
                   <StatField
                     centered
-                    label="Cost/unit"
+                    label={t("inventory.unitCost", "Cost/unit")}
                     value={formatPoMoney(row?.next_lot_cost ?? row?.wac_cost ?? 0)}
                   />
                   ) : null}
                   {(() => {
-                    const sell = sellPriceOverview(row);
+                    const sell = sellPriceOverview(row, t);
                     return <StatField centered label={sell.label} value={sell.value} hint={sell.hint} />;
                   })()}
                   {isSuperAdmin ? (
-                  <StatField centered label="Stock value" value={formatPoMoney(row.stock_value)} />
+                  <StatField centered label={t("inventory.totalCost", "Stock value")} value={formatPoMoney(row.stock_value)} />
                   ) : null}
                   <div className="flex min-w-0 flex-col items-center">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
-                      Status
+                      {t("common.status", "Status")}
                     </p>
-                    <span
-                      className={`mt-1.5 inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${stockStatusMeta(row.status)}`}
-                    >
-                      {row.status || "In stock"}
-                    </span>
+                    {(() => {
+                      const statusMeta = stockStatusMeta(row.status, t);
+                      return (
+                        <span
+                          className={`mt-1.5 inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusMeta.className}`}
+                        >
+                          {statusMeta.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 {lotSummary &&
@@ -331,22 +357,22 @@ export default function StockSkuDetailModal({
                   <div className="mt-2 flex flex-wrap justify-center gap-2 text-xs">
                     {lotSummary.older > 0 ? (
                       <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 font-semibold text-amber-900">
-                        Older {lotSummary.older}
+                        {t("inventory.lotTierOlder", "Older")} {lotSummary.older}
                       </span>
                     ) : null}
                     {lotSummary.newer > 0 ? (
                       <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 font-semibold text-blue-800">
-                        Newer {lotSummary.newer}
+                        {t("inventory.lotTierNewer", "Newer")} {lotSummary.newer}
                       </span>
                     ) : null}
                     {lotSummary.active > 0 ? (
                       <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 font-semibold text-emerald-800">
-                        Active {lotSummary.active}
+                        {t("inventory.active", "Active")} {lotSummary.active}
                       </span>
                     ) : null}
                     {lotSummary.clearance > 0 ? (
                       <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 font-semibold text-amber-900">
-                        Clearance {lotSummary.clearance}
+                        {t("inventory.clearance", "Clearance")} {lotSummary.clearance}
                       </span>
                     ) : null}
                   </div>
@@ -358,7 +384,7 @@ export default function StockSkuDetailModal({
           <AccordionSection
             id="sku-detail-lots"
             icon={Tag}
-            title="Inventory Lots"
+            title={t("inventory.inventoryLotsTitle", "Inventory Lots")}
             open={openSections.lots}
             onToggle={() => toggleSection("lots")}
           >
@@ -380,7 +406,7 @@ export default function StockSkuDetailModal({
           <AccordionSection
             id="sku-detail-movements"
             icon={History}
-            title="Movements"
+            title={t("inventory.movements", "Movements")}
             badge={movementCountLabel}
             open={openSections.movements}
             onToggle={() => toggleSection("movements")}
@@ -392,7 +418,7 @@ export default function StockSkuDetailModal({
                   singleRow
                   search={movementSearch}
                   onSearchChange={onMovementSearchChange}
-                  searchPlaceholder="Search type, ref, qty, price…"
+                  searchPlaceholder={t("inventory.searchMovementsPlaceholder", "Search type, ref, qty, price…")}
                   fromDate={movementFromDate}
                   onFromDateChange={onMovementFromDateChange}
                   toDate={movementToDate}
@@ -410,22 +436,22 @@ export default function StockSkuDetailModal({
 
               <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-950/[0.03] dark:border-slate-800 dark:bg-slate-900 dark:ring-white/[0.04]">
                 {movementsLoading ? (
-                  <p className="px-4 py-12 text-center text-sm text-slate-500">Loading movement history…</p>
+                  <p className="px-4 py-12 text-center text-sm text-slate-500">{t("inventory.loadingMovementDetail", "Loading movement history…")}</p>
                 ) : (
                   <>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[720px] border-collapse text-sm">
                       <thead>
                         <tr className="border-b border-slate-200 bg-slate-100/95 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:border-slate-600 dark:bg-slate-800/95 dark:text-slate-400">
-                          <th className="px-4 py-3 text-left">Date</th>
-                          <th className="px-4 py-3 text-left">Type</th>
-                          <th className="px-4 py-3 text-right text-emerald-700 dark:text-emerald-400">Qty in</th>
-                          <th className="px-4 py-3 text-right text-red-600 dark:text-red-400">Qty out</th>
-                          {isSuperAdmin ? <th className="px-4 py-3 text-right">Cost/unit</th> : null}
-                          <th className="px-4 py-3 text-right">Sell/unit</th>
-                          <th className="px-4 py-3 text-right">Balance</th>
-                          <th className="px-4 py-3 text-left">Ref</th>
-                          <th className="px-4 py-3 text-center">Details</th>
+                          <th className="px-4 py-3 text-left">{t("inventory.date", "Date")}</th>
+                          <th className="px-4 py-3 text-left">{t("inventory.type", "Type")}</th>
+                          <th className="px-4 py-3 text-right text-emerald-700 dark:text-emerald-400">{t("inventory.qtyIn", "Qty in")}</th>
+                          <th className="px-4 py-3 text-right text-red-600 dark:text-red-400">{t("inventory.qtyOut", "Qty out")}</th>
+                          {isSuperAdmin ? <th className="px-4 py-3 text-right">{t("inventory.unitCost", "Cost/unit")}</th> : null}
+                          <th className="px-4 py-3 text-right">{t("inventory.unitPrice", "Sell/unit")}</th>
+                          <th className="px-4 py-3 text-right">{t("inventory.balance", "Balance")}</th>
+                          <th className="px-4 py-3 text-left">{t("inventory.ref", "Ref")}</th>
+                          <th className="px-4 py-3 text-center">{t("inventory.details", "Details")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -433,10 +459,10 @@ export default function StockSkuDetailModal({
                           <tr>
                             <td colSpan={isSuperAdmin ? 9 : 8} className="bg-white px-4 py-10 text-center text-slate-500 dark:bg-slate-950/20">
                               {movementHasFilters
-                                ? "No movements match your search or date range."
+                                ? t("inventory.noMovementsMatchFilters", "No movements match your search or date range.")
                                 : hasDateRange
-                                  ? "No purchase or sale movements in the selected date range."
-                                  : "No movements recorded for this SKU yet."}
+                                  ? t("inventory.noMovementsDateRange", "No purchase or sale movements in the selected date range.")
+                                  : t("inventory.noMovementsRecorded", "No movements recorded for this SKU yet.")}
                             </td>
                           </tr>
                         ) : (
@@ -502,7 +528,7 @@ export default function StockSkuDetailModal({
             onClick={onClose}
             className="inline-flex h-8 items-center rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
-            Close
+            {t("common.actions.close", "Close")}
           </button>
           <Link
             to={`/admin/products?edit=${row.product_id}`}
@@ -510,7 +536,7 @@ export default function StockSkuDetailModal({
             className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[color:var(--admin-primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
           >
             <Pencil className="h-4 w-4" aria-hidden />
-            Edit product
+            {t("inventory.editProduct", "Edit product")}
           </Link>
         </footer>
       </div>

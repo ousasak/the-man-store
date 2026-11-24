@@ -1,28 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import api from "../../lib/api";
 import { useTheme } from "../../state/theme.jsx";
+import { useLanguage } from "../../lib/i18n.jsx";
 import { closeSwal, errorAlert, loadingAlert, toastSuccess } from "../../lib/swal";
 import { getAdminValidationMessage } from "../../lib/adminValidation.js";
 import AdminSearchSelect from "./AdminSearchSelect.jsx";
-
-const GENDER_OPTIONS = [
-  { value: "", label: "All Genders" },
-  { value: "MEN", label: "Men" },
-  { value: "WOMEN", label: "Women" },
-  { value: "BOY", label: "Boy" },
-  { value: "GIRL", label: "Girl" },
-];
-
-const CATEGORY_TYPE_OPTIONS = [
-  { value: "", label: "Select type" },
-  { value: "clothes", label: "Clothes" },
-  { value: "shoes", label: "Shoes" },
-  { value: "belt", label: "Belt" },
-  { value: "hat", label: "Hat" },
-  { value: "bag", label: "Bag" },
-  { value: "accessory", label: "Accessory" },
-  { value: "other", label: "Other" },
-];
 
 const EMPTY = { name: "", gender: "", type: "", is_active: true };
 
@@ -31,11 +13,37 @@ const fieldClass =
 
 export default function CategoryCreateForm({ onSuccess, onCancel, showToast = true }) {
   const { primaryColor, mode } = useTheme();
+  const { t } = useLanguage();
   const accentColor = primaryColor;
   const accentIsWhite = (accentColor || "").toUpperCase() === "#FFFFFF";
   const [form, setForm] = useState(EMPTY);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+
+  const genderOptions = useMemo(
+    () => [
+      { value: "", label: t("categories.gender.allGenders", "All Genders") },
+      { value: "MEN", label: t("categories.gender.men", "Men") },
+      { value: "WOMEN", label: t("categories.gender.women", "Women") },
+      { value: "BOY", label: t("categories.gender.boy", "Boy") },
+      { value: "GIRL", label: t("categories.gender.girl", "Girl") },
+    ],
+    [t],
+  );
+
+  const typeOptions = useMemo(
+    () => [
+      { value: "", label: t("categories.type.selectType", "Select type") },
+      { value: "clothes", label: t("categories.type.clothes", "Clothes") },
+      { value: "shoes", label: t("categories.type.shoes", "Shoes") },
+      { value: "belt", label: t("categories.type.belt", "Belt") },
+      { value: "hat", label: t("categories.type.hat", "Hat") },
+      { value: "bag", label: t("categories.type.bag", "Bag") },
+      { value: "accessory", label: t("categories.type.accessory", "Accessory") },
+      { value: "other", label: t("categories.type.other", "Other") },
+    ],
+    [t],
+  );
 
   const create = async (e) => {
     e.preventDefault();
@@ -43,9 +51,9 @@ export default function CategoryCreateForm({ onSuccess, onCancel, showToast = tr
     setCreateError("");
     setIsCreating(true);
     loadingAlert({
-      khTitle: "កំពុងបង្កើតប្រភេទ",
+      khTitle: t("categories.messages.creating", "កំពុងបង្កើតប្រភេទទំនិញ"),
       enTitle: "Creating category",
-      khText: "សូមរង់ចាំបន្តិច",
+      khText: t("categories.messages.pleaseWait", "សូមរង់ចាំបន្តិច"),
       enText: "Please wait",
     });
     try {
@@ -62,7 +70,7 @@ export default function CategoryCreateForm({ onSuccess, onCancel, showToast = tr
       closeSwal();
       if (showToast) {
         await toastSuccess({
-          khText: "បានបង្កើតប្រភេទដោយជោគជ័យ",
+          khText: t("categories.messages.created", "បានបង្កើតប្រភេទដោយជោគជ័យ"),
           enText: "Category created!",
         });
       }
@@ -73,7 +81,7 @@ export default function CategoryCreateForm({ onSuccess, onCancel, showToast = tr
       const slugHint = String(detail).toLowerCase().includes("slug") ? `សូមបំពេញ Slug - ${detail}` : detail;
       setCreateError(slugHint);
       await errorAlert({
-        khTitle: "បង្កើតប្រភេទបរាជ័យ",
+        khTitle: t("categories.messages.createFailed", "បង្កើតប្រភេទបរាជ័យ"),
         enTitle: "Create failed",
         detail: slugHint,
       });
@@ -86,42 +94,50 @@ export default function CategoryCreateForm({ onSuccess, onCancel, showToast = tr
   return (
     <form onSubmit={create} className="grid md:grid-cols-12 gap-4 items-end">
       <label className="md:col-span-6">
-        <span className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Category Name</span>
+        <span className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+          {t("categories.form.name", "Category Name")}
+        </span>
         <input
           value={form.name}
           onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))}
           required
           className={fieldClass}
-          placeholder="e.g., Summer Collection"
+          placeholder={t("categories.form.namePlaceholder", "e.g., Summer Collection")}
         />
       </label>
 
       <label className="md:col-span-3">
-        <span className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Gender (Optional)</span>
+        <span className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+          {t("categories.form.genderOptional", "Gender (Optional)")}
+        </span>
         <AdminSearchSelect
           value={form.gender}
           onChange={(v) => setForm((s) => ({ ...s, gender: v }))}
-          options={GENDER_OPTIONS}
+          options={genderOptions}
           inputClassName={fieldClass}
-          placeholder="Search gender…"
-          ariaLabel="Gender"
+          placeholder={t("categories.form.searchGender", "Search gender…")}
+          ariaLabel={t("categories.form.gender", "Gender")}
         />
       </label>
 
       <label className="md:col-span-3">
-        <span className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Category Type</span>
+        <span className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+          {t("categories.form.type", "Category Type")}
+        </span>
         <AdminSearchSelect
           value={form.type}
           onChange={(v) => setForm((s) => ({ ...s, type: v }))}
-          options={CATEGORY_TYPE_OPTIONS}
+          options={typeOptions}
           inputClassName={fieldClass}
-          placeholder="Search type…"
-          ariaLabel="Category type"
+          placeholder={t("categories.form.searchType", "Search type…")}
+          ariaLabel={t("categories.form.typeAria", "Category type")}
         />
       </label>
 
       <label className="md:col-span-6 flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3">
-        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Active Status</span>
+        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {t("categories.form.activeStatus", "Active Status")}
+        </span>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -135,7 +151,7 @@ export default function CategoryCreateForm({ onSuccess, onCancel, showToast = tr
             />
           </button>
           <span className="text-sm font-medium text-black dark:text-white min-w-[30px] text-right">
-            {form.is_active ? "Yes" : "No"}
+            {form.is_active ? t("categories.form.yes", "Yes") : t("categories.form.no", "No")}
           </span>
         </div>
       </label>
@@ -153,7 +169,7 @@ export default function CategoryCreateForm({ onSuccess, onCancel, showToast = tr
             disabled={isCreating}
             className="h-12 px-5 rounded-xl border border-slate-300 dark:border-slate-600 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-60"
           >
-            Cancel
+            {t("common.actions.cancel", "Cancel")}
           </button>
         ) : null}
         <button
@@ -166,7 +182,7 @@ export default function CategoryCreateForm({ onSuccess, onCancel, showToast = tr
             borderColor: accentIsWhite ? "#cbd5e1" : accentColor,
           }}
         >
-          {isCreating ? "Creating..." : "Add Category"}
+          {isCreating ? t("categories.form.creating", "Creating...") : t("categories.form.addCategory", "Add Category")}
         </button>
       </div>
     </form>

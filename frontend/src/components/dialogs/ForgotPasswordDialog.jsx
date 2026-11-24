@@ -12,6 +12,7 @@ import {
 } from "../../lib/auth-api";
 import { getDeviceMeta } from "../../lib/device";
 import { formatOtpNotice } from "../auth/AuthDialogShared";
+import { useLanguage } from "../../lib/i18n.jsx";
 
 const INPUT_CLASS =
   "h-14 w-full rounded-none border border-slate-200 bg-slate-50/60 pl-11 pr-4 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0F172A] focus:bg-white focus:ring-2 focus:ring-[#0F172A]/15";
@@ -40,6 +41,7 @@ function ErrorBox({ message }) {
 }
 
 export default function ForgotPasswordDialog({ isOpen, onClose }) {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [step, setStep] = useState("email");
   const [challengeToken, setChallengeToken] = useState("");
@@ -167,19 +169,19 @@ export default function ForgotPasswordDialog({ isOpen, onClose }) {
   };
 
   const stepTitle = {
-    email: "Reset your password",
-    method: "Verify your identity",
-    verify: "Enter verification code",
-    password: "Set new password",
-    done: "All done!",
+    email: t("auth.forgotPasswordTitle") || "Reset your password",
+    method: t("auth.otpVerification") || "Verify your identity",
+    verify: t("auth.otpCode") || "Enter verification code",
+    password: t("auth.resetPasswordTitle") || "Set new password",
+    done: t("common.messages.success") || "All done!",
   };
 
   const stepSubtitle = {
-    email: "Enter your registered email address to begin.",
-    method: "Choose how you'd like to verify your identity.",
-    verify: verifyKind === "otp" ? "Enter the 6-digit code sent to your email." : "Enter the code from your authenticator app.",
-    password: "Choose a strong new password for your account.",
-    done: "Your password has been updated. You can now sign in.",
+    email: t("auth.forgotPasswordSubtitle") || "Enter your registered email address to begin.",
+    method: t("auth.authOptionsDescLogin") || "Choose how you'd like to verify your identity.",
+    verify: verifyKind === "otp" ? (t("auth.otpSubtitle") || "Enter the 6-digit code sent to your email.") : (t("auth.otpSubtitle") || "Enter the code from your authenticator app."),
+    password: t("auth.resetPasswordSubtitle") || "Choose a strong new password for your account.",
+    done: t("common.messages.success") || "Your password has been updated. You can now sign in.",
   };
 
   if (!isOpen) return null;
@@ -216,7 +218,7 @@ export default function ForgotPasswordDialog({ isOpen, onClose }) {
           {step === "email" && (
             <form onSubmit={handleEmail} className="flex flex-col gap-5">
               <div>
-                <label htmlFor="fpd-email" className={LABEL_CLASS}>Email address</label>
+                <label htmlFor="fpd-email" className={LABEL_CLASS}>{t("auth.email") || "Email address"}</label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden />
                   <input
@@ -226,17 +228,17 @@ export default function ForgotPasswordDialog({ isOpen, onClose }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={INPUT_CLASS}
-                    placeholder="you@example.com"
+                    placeholder={t("auth.emailPlaceholder") || "you@example.com"}
                     required
                   />
                 </div>
               </div>
               <button type="submit" disabled={loading} className={BTN_PRIMARY}>
-                {loading ? "Continuing…" : "Continue"}
+                {loading ? (t("auth.sending") || "Continuing…") : (t("common.actions.continue") || "Continue")}
               </button>
               <button type="button" onClick={handleClose} className="flex items-center justify-center gap-1.5 text-sm font-medium text-slate-500 hover:text-[#38554a] transition-colors">
                 <ArrowLeft className="h-4 w-4" />
-                Back to login
+                {t("auth.backToLogin") || "Back to login"}
               </button>
             </form>
           )}

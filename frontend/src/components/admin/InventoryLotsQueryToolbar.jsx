@@ -1,12 +1,16 @@
 import React from "react";
+import { useTranslation } from "../../lib/i18n.jsx";
 import { ADMIN_LIST_FIELD_CLASS, adminListFiltersActive } from "../../lib/adminListQuery.js";
 import { mapIdLabelOptions } from "../../lib/adminSelectHelpers.js";
 import {
   LOT_LISTING_STATUS_FILTER_OPTIONS,
   LOT_TIER_FILTER_OPTIONS,
+  getLotListingStatusFilterOptions,
+  getLotTierFilterOptions,
 } from "../../lib/inventoryLotHelpers.js";
 import { useAdminSidebarPinned } from "../../lib/useAdminSidebarPinned.js";
 import AdminSearchSelect from "./AdminSearchSelect.jsx";
+import AdminDatePicker from "./AdminDatePicker.jsx";
 
 function formatCount(value) {
   return new Intl.NumberFormat("en-US").format(Number(value) || 0);
@@ -35,6 +39,7 @@ export default function InventoryLotsQueryToolbar({
   loading = false,
   onClearFilters,
 }) {
+  const { t } = useTranslation();
   const hasDateRangeFilter = Boolean(fromDate || toDate);
   const filtersActive = adminListFiltersActive({
     search,
@@ -57,47 +62,47 @@ export default function InventoryLotsQueryToolbar({
           type="search"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={sidebarPinned ? "Search product, SKU, lot, barcode, season…" : "Search product, SKU, lot…"}
+          placeholder={sidebarPinned ? t("inventory.searchLotsPlaceholder") : (t("inventory.searchLotsPlaceholder") || "Search product, SKU, lot…")}
           className={searchClass}
-          aria-label="Search inventory lots"
+          aria-label={t("inventory.searchLotsPlaceholder")}
         />
         <AdminSearchSelect
           value={statusFilter}
           onChange={onStatusFilterChange}
-          options={mapIdLabelOptions(LOT_LISTING_STATUS_FILTER_OPTIONS)}
-          ariaLabel="Filter by listing status"
+          options={mapIdLabelOptions(getLotListingStatusFilterOptions(t))}
+          ariaLabel={t("inventory.filterByListingStatus", "Filter by listing status")}
           inputClassName={`${field} h-10 w-full min-w-[8.5rem] sm:w-[9.5rem]`}
           className="w-full min-w-[8.5rem] sm:w-[9.5rem]"
-          placeholder="Search status…"
+          placeholder={t("inventory.searchStatus", "Search status…")}
           allowEmpty={false}
         />
         <AdminSearchSelect
           value={lotTierFilter}
           onChange={onLotTierFilterChange}
-          options={mapIdLabelOptions(LOT_TIER_FILTER_OPTIONS)}
-          ariaLabel="Filter by lot tier"
+          options={mapIdLabelOptions(getLotTierFilterOptions(t))}
+          ariaLabel={t("inventory.filterByLotTier", "Filter by lot tier")}
           inputClassName={`${field} h-10 w-full min-w-[8.5rem] sm:w-[9.5rem]`}
           className="w-full min-w-[8.5rem] sm:w-[9.5rem]"
-          placeholder="Search tier…"
+          placeholder={t("inventory.searchTier", "Search tier…")}
           allowEmpty={false}
         />
-        <input
-          type="date"
+        <AdminDatePicker
           value={fromDate}
-          onChange={(e) => onFromDateChange(e.target.value)}
+          onChange={onFromDateChange}
           max={toDate || undefined}
-          className={`${field} h-10 w-full min-w-[9.5rem] sm:w-[10.5rem]`}
-          aria-label="From date"
-          title="From date"
+          wrapperClassName="w-full min-w-[8.5rem] sm:w-[10.5rem]"
+          className={`${field} h-10 w-full min-w-[8.5rem] sm:w-[10.5rem]`}
+          ariaLabel={t("common.fromDate", "From date")}
+          placeholder={t("common.fromDate", "From date")}
         />
-        <input
-          type="date"
+        <AdminDatePicker
           value={toDate}
-          onChange={(e) => onToDateChange(e.target.value)}
+          onChange={onToDateChange}
           min={fromDate || undefined}
-          className={`${field} h-10 w-full min-w-[9.5rem] sm:w-[10.5rem]`}
-          aria-label="To date"
-          title="To date"
+          wrapperClassName="w-full min-w-[8.5rem] sm:w-[10.5rem]"
+          className={`${field} h-10 w-full min-w-[8.5rem] sm:w-[10.5rem]`}
+          ariaLabel={t("common.toDate", "To date")}
+          placeholder={t("common.toDate", "To date")}
         />
         <label className="inline-flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
           <input
@@ -106,43 +111,45 @@ export default function InventoryLotsQueryToolbar({
             checked={inStockOnly}
             onChange={(e) => onInStockOnlyChange(e.target.checked)}
           />
-          Hide sold-out lots
+          {t("inventory.hideSoldOutLots")}
         </label>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
           <span>
-            Showing{" "}
+            {t("common.showing", "Showing")}{" "}
             <span className="font-semibold tabular-nums text-slate-700 dark:text-slate-200">
               {loading ? "…" : formatCount(showingCount)}
             </span>{" "}
-            of <span className="font-semibold tabular-nums">{formatCount(totalCount)}</span>
-            {filtersActive ? " (filtered)" : ""}
+            {t("common.of", "of")} <span className="font-semibold tabular-nums">{formatCount(totalCount)}</span>
+            {filtersActive ? ` (${t("common.filtered", "filtered")})` : ""}
           </span>
           <span className="hidden text-slate-300 sm:inline dark:text-slate-600">·</span>
           <span>
-            On hand <span className="font-semibold tabular-nums text-slate-700 dark:text-slate-200">{formatCount(onHand)}</span>
+            {t("inventory.onHand")}{" "}
+            <span className="font-semibold tabular-nums text-slate-700 dark:text-slate-200">{formatCount(onHand)}</span>
             {" · "}
-            Sold <span className="font-semibold tabular-nums text-slate-700 dark:text-slate-200">{formatCount(sold)}</span>
+            {t("inventory.sold")}{" "}
+            <span className="font-semibold tabular-nums text-slate-700 dark:text-slate-200">{formatCount(sold)}</span>
           </span>
           {hasDateRangeFilter ? (
             <>
               <span className="hidden text-slate-300 sm:inline dark:text-slate-600">·</span>
               <span>
-                Received{" "}
+                {t("inventory.received")}{" "}
                 {fromDate && toDate
                   ? `${fromDate} – ${toDate}`
                   : fromDate
-                    ? `from ${fromDate}`
-                    : `to ${toDate}`}
+                    ? `${t("common.from", "from")} ${fromDate}`
+                    : `${t("common.to", "to")} ${toDate}`}
               </span>
             </>
           ) : null}
           {!inStockOnly ? (
             <>
               <span className="hidden text-slate-300 sm:inline dark:text-slate-600">·</span>
-              <span className="font-medium text-slate-600 dark:text-slate-300">Including sold-out</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">{t("inventory.includingSoldOut")}</span>
             </>
           ) : null}
         </p>
@@ -152,7 +159,7 @@ export default function InventoryLotsQueryToolbar({
             onClick={onClearFilters}
             className="shrink-0 font-semibold text-[color:var(--admin-primary)] hover:underline"
           >
-            Clear filters
+            {t("inventory.clearFilters")}
           </button>
         ) : null}
       </div>

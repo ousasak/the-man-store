@@ -3,6 +3,7 @@ import { Lock, Mail, User } from "lucide-react";
 import { useAuth } from "../../state/auth";
 import { useHomepageSettings } from "../../state/homepageSettings.jsx";
 import { resolveBackendOrigin } from "../../lib/backendOrigin";
+import { useLanguage } from "../../lib/i18n.jsx";
 import { Dialog } from "../ui/Dialog";
 import {
   AuthDialogShell,
@@ -21,6 +22,7 @@ import {
 } from "../auth/AuthDialogShared";
 
 export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
+  const { t } = useLanguage();
   const { settings } = useHomepageSettings();
   const [countryCode, setCountryCode] = useState("+855");
   const [phoneLocal, setPhoneLocal] = useState("");
@@ -225,14 +227,14 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                 onContinue={handleContinue}
               />
               <AuthFooterLink>
-                Already have an account?{" "}
+                {t("auth.alreadyHaveAccount") || "Already have an account?"}{" "}
                 <AuthTextButton
                   onClick={() => {
                     onClose();
                     onSwitchToLogin();
                   }}
                 >
-                  Login
+                  {t("auth.login") || "Login"}
                 </AuthTextButton>
               </AuthFooterLink>
             </>
@@ -253,7 +255,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
           {!otpMode && step === "email" ? (
             <>
               <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-6">
-                <AuthField id="register-name" label="Full name" icon={User}>
+                <AuthField id="register-name" label={t("auth.name") || "Full name"} icon={User}>
                   <input
                     id="register-name"
                     name="name"
@@ -261,13 +263,13 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                     autoComplete="name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="John Doe"
+                    placeholder={t("auth.namePlaceholder") || "John Doe"}
                     className={AUTH_INPUT}
                     required
                   />
                 </AuthField>
 
-                <AuthField id="register-email" label="Email" icon={Mail}>
+                <AuthField id="register-email" label={t("auth.email") || "Email"} icon={Mail}>
                   <input
                     id="register-email"
                     name="email"
@@ -275,7 +277,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                     autoComplete="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="you@example.com"
+                    placeholder={t("auth.emailPlaceholder") || "you@example.com"}
                     className={AUTH_INPUT}
                     required
                   />
@@ -283,14 +285,14 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
 
                 <AuthPhoneField
                   id="register-phone"
-                  label="Phone (optional)"
+                  label={t("auth.phone") || "Phone"}
                   countryCode={countryCode}
                   onCountryCodeChange={setCountryCode}
                   value={phoneLocal}
                   onChange={(e) => setPhoneLocal(e.target.value)}
                 />
 
-                <AuthField id="register-password" label="Password" icon={Lock}>
+                <AuthField id="register-password" label={t("auth.password") || "Password"} icon={Lock}>
                   <input
                     id="register-password"
                     name="password"
@@ -298,14 +300,14 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                     autoComplete="new-password"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder="At least 8 characters"
+                    placeholder={t("auth.passwordPlaceholder") || "At least 8 characters"}
                     className={AUTH_INPUT}
                     required
                     minLength={8}
                   />
                 </AuthField>
 
-                <AuthField id="register-password-confirm" label="Confirm password" icon={Lock}>
+                <AuthField id="register-password-confirm" label={t("auth.confirmPassword") || "Confirm password"} icon={Lock}>
                   <input
                     id="register-password-confirm"
                     name="password_confirmation"
@@ -313,7 +315,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                     autoComplete="new-password"
                     value={form.password_confirmation}
                     onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
-                    placeholder="Repeat your password"
+                    placeholder={t("auth.confirmPasswordPlaceholder") || "Repeat your password"}
                     className={AUTH_INPUT}
                     required
                     minLength={8}
@@ -323,7 +325,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                 <AuthError message={error} />
 
                 <button type="submit" disabled={loading} className={AUTH_PRIMARY_BTN}>
-                  {loading ? "Registering…" : "Register"}
+                  {loading ? (t("auth.registering") || "Registering…") : (t("auth.register") || "Register")}
                 </button>
               </form>
 
@@ -334,7 +336,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                     setStep("choose");
                   }}
                 >
-                  ← Back to options
+                  {t("auth.backToOptions") || "← Back to options"}
                 </AuthTextButton>
               </AuthFooterLink>
             </>
@@ -343,7 +345,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
           {otpMode ? (
             <form onSubmit={handleVerifyOtp} className="mt-7 flex flex-col gap-6">
               <OtpDeliveryNotice message={otpNotice} emailSent={otpEmailSent} />
-              <AuthField id="register-otp-code" label="Verification code" icon={Lock}>
+              <AuthField id="register-otp-code" label={t("auth.otpCode") || "Verification code"} icon={Lock}>
                 <input
                   id="register-otp-code"
                   name="otp_code"
@@ -352,14 +354,14 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                   autoComplete="one-time-code"
                   value={otpForm.code}
                   onChange={(e) => setOtpForm({ ...otpForm, code: e.target.value })}
-                  placeholder="6-digit code"
+                  placeholder={t("auth.otpPlaceholder") || "6-digit code"}
                   className={AUTH_INPUT}
                   required
                 />
               </AuthField>
               <AuthError message={error} />
               <button type="submit" disabled={loading} className={AUTH_PRIMARY_BTN}>
-                {loading ? "Verifying…" : "Verify email"}
+                {loading ? (t("auth.verifying") || "Verifying…") : (t("auth.verifyAndRegister") || "Verify email")}
               </button>
               <button
                 type="button"
@@ -367,7 +369,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                 disabled={loading}
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-60"
               >
-                Resend code
+                {t("auth.resendCode") || "Resend code"}
               </button>
               <AuthTextButton
                 onClick={() => {
@@ -377,7 +379,7 @@ export default function RegisterDialog({ isOpen, onClose, onSwitchToLogin }) {
                   setStep("email");
                 }}
               >
-                ← Back to register
+                {t("auth.backToLogin") || "← Back to register"}
               </AuthTextButton>
             </form>
           ) : null}

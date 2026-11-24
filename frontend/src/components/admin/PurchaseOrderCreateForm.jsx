@@ -5,10 +5,12 @@ import api from "../../lib/api";
 import { loadPoApplyProduct, loadPoCreateDraft } from "../../lib/poCreateBridge.js";
 import AdminModal from "./AdminModal.jsx";
 import AdminSearchSelect from "./AdminSearchSelect.jsx";
+import AdminDatePicker from "./AdminDatePicker.jsx";
 import { mapIdLabelOptions } from "../../lib/adminSelectHelpers.js";
-import AdminProducts from "../../pages/admin/Products.jsx";
+import AdminProducts from "../../pages/admin/catalog/Products.jsx";
 import { useTheme } from "../../state/theme.jsx";
 import { useAuth } from "../../state/auth.jsx";
+import { useTranslation } from "../../lib/i18n.jsx";
 import { getAdminValidationMessage } from "../../lib/adminValidation.js";
 import { QUICK_CREATE_OPTION } from "./FieldWithQuickCreate.jsx";
 import SupplierCreateForm from "./SupplierCreateForm.jsx";
@@ -175,6 +177,7 @@ export default function PurchaseOrderCreateForm({
   nextPoNumber = "",
   orderToEdit = null,
 }) {
+  const { t } = useTranslation();
   const isEditMode = Boolean(orderToEdit?.id);
   const editOrderId = orderToEdit?.id ?? null;
   const { primaryColor, mode } = useTheme();
@@ -749,24 +752,24 @@ export default function PurchaseOrderCreateForm({
               <FieldLabel htmlFor="po-order-date" required>
                 Order Date
               </FieldLabel>
-              <input
+              <AdminDatePicker
                 id="po-order-date"
-                type="date"
-                className={`${poFieldClass} dark:[color-scheme:dark]`}
+                className={poFieldClass}
                 value={orderDate}
-                onChange={(e) => setOrderDate(e.target.value)}
+                onChange={setOrderDate}
                 required
+                placeholder="Select order date"
               />
             </div>
             <div>
               <FieldLabel htmlFor="po-expected">Expected Date</FieldLabel>
-              <input
+              <AdminDatePicker
                 id="po-expected"
-                type="date"
-                className={`${poFieldClass} dark:[color-scheme:dark]`}
+                className={poFieldClass}
                 value={expectedDelivery}
                 min={orderDate || undefined}
-                onChange={(e) => setExpectedDelivery(e.target.value)}
+                onChange={setExpectedDelivery}
+                placeholder="Select expected date"
               />
             </div>
             <div className="sm:col-span-2">
@@ -1226,7 +1229,7 @@ export default function PurchaseOrderCreateForm({
             disabled={isSaving}
             className="h-10 rounded-lg border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           >
-            Cancel
+            {t("common.actions.cancel", "Cancel")}
           </button>
           <button
             type="submit"

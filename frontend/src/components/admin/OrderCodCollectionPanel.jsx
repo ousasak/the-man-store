@@ -1,3 +1,4 @@
+import { useTranslation } from "../../lib/i18n.jsx";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../../lib/api";
@@ -47,6 +48,7 @@ export default function OrderCodCollectionPanel({
   apiScope = "admin",
   apiClient,
 }) {
+  const { t, language } = useTranslation();
   const http = apiClient || api;
   const orderBase = apiScope === "driver" ? `/driver/orders/${order?.id}` : `/admin/orders/${order?.id}`;
   const [quote, setQuote] = useState(null);
@@ -376,15 +378,15 @@ export default function OrderCodCollectionPanel({
     return (
       <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/90 p-4 dark:border-emerald-800/50 dark:bg-emerald-950/25">
         <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-100">
-          COD — បានបង់រួច / Paid on delivery
+          {t("sales.codPaidOnDelivery", "COD — Paid on delivery")}
         </h4>
         <div className="mt-2 space-y-1 text-sm text-emerald-800 dark:text-emerald-200">
           <p>
-            <span className="font-semibold">របៀបប្រមូល / Channel:</span>{" "}
+            <span className="font-semibold">{t("sales.collectionChannel", "Channel:")}</span>{" "}
             {paidSettlement.channelKm || paidSettlement.channelEn}
           </p>
           <p>
-            <span className="font-semibold">លម្អិត / Settlement:</span>{" "}
+            <span className="font-semibold">{t("sales.settlement", "Settlement:")}</span>{" "}
             {paidSettlement.labelKm}
           </p>
           {paidSettlement.qrBank ? (
@@ -394,29 +396,29 @@ export default function OrderCodCollectionPanel({
           ) : null}
           {paidSettlement.remittanceToShop === "pending" ? (
             <p className="text-amber-800 dark:text-amber-200">
-              អ្នកដឹកនឹងបង់មកហាងផ្ទាល់ / Driver still remits this amount to the shop.
+              {t("sales.driverRemitsPending", "Driver still remits this amount to the shop.")}
             </p>
           ) : null}
           {paidSettlement.actualLabel ? (
             <p>
-              <span className="font-semibold">ចំនួនទទួលពិត / Received:</span>{" "}
+              <span className="font-semibold">{t("sales.receivedAmount", "Received:")}</span>{" "}
               {paidSettlement.actualLabel}
               {showAmountMismatch && paidSettlement.expectedLabel ? (
                 <span className="ml-1 text-amber-700 dark:text-amber-300">
-                  (ត្រូវបង់ {paidSettlement.expectedLabel})
+                  ({t("sales.expectedToPay", "Expected:")} {paidSettlement.expectedLabel})
                 </span>
               ) : null}
             </p>
           ) : null}
           {paidSettlement.courierName ? (
             <p>
-              <span className="font-semibold">អ្នកដឹក / Courier:</span>{" "}
+              <span className="font-semibold">{t("sales.courier", "Courier:")}</span>{" "}
               {paidSettlement.courierName}
             </p>
           ) : null}
           {paidSettlement.notes ? (
             <p>
-              <span className="font-semibold">កំណត់ហតុ / Notes:</span>{" "}
+              <span className="font-semibold">{t("sales.notes", "Notes:")}</span>{" "}
               {paidSettlement.notes}
             </p>
           ) : null}
@@ -430,73 +432,73 @@ export default function OrderCodCollectionPanel({
   return (
     <div className="mb-6 rounded-2xl border-2 border-amber-300/60 bg-amber-50/80 p-4 dark:border-amber-500/40 dark:bg-amber-950/20">
       <h4 className="text-sm font-bold text-amber-900 dark:text-amber-100">
-        COD — ជម្រើសអ្នកដឹក / Driver payment
+        {t("sales.codTitle", "COD — Driver payment")}
       </h4>
       <p className="mt-1 text-xs text-amber-800/90 dark:text-amber-200/80">
-        ជម្រើសទី១៖ អ្នកដឹកស្កេន QR ហាងនៅហាង។ ជម្រើសទី២៖ បង់ពេលដឹកដល់ — QR នៅក្នុង Telegram bot អ្នកដឹក។ Customer មិនត្រូវឃើញការកាត់ថ្លៃដឹកទេ។
+        {t("sales.codDesc", "Option 1: Driver scans shop QR. Option 2: Pay on delivery — QR inside driver Telegram bot.")}
       </p>
       <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
-        <span>Customer បង់ / Due: {usdLabel}</span>
+        <span>{t("sales.customerDue", "Customer Due:")} {usdLabel}</span>
         <span>≈ {khrLabel}</span>
         {quote?.exchange_rate ? <span>({quote.exchange_rate} ៛/USD)</span> : null}
         {goodsLabel && shippingLabel && Number(quote?.shipping_usd) > 0 ? (
-          <span>ទំនិញ {goodsLabel} + ដឹក {shippingLabel}</span>
+          <span>{t("sales.itemsAndShipping", "Items {items} + Shipping {shipping}", { items: goodsLabel, shipping: shippingLabel })}</span>
         ) : null}
       </div>
 
       {savedPlan === "collect_at_delivery" ? (
         <p className="mt-3 rounded-lg border border-amber-400/50 bg-white/70 px-3 py-2 text-xs text-amber-900 dark:bg-slate-900/60 dark:text-amber-100">
-          ផែនការ: Customer បង់ QR អ្នកដឹក {usdLabel}។ អ្នកដឹកបង់មកហាង {remitLabel || goodsLabel} តាម Telegram (កាត់ថ្លៃដឹក {shippingLabel})។ Customer មិនឃើញការបង់នេះទេ។
+          {t("sales.codPlanCollectAtDeliveryDesc", "Plan: Customer pays driver QR {usd}. Driver remits {remit} via Telegram (shipping fee {shipping} deducted). Customer does not see this.", { usd: usdLabel, remit: remitLabel || goodsLabel, shipping: shippingLabel })}
         </p>
       ) : null}
       {savedPlan === "customer_pays_shop" ? (
         <p className="mt-3 rounded-lg border border-emerald-400/50 bg-white/70 px-3 py-2 text-xs text-emerald-900 dark:bg-slate-900/60 dark:text-emerald-100">
-          ផែនការ: ហាងចេញថ្លៃដឹករួច។ អ្នកដឹកបង្កើត QR ហាងក្នុង Telegram អោយ Customer ស្កេនពេញ {usdLabel} មកហាង។
+          {t("sales.codPlanCustomerPaysShopDesc", "Plan: Shop covered shipping. Driver generates shop QR in Telegram for customer to scan full {usd} to shop.", { usd: usdLabel })}
         </p>
       ) : null}
 
       {canEdit ? (
         <>
           <p className="mt-4 text-xs font-bold uppercase tracking-wide text-slate-600 dark:text-slate-300">
-            ជម្រើស — Driver options
+            {t("sales.driverOptions", "Driver options")}
           </p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <ChoiceButton
               selected={plan === "driver_advance"}
               disabled={loading}
               onClick={() => { setPlan("driver_advance"); setAdvancePay(null); setKhqr(null); setPolling(false); }}
-              title="ជម្រើសទី១ — Driver បង់ឥឡូវ"
-              subtitle="ចេញលុយអោយ Customer សិន · QR (ABA, AC…) ឬ លុយសុទ្ធ"
+              title={t("sales.codOptionDriverAdvance", "Option 1: Driver pays now")}
+              subtitle={t("sales.codOptionDriverAdvanceDesc", "Advance payment for customer · QR or Cash")}
             />
             <ChoiceButton
               selected={isDeliveryPlan}
               disabled={loading}
               accent="red"
               onClick={() => { setPlan("collect_at_delivery"); setAdvancePay(null); setKhqr(null); setPolling(false); }}
-              title="ជម្រើសទី២ — បង់ពេលដឹកដល់"
-              subtitle="ប្រមូលពី Customer ឬ Customer ស្កេន QR ហាងក្នុង Telegram"
+              title={t("sales.codOptionDelivery", "Option 2: Pay on delivery")}
+              subtitle={t("sales.codOptionDeliveryDesc", "Collect from customer or customer scans shop QR in Telegram")}
             />
           </div>
 
           {plan === "driver_advance" ? (
             <div className="mt-4 space-y-3">
               <p className="text-xs font-bold uppercase tracking-wide text-slate-600 dark:text-slate-300">
-                Driver បង់តាម / How the driver paid
+                {t("sales.driverPaidVia", "How the driver paid")}
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <ChoiceButton
                   selected={advancePay === "qr"}
                   disabled={loading}
                   onClick={() => startShopQr("driver_advance")}
-                  title="QR (ABA, ACLEDA…)"
-                  subtitle="ហាងបង្ហាញ QR — អ្នកដឹកស្កេន"
+                  title={t("sales.codPaidByQr", "QR (ABA, ACLEDA…)")}
+                  subtitle={t("sales.codPaidByQrDesc", "Shop shows QR — Driver scans")}
                 />
                 <ChoiceButton
                   selected={advancePay === "cash"}
                   disabled={loading}
                   onClick={() => { setAdvancePay("cash"); }}
-                  title="លុយសុទ្ធ"
-                  subtitle="កន្លែង Manual — Driver អោយជាលុយសុទ្ធ"
+                  title={t("sales.codPaidByCash", "Cash")}
+                  subtitle={t("sales.codPaidByCashDesc", "Manual settlement — Driver gives cash")}
                 />
               </div>
 
@@ -504,15 +506,15 @@ export default function OrderCodCollectionPanel({
                 <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-slate-900">
                   <DriverScanWait
                     waiting={waitingForDriverScan || polling}
-                    title="QR ហាង — អ្នកដឹកជាអ្នកស្កេន"
-                    body="ហាងមិនស្កេនទេ។ បង្ហាញ QR ខាងក្រោមអោយអ្នកដឹកស្កេនតាម ABA / ACLEDA / Wing។ ប្រព័ន្ធកត់ថា បានបង់ដោយអ្នកដឹកជា QR (ធនាគារនោះ)។"
+                    title={t("sales.shopQrDriverScans", "Shop QR — Driver scans")}
+                    body={t("sales.shopQrDriverScansBody", "The shop does not scan. Show the QR below for the driver to scan with ABA / ACLEDA / Wing. System records payment by driver via QR.")}
                   />
                   <NotesAndCourier
                     courierName={courierName}
                     setCourierName={setCourierName}
                     notes={notes}
                     setNotes={setNotes}
-                    notesPlaceholder="ឧ. បានផ្ទេរ ម៉ោង ៧..."
+                    notesPlaceholder={t("sales.notesExampleTime", "e.g. Transferred at 7 AM...")}
                   />
                 </div>
               ) : null}
@@ -520,7 +522,7 @@ export default function OrderCodCollectionPanel({
               {advancePay === "cash" ? (
                 <div className="space-y-3 rounded-xl border border-dashed border-amber-400 bg-white p-4 dark:border-amber-500/50 dark:bg-slate-900">
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-600 dark:text-slate-300">
-                    Manual — Driver អោយជាលុយសុទ្ធ
+                    {t("sales.manualDriverCash", "Manual — Driver gives cash")}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <button
@@ -532,7 +534,7 @@ export default function OrderCodCollectionPanel({
                           : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-950"
                         }`}
                     >
-                      <span className="block text-sm font-bold">ដុល្លារ (USD)</span>
+                      <span className="block text-sm font-bold">{t("sales.usdCurrency", "USD ($)")}</span>
                       <span className="block text-xs text-slate-500">{usdLabel}</span>
                     </button>
                     <button
@@ -544,13 +546,13 @@ export default function OrderCodCollectionPanel({
                           : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-950"
                         }`}
                     >
-                      <span className="block text-sm font-bold">រៀល (KHR)</span>
+                      <span className="block text-sm font-bold">{t("sales.khrCurrency", "KHR (៛)")}</span>
                       <span className="block text-xs text-slate-500">{khrLabel}</span>
                     </button>
                   </div>
                   <label className="block">
                     <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                      ចំនួនលុយសុទ្ធ / Cash amount
+                      {t("sales.cashAmount", "Cash amount")}
                     </span>
                     <input
                       type="number"
@@ -566,7 +568,7 @@ export default function OrderCodCollectionPanel({
                     setCourierName={setCourierName}
                     notes={notes}
                     setNotes={setNotes}
-                    notesPlaceholder="ឧ. Driver អោយលុយសុទ្ធនៅហាង..."
+                    notesPlaceholder={t("sales.notesExampleCashAtShop", "e.g. Driver paid cash at shop...")}
                   />
                   <button
                     type="button"
@@ -589,7 +591,7 @@ export default function OrderCodCollectionPanel({
                     }}
                     className="w-full rounded-xl bg-[#567D74] px-4 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
                   >
-                    កត់ត្រា: Driver អោយជាលុយសុទ្ធ
+                    {t("sales.recordDriverGivesCash", "Record: Driver gives cash")}
                   </button>
                 </div>
               ) : null}
@@ -599,33 +601,38 @@ export default function OrderCodCollectionPanel({
           {isDeliveryPlan ? (
             <div className="mt-4 space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-slate-900">
               <p className="text-xs font-bold uppercase tracking-wide text-slate-600 dark:text-slate-300">
-                ពេលដឹកដល់ / At delivery
+                {t("sales.atDelivery", "At delivery")}
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <ChoiceButton
                   selected={plan === "collect_at_delivery"}
                   disabled={loading}
                   onClick={() => saveDeliveryPlan("collect_at_delivery")}
-                  title="២ក — Customer បង់ QR អ្នកដឹក"
-                  subtitle={`Customer បង់ ${usdLabel}។ អ្នកដឹកបង់ហាង ${remitLabel || goodsLabel || usdLabel} ក្នុង Telegram (កាត់ថ្លៃដឹក ${shippingLabel || "$0"}). Customer មិនឃើញ។`}
+                  title={t("sales.codOption2aTitle", "2A — Customer pays driver QR")}
+                  subtitle={t("sales.codOption2aSub", "Customer pays {usd}. Driver remits {remit} in Telegram (shipping {shipping} deducted). Customer does not see this.", { usd: usdLabel, remit: remitLabel || goodsLabel || usdLabel, shipping: shippingLabel || "$0" })}
                 />
                 <ChoiceButton
                   selected={plan === "customer_pays_shop"}
                   disabled={loading}
                   onClick={() => saveDeliveryPlan("customer_pays_shop")}
-                  title="២ខ — ហាងចេញថ្លៃដឹករួច"
-                  subtitle={`អ្នកដឹកបង្កើត QR ហាងក្នុង Telegram។ Customer ស្កេនពេញ ${usdLabel} មកហាង។`}
+                  title={t("sales.codOption2bTitle", "2B — Shop covered shipping")}
+                  subtitle={t("sales.codOption2bSub", "Driver creates shop QR in Telegram. Customer scans full {usd} directly to shop.", { usd: usdLabel })}
                 />
               </div>
               {plan === "collect_at_delivery" ? (
                 <p className="text-sm text-slate-700 dark:text-slate-200">
-                  ឧទាហរណ៍: Customer បង់ {usdLabel} (ទំនិញ {goodsLabel} + ដឹក {shippingLabel})។
-                  ក្នុង Telegram bot អ្នកដឹកមាន QR ហាងសម្រាប់ស្កេនបង់ {remitLabel}
-                  {remitKhrLabel ? ` ≈ ${remitKhrLabel}` : ""}។ ថ្លៃដឹកនៅនឹងអ្នកដឹក។ Customer មិនត្រូវដឹងទេ។
+                  {t("sales.codOption2aExample", "Example: Customer pays {usd} (items {goods} + shipping {shipping}). Driver Telegram bot has shop QR to remit {remit}. Shipping fee stays with driver. Customer is not notified.", {
+                    usd: usdLabel,
+                    goods: goodsLabel,
+                    shipping: shippingLabel,
+                    remit: remitLabel + (remitKhrLabel ? ` ≈ ${remitKhrLabel}` : ""),
+                  })}
                 </p>
               ) : (
                 <p className="text-sm text-slate-700 dark:text-slate-200">
-                  ហាងបានចេញថ្លៃដឹករួច។ ពេលដឹកដល់ អ្នកដឹកចុចបង្កើត QR ហាងក្នុង Telegram អោយ Customer ស្កេនបង់ពេញ {usdLabel} មកហាងតែម្ដង។
+                  {t("sales.codOption2bExample", "The shop covered shipping. Upon delivery, the driver creates a shop QR in Telegram for the customer to scan full {usd} directly to the shop.", {
+                    usd: usdLabel,
+                  })}
                 </p>
               )}
               <NotesAndCourier
@@ -634,19 +641,19 @@ export default function OrderCodCollectionPanel({
                 notes={notes}
                 setNotes={setNotes}
                 notesPlaceholder={plan === "customer_pays_shop"
-                  ? "ឧ. ហាងចេញថ្លៃដឹករួច — Customer ស្កេន QR ហាង..."
-                  : "ឧ. Customer បង់ QR អ្នកដឹក រួចអ្នកដឹកស្កេន QR ហាងក្នុង Telegram..."}
+                  ? t("sales.notesExample2b", "e.g. Shop covered shipping — Customer scanned shop QR...")
+                  : t("sales.notesExample2a", "e.g. Customer paid driver QR, then driver remitted in Telegram...")}
               />
               {savedPlan === plan ? (
                 <>
                   <DriverScanWait
                     waiting={watchRemotePaid}
                     title={plan === "customer_pays_shop"
-                      ? "កំពុងរង់ចាំ Customer ស្កេន QR ហាង"
-                      : "កំពុងរង់ចាំអ្នកដឹកបង់មកហាង"}
+                      ? t("sales.waitingCustomerScanShopQr", "Waiting for customer to scan shop QR")
+                      : t("sales.waitingDriverRemitToShop", "Waiting for driver to remit to shop")}
                     body={plan === "customer_pays_shop"
-                      ? "ពេល Bakong បញ្ជាក់ ទំព័រនេះនឹងលោត Alert។ បើធនាគារទទួលរួច ចុច «បានទទួលប្រាក់ហើយ»."
-                      : "អ្នកដឹកស្កេន QR ហាងក្នុង Telegram។ ពេលហាងទទួលប្រាក់ ទំព័រនេះនឹងលោត Alert។"}
+                      ? t("sales.waitingCustomerScanShopQrBody", "When Bakong confirms, this page will alert. If bank confirmed, click 'Money received'.")
+                      : t("sales.waitingDriverRemitToShopBody", "Driver scans shop QR in Telegram. When shop receives money, this page will alert.")}
                   />
                   <div className="flex flex-col gap-2">
                     <button
@@ -655,7 +662,7 @@ export default function OrderCodCollectionPanel({
                       onClick={checkShopQrNow}
                       className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
                     >
-                      ពិនិត្យឥឡូវ / Check payment now
+                      {t("sales.checkPaymentNow", "Check payment now")}
                     </button>
                     <button
                       type="button"
@@ -663,7 +670,7 @@ export default function OrderCodCollectionPanel({
                       onClick={confirmShopQrReceived}
                       className="w-full rounded-xl bg-[#567D74] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
                     >
-                      បានទទួលប្រាក់ហើយ / Money received
+                      {t("sales.moneyReceived", "Money received")}
                     </button>
                   </div>
                 </>
@@ -678,17 +685,17 @@ export default function OrderCodCollectionPanel({
               onClick={resetChoices}
               className="mt-3 text-xs text-slate-500 underline hover:text-slate-700 dark:hover:text-slate-300"
             >
-              ប្តូរជម្រើស / Change option
+              {t("sales.changeOption", "Change option")}
             </button>
           ) : null}
         </>
       ) : (
-        <p className="mt-3 text-xs text-slate-500">You do not have permission to record COD payments.</p>
+        <p className="mt-3 text-xs text-slate-500">{t("sales.noCodPermission", "You do not have permission to record COD payments.")}</p>
       )}
 
       {khqr?.qr_string && plan === "driver_advance" ? (
         <div className="mt-4 flex flex-col items-center rounded-xl border border-[#C0272D]/30 bg-white p-4 dark:bg-slate-950">
-          <p className="text-xs font-semibold text-[#C0272D]">QR ហាង — អ្នកដឹកជាអ្នកស្កេន (ហាងមិនស្កេនទេ)</p>
+          <p className="text-xs font-semibold text-[#C0272D]">{t("sales.shopQrDriverScansOnly", "Shop QR — Driver scans (Shop does not scan)")}</p>
           <div className="mt-3 rounded-xl bg-white p-3">
             <QRCodeSVG value={khqr.qr_string} size={200} level="M" includeMargin />
           </div>
@@ -696,7 +703,7 @@ export default function OrderCodCollectionPanel({
             {khqr.amount ? Number(khqr.amount).toLocaleString() : ""} {khqr.currency || "KHR"}
           </p>
           {polling ? (
-            <p className="mt-1 text-xs text-slate-500">កំពុងរង់ចាំការបង់… / Waiting for payment…</p>
+            <p className="mt-1 text-xs text-slate-500">{t("sales.waitingForPayment", "Waiting for payment…")}</p>
           ) : null}
           {canEdit && khqr?.qr_string ? (
             <div className="mt-3 flex w-full flex-col gap-2">
@@ -706,7 +713,7 @@ export default function OrderCodCollectionPanel({
                 onClick={checkShopQrNow}
                 className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
               >
-                ពិនិត្យឥឡូវ / Check payment now
+                {t("sales.checkPaymentNow", "Check payment now")}
               </button>
               <button
                 type="button"
@@ -714,7 +721,7 @@ export default function OrderCodCollectionPanel({
                 onClick={confirmShopQrReceived}
                 className="w-full rounded-xl bg-[#567D74] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
               >
-                បានទទួលប្រាក់ហើយ / Money received
+                {t("sales.moneyReceived", "Money received")}
               </button>
             </div>
           ) : null}
@@ -731,7 +738,7 @@ function DriverScanWait({ waiting, title, body }) {
       <p className="mt-1 text-xs text-teal-800 dark:text-teal-200">{body}</p>
       {waiting ? (
         <p className="mt-2 text-xs font-semibold text-teal-700 dark:text-teal-300">
-          កំពុងរង់ចាំអ្នកដឹកស្កេន… / Waiting for driver scan…
+          {t("sales.waitingForDriverScan", "Waiting for driver scan…")}
         </p>
       ) : null}
     </div>
@@ -743,7 +750,7 @@ function NotesAndCourier({ courierName, setCourierName, notes, setNotes, notesPl
     <>
       <label className="block">
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-          អ្នកដឹក / Courier
+          {t("sales.courier", "Courier")}
         </span>
         <select
           value={courierName}
@@ -760,7 +767,7 @@ function NotesAndCourier({ courierName, setCourierName, notes, setNotes, notesPl
       </label>
       <label className="block">
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-          កំណត់ហតុ / Notes (optional)
+          {t("sales.notesOptional", "Notes (optional)")}
         </span>
         <textarea
           rows={2}

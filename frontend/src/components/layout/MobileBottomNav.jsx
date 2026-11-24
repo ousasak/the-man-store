@@ -5,6 +5,7 @@ import { useCart } from "../../state/cart.jsx";
 import { useWishlist } from "../../state/wishlist.jsx";
 import { useAuth } from "../../state/auth.jsx";
 import { useHomepageSettings } from "../../state/homepageSettings.jsx";
+import { useLanguage } from "../../lib/i18n.jsx";
 import NotificationDrawer from "./NotificationDrawer.jsx";
 import { isAdminUser } from "../../app/redirectAfterAuth.js";
 
@@ -39,6 +40,7 @@ export default function MobileBottomNav({
   const wishlist = useWishlist();
   const { user } = useAuth();
   const { settings } = useHomepageSettings();
+  const { t } = useLanguage();
   const { pathname, tab } = useActiveTab();
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -46,23 +48,23 @@ export default function MobileBottomNav({
 
   const items = useMemo(() => {
     const base = [
-      { key: "home", label: "Home", to: "/", icon: Home, isLink: true },
-      { key: "shop", label: "Shop", to: "/search", icon: Store, isLink: true },
-      { key: "notifications", label: "Notifications", to: null, icon: Bell, isLink: false, badge: notificationsUnread, onClick: () => { setShowNotifications(true); onOpenNotifications(); } },
-      { key: "cart", label: "Cart", to: "/cart", icon: ShoppingBag, isLink: true, badge: count },
+      { key: "home", label: t("home") || "Home", to: "/", icon: Home, isLink: true },
+      { key: "shop", label: t("shop") || "Shop", to: "/search", icon: Store, isLink: true },
+      { key: "notifications", label: t("notifications") || "Notifications", to: null, icon: Bell, isLink: false, badge: notificationsUnread, onClick: () => { setShowNotifications(true); onOpenNotifications(); } },
+      { key: "cart", label: t("cart") || "Cart", to: "/cart", icon: ShoppingBag, isLink: true, badge: count },
     ];
 
     if (showWishlist) {
-      base.push({ key: "wishlist", label: "Wishlist", to: "/search?tab=wishlist", icon: Heart, isLink: true, badge: wishlist.count });
+      base.push({ key: "wishlist", label: t("wishlist") || "Wishlist", to: "/search?tab=wishlist", icon: Heart, isLink: true, badge: wishlist.count });
     }
 
     base.push(
       isAdminUser(user)
-        ? { key: "account", label: "Dashboard", to: "/admin", icon: LayoutDashboard, isLink: true }
-        : { key: "account", label: user ? "Account" : "Login", to: user ? "/profile" : "/login", icon: User, isLink: true }
+        ? { key: "account", label: t("navDashboard") || "Dashboard", to: "/admin", icon: LayoutDashboard, isLink: true }
+        : { key: "account", label: user ? (t("account") || "Account") : (t("login") || "Login"), to: user ? "/profile" : "/login", icon: User, isLink: true }
     );
     return base;
-  }, [count, showWishlist, wishlist.count, user, notificationsUnread, onOpenNotifications]);
+  }, [count, showWishlist, wishlist.count, user, notificationsUnread, onOpenNotifications, t]);
 
   const isActive = (key) => {
     if (key === "home") return pathname === "/";
